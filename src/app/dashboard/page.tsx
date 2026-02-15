@@ -151,21 +151,58 @@ export default function Dashboard() {
     fetchBots();
   }, []);
 
-  const handleViewLogs = (botId: number) => {
-    alert(`View logs for bot ${botId} - Coming soon!`);
+  const handleViewLogs = (botId: string) => {
+    // Show logs modal or navigate to logs page
+    alert('📊 Logs Feature\n\nThis will show:\n- Message history\n- API calls\n- Errors and warnings\n- Performance metrics\n\n(Feature coming in next update)');
   };
 
-  const handleConfigure = (botId: number) => {
-    alert(`Configure bot ${botId} - Coming soon!`);
+  const handleConfigure = (botId: string) => {
+    // Navigate to configuration page
+    router.push(`/dashboard/configure/${botId}`);
   };
 
-  const handlePause = (botId: number) => {
-    alert(`Pause bot ${botId} - Coming soon!`);
+  const handlePause = async (botId: string) => {
+    const bot = bots.find(b => b.id === botId);
+    if (!bot) return;
+    
+    const newStatus = bot.status === 'paused' ? 'running' : 'paused';
+    
+    // Update bot status in database
+    try {
+      const response = await fetch(`/api/bots/${botId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      
+      if (response.ok) {
+        // Update local state
+        setBots(bots.map(b => b.id === botId ? { ...b, status: newStatus } : b));
+      }
+    } catch (error) {
+      console.error('Failed to update bot status:', error);
+      alert('Failed to update bot status. Please try again.');
+    }
   };
 
-  const handleDelete = (botId: number) => {
-    if (confirm('Are you sure you want to delete this bot?')) {
-      setBots(bots.filter(bot => bot.id !== botId));
+  const handleDelete = async (botId: string) => {
+    if (!confirm('Are you sure you want to delete this bot? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/bots/${botId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        setBots(bots.filter(bot => bot.id !== botId));
+      } else {
+        alert('Failed to delete bot. Please try again.');
+      }
+    } catch (error) {
+      console.error('Failed to delete bot:', error);
+      alert('Failed to delete bot. Please try again.');
     }
   };
 
