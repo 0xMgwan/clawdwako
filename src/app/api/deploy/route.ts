@@ -88,36 +88,6 @@ function selectOptimalProvider(requirements: any): CloudProvider {
   return cloudProviders[Math.floor(Math.random() * cloudProviders.length)];
 }
 
-async function setupAgentEnvironment(instance: any, deployment: DeploymentRequest) {
-  // Simulate agent environment setup
-  const steps = [
-    'Installing base dependencies',
-    'Configuring AI model',
-    'Setting up channel integrations',
-    'Initializing agent runtime',
-    'Running health checks'
-  ];
-  
-  // In a real implementation, this would:
-  // 1. SSH into the instance
-  // 2. Install required packages (Python, Node.js, etc.)
-  // 3. Clone agent template repository
-  // 4. Configure environment variables
-  // 5. Set up channel integrations (Telegram, WhatsApp, etc.)
-  // 6. Start the agent service
-  // 7. Configure monitoring and logging
-  
-  return {
-    steps,
-    status: 'completed',
-    agentUrl: `https://${instance.instanceId}.clawdwako.com`,
-    webhooks: deployment.channels.map(channel => ({
-      channel,
-      url: `https://${instance.instanceId}.clawdwako.com/webhook/${channel}`,
-      status: 'active'
-    }))
-  };
-}
 
 export async function POST(request: NextRequest) {
   try {
