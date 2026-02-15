@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import Anthropic from '@anthropic-ai/sdk';
 import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export async function POST(
   request: NextRequest,
@@ -70,20 +71,13 @@ export async function POST(
 
       aiResponse = response.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
     } else if (bot.selectedModel.includes('gemini')) {
-      // Use Google AI API
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.GOOGLE_AI_API_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: userMessage }] }]
-          })
-        }
-      );
+      // Use Google Generative AI SDK
+      const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '');
+      const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
-      const data = await response.json();
-      aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not generate a response.';
+      const result = await model.generateContent(userMessage);
+      const response = await result.response;
+      aiResponse = response.text() || 'Sorry, I could not generate a response.';
     }
 
     // Send response back to Telegram
