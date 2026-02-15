@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
         data: {
           name: deployment.botUsername,
           selectedModel: deployment.selectedModel,
-          status: 'configured',
+          status: 'running',
           deployedAt: new Date(),
         }
       });
@@ -170,12 +170,35 @@ export async function POST(request: NextRequest) {
           telegramBotToken: deployment.botToken,
           telegramBotUsername: deployment.botUsername,
           selectedModel: deployment.selectedModel,
-          status: 'configured', // Not deployed yet, just configured
+          status: 'running',
           railwayProjectId: null,
           railwayServiceId: null,
           deployedAt: new Date(),
         },
       });
+    }
+
+    // Automatically set up Telegram webhook for all bots
+    const webhookUrl = `https://clawdwako.vercel.app/api/webhook/${bot.id}`;
+    try {
+      const webhookResponse = await fetch(
+        `https://api.telegram.org/bot${deployment.botToken}/setWebhook`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: webhookUrl })
+        }
+      );
+
+      const webhookData = await webhookResponse.json();
+      console.log('Webhook setup result:', webhookData);
+
+      if (!webhookData.ok) {
+        console.error('Failed to set webhook:', webhookData);
+      }
+    } catch (webhookError) {
+      console.error('Error setting webhook:', webhookError);
+      // Don't fail the deployment if webhook setup fails
     }
 
     return NextResponse.json({
@@ -186,7 +209,7 @@ export async function POST(request: NextRequest) {
         status: bot.status,
         railwayProjectId: null,
       },
-      message: 'Bot configured successfully',
+      message: 'Bot deployed successfully! You can now chat with it on Telegram.',
     });
     
   } catch (error: any) {
