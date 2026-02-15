@@ -3,11 +3,14 @@ import { prisma } from '@/lib/prisma';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const { status } = await request.json();
+    const params = await context.params;
     const botId = params.id;
+
+    console.log('Updating bot:', botId, 'to status:', status);
 
     const bot = await prisma.bot.update({
       where: { id: botId },
@@ -29,10 +32,13 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const botId = params.id;
+
+    console.log('Deleting bot:', botId);
 
     await prisma.bot.delete({
       where: { id: botId }
