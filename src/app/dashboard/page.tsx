@@ -105,9 +105,40 @@ export default function Dashboard() {
 
   useEffect(() => {
     // Fetch user's bots from the database
-    // For now, using mock data until we implement the API
-    setBots(deployedAgents);
-    setLoading(false);
+    const fetchBots = async () => {
+      try {
+        const response = await fetch('/api/bots');
+        const data = await response.json();
+        
+        if (data.success) {
+          // Map database bots to dashboard format
+          const mappedBots = data.bots.map((bot: any) => ({
+            id: bot.id,
+            name: bot.name || bot.telegramBotUsername,
+            type: 'AI Agent',
+            status: bot.status === 'configured' ? 'paused' : bot.status,
+            uptime: '99.9%',
+            messages: 0,
+            users: 0,
+            cost: '$0.00/mo',
+            channels: ['Telegram'],
+            lastActive: new Date(bot.deployedAt).toLocaleString(),
+            model: bot.selectedModel
+          }));
+          
+          setBots(mappedBots.length > 0 ? mappedBots : deployedAgents);
+        } else {
+          setBots(deployedAgents);
+        }
+      } catch (error) {
+        console.error('Error fetching bots:', error);
+        setBots(deployedAgents);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchBots();
   }, []);
 
   const handleViewLogs = (botId: number) => {
