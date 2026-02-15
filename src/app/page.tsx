@@ -21,7 +21,10 @@ export default function Home() {
 
   const handleTelegramSuccess = (data: any) => {
     setTelegramBotInfo(data);
-    console.log("Bot connected:", data.botInfo);
+    console.log("Bot connected - Full data:", data);
+    console.log("Bot connected - botInfo:", data.botInfo);
+    console.log("Bot connected - username:", data.botInfo?.username);
+    console.log("Bot connected - token:", data.token);
   };
 
   const handleDeploy = async () => {
@@ -42,20 +45,41 @@ export default function Home() {
 
       const hasAnyUserKey = combinedApiKeys.anthropic || combinedApiKeys.openai || combinedApiKeys.google;
 
+      const deploymentPayload = {
+        botToken: telegramBotInfo.token,
+        botUsername: telegramBotInfo.botInfo?.username,
+        selectedModel: selectedModel,
+        userApiKeys: hasAnyUserKey ? combinedApiKeys : null,
+      };
+
+      console.log('Sending deployment request:', {
+        hasBotToken: !!deploymentPayload.botToken,
+        botUsername: deploymentPayload.botUsername,
+        selectedModel: deploymentPayload.selectedModel,
+        hasUserApiKeys: !!deploymentPayload.userApiKeys
+      });
+
       const response = await fetch("/api/deploy", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          botToken: telegramBotInfo.token,
-          botUsername: telegramBotInfo.botInfo.username,
-          selectedModel: selectedModel,
-          userApiKeys: hasAnyUserKey ? combinedApiKeys : null,
-        }),
+        body: JSON.stringify(deploymentPayload),
       });
 
-      const data = await response.json();
+      console.log('Response status:', response.status);
+      console.log('Response content-type:', response.headers.get('content-type'));
+      
+      const responseText = await response.text();
+      console.log('Response text (first 200 chars):', responseText.substring(0, 200));
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error('Failed to parse response as JSON');
+        throw new Error('Server returned invalid response: ' + responseText.substring(0, 100));
+      }
 
       if (!response.ok) {
         let errorMsg = data.error || "Deployment failed";

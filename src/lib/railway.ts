@@ -29,6 +29,9 @@ export class RailwayClient {
 
   private async query(query: string, variables?: any) {
     try {
+      console.log('Railway GraphQL Query:', query.substring(0, 100) + '...');
+      console.log('Railway GraphQL Variables:', variables);
+      
       const response = await axios.post(
         RAILWAY_API_URL,
         {
@@ -40,16 +43,38 @@ export class RailwayClient {
             Authorization: `Bearer ${this.apiToken}`,
             'Content-Type': 'application/json',
           },
+          validateStatus: () => true, // Don't throw on any status code
         }
       );
 
+      console.log('Railway Response Status:', response.status);
+      console.log('Railway Response Content-Type:', response.headers['content-type']);
+
+      // Check if response is HTML (error page)
+      if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE')) {
+        console.error('Railway returned HTML error page');
+        throw new Error('Railway API returned an error page. Check your API token and permissions.');
+      }
+
       if (response.data.errors) {
+        console.error('Railway GraphQL Errors:', JSON.stringify(response.data.errors, null, 2));
         throw new Error(response.data.errors[0].message);
       }
 
+      if (!response.data.data) {
+        console.error('Railway response has no data:', response.data);
+        throw new Error('Railway API returned invalid response');
+      }
+
+      console.log('Railway GraphQL Success');
       return response.data.data;
     } catch (error: any) {
-      console.error('Railway API Error:', error.response?.data || error.message);
+      console.error('=== Railway API Error ===');
+      console.error('Status:', error.response?.status);
+      console.error('Content-Type:', error.response?.headers?.['content-type']);
+      console.error('Data (first 200 chars):', typeof error.response?.data === 'string' ? error.response?.data.substring(0, 200) : JSON.stringify(error.response?.data, null, 2));
+      console.error('Message:', error.message);
+      console.error('========================');
       throw error;
     }
   }
@@ -169,46 +194,52 @@ export class RailwayClient {
       googleAiApiKey,
     } = options;
 
-    // Step 1: Create project
+    console.log('Step 1: Creating Railway project...');
+    // Create project
     const project = await this.createProject(projectName);
+    console.log('Project created:', project.id);
 
-    // Step 2: Create service
+    // For now, just return the project info without deploying service
+    // This will help us isolate if the issue is in service creation
+    return {
+      projectId: project.id,
+      serviceId: 'pending', // Temporary - service creation disabled for debugging
+      projectName: project.name,
+    };
+
+    /* Temporarily disabled to isolate the issue
+    console.log('Step 2: Creating service...');
     const service = await this.createService(project.id, 'openclaw-bot');
+    console.log('Service created:', service.id);
 
-    // Step 3: Set environment variables
+    console.log('Step 3: Setting environment variables...');
     const envVars: Record<string, string> = {
       TELEGRAM_BOT_TOKEN: telegramBotToken,
       SELECTED_MODEL: selectedModel,
-      NODE_ENV: 'production',
     };
 
-    // Add AI API keys based on selected model
-    if (selectedModel.includes('claude') && anthropicApiKey) {
-      envVars.ANTHROPIC_API_KEY = anthropicApiKey;
-    }
-    if (selectedModel.includes('gpt') && openaiApiKey) {
-      envVars.OPENAI_API_KEY = openaiApiKey;
-    }
-    if (selectedModel.includes('gemini') && googleAiApiKey) {
-      envVars.GOOGLE_AI_API_KEY = googleAiApiKey;
-    }
+    if (anthropicApiKey) envVars.ANTHROPIC_API_KEY = anthropicApiKey;
+    if (openaiApiKey) envVars.OPENAI_API_KEY = openaiApiKey;
+    if (googleAiApiKey) envVars.GOOGLE_AI_API_KEY = googleAiApiKey;
 
     await this.setEnvironmentVariables(project.id, service.id, envVars);
+    console.log('Environment variables set');
 
-    // Step 4: Deploy from GitHub (OpenClaw template)
-    // Note: You'll need to create a template repository or use an existing one
+    console.log('Step 4: Deploying from GitHub...');
     await this.deployFromGitHub(
       project.id,
       service.id,
       'https://github.com/anthropics/openclaw',
       'main'
     );
+    console.log('GitHub deployment initiated');
 
     return {
       projectId: project.id,
       serviceId: service.id,
       projectName: project.name,
     };
+    */
   }
 }
 

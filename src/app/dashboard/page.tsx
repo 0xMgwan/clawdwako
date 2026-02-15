@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +22,9 @@ import {
   Trash2,
   RefreshCw,
   ExternalLink,
-  Key
+  Key,
+  Sun,
+  Moon
 } from "lucide-react";
 
 const deployedAgents = [
@@ -96,6 +99,7 @@ const getStatusIcon = (status: string) => {
 export default function Dashboard() {
   const [bots, setBots] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     // Fetch user's bots from the database
@@ -103,6 +107,24 @@ export default function Dashboard() {
     setBots(deployedAgents);
     setLoading(false);
   }, []);
+
+  const handleViewLogs = (botId: number) => {
+    alert(`View logs for bot ${botId} - Coming soon!`);
+  };
+
+  const handleConfigure = (botId: number) => {
+    alert(`Configure bot ${botId} - Coming soon!`);
+  };
+
+  const handlePause = (botId: number) => {
+    alert(`Pause bot ${botId} - Coming soon!`);
+  };
+
+  const handleDelete = (botId: number) => {
+    if (confirm('Are you sure you want to delete this bot?')) {
+      setBots(bots.filter(bot => bot.id !== botId));
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -115,6 +137,18 @@ export default function Dashboard() {
               <span className="text-xl font-bold text-foreground">ClawdWako</span>
             </div>
             <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="relative"
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )}
+              </Button>
               <Button variant="outline" size="sm">
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
@@ -261,26 +295,26 @@ export default function Dashboard() {
                     </div>
                     
                     <div className="flex space-x-2">
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => handleViewLogs(agent.id)}>
                         <Activity className="h-4 w-4 mr-2" />
                         View Logs
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => handleConfigure(agent.id)}>
                         <Settings className="h-4 w-4 mr-2" />
                         Configure
                       </Button>
                       {agent.status === "running" ? (
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => handlePause(agent.id)}>
                           <Pause className="h-4 w-4 mr-2" />
                           Pause
                         </Button>
                       ) : (
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => handlePause(agent.id)}>
                           <Play className="h-4 w-4 mr-2" />
-                          Start
+                          Resume
                         </Button>
                       )}
-                      <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                      <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" onClick={() => handleDelete(agent.id)}>
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete
                       </Button>
