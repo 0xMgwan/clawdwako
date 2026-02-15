@@ -11,8 +11,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ClawdWako - Deploy OpenClaw under 1 minute",
-  description: "Avoid all technical complexity and one-click deploy your own 24/7 active OpenClaw instance under 1 minute.",
+  title: "Clawdwako.ai - Deploy AI Agents in Seconds",
+  description: "Deploy powerful AI agents to Telegram in under 60 seconds. No coding required.",
 };
 
 export default function RootLayout({

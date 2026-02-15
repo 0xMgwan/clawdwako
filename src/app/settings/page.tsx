@@ -41,7 +41,7 @@ export default function SettingsPage() {
               </Button>
               <div className="flex items-center space-x-2">
                 <Bot className="h-8 w-8 text-primary" />
-                <span className="text-xl font-bold text-foreground">ClawdWako Settings</span>
+                <span className="text-xl font-bold text-foreground">Clawdwako.ai Settings</span>
               </div>
             </div>
             <div className="flex items-center space-x-4">

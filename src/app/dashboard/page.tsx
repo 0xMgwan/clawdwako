@@ -225,7 +225,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
               <Bot className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold text-foreground">ClawdWako</span>
+              <span className="text-xl font-bold text-foreground">Clawdwako.ai</span>
             </div>
             <div className="flex items-center space-x-4">
               {mounted && (

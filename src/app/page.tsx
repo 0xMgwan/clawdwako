@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Mail, Moon, Sun } from "lucide-react";
+import { Bot, Mail, Moon, Sun } from "lucide-react";
 import { TelegramBotModal } from "@/components/TelegramBotModal";
 import { DeploymentSuccessModal } from "@/components/DeploymentSuccessModal";
 import { signIn } from "next-auth/react";
@@ -117,11 +117,9 @@ export default function Home() {
       <nav className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="text-2xl font-bold">
-                <span className="text-foreground">ClawdWako</span>
-                <span className="text-muted-foreground">.com</span>
-              </div>
+            <div className="flex items-center space-x-2">
+              <Bot className="h-6 w-6 text-primary" />
+              <span className="text-lg font-bold">Clawdwako<span className="text-muted-foreground">.ai</span></span>
             </div>
             <div className="hidden md:flex items-center space-x-4">
               <Button
@@ -151,9 +149,8 @@ export default function Home() {
       {/* Hero Header */}
       <section className="pt-16 pb-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl md:text-5xl font-bold mb-3 leading-tight">
-            Launch Your AI Agent in 
-            <span className="text-primary"> Under 60 Seconds</span>
+          <h1 className="text-5xl md:text-7xl font-bold mb-6">
+            Launch Your AI Agent in <span className="text-green-500">Under 60 Seconds</span>
           </h1>
           <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
             Skip the technical setup entirely. Get your personal AI assistant running 
@@ -327,7 +324,7 @@ export default function Home() {
                   Deploying...
                 </>
               ) : (
-                <>⚡ Deploy OpenClaw</>
+                <> Deploy Agent</>
               )}
             </Button>
             <p className="text-xs text-muted-foreground mt-2">
@@ -424,7 +421,7 @@ export default function Home() {
       <section className="py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="max-w-6xl mx-auto text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold mb-3">
-            What can OpenClaw do for you?
+            What can Clawdwako.ai do for you?
           </h2>
           <p className="text-base text-muted-foreground">
             One assistant, thousands of use cases
