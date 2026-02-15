@@ -100,17 +100,25 @@ const getStatusIcon = (status: string) => {
 export default function Dashboard() {
   const [bots, setBots] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
   const router = useRouter();
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     // Fetch user's bots from the database
     const fetchBots = async () => {
+      console.log('🔍 FETCHING BOTS FROM DATABASE...');
       try {
         const response = await fetch('/api/bots');
         const data = await response.json();
+        console.log('📦 API Response:', data);
         
-        if (data.success) {
+        if (data.success && data.bots.length > 0) {
+          console.log('✅ Found', data.bots.length, 'bots in database');
           // Map database bots to dashboard format
           const mappedBots = data.bots.map((bot: any) => ({
             id: bot.id,
@@ -126,12 +134,14 @@ export default function Dashboard() {
             model: bot.selectedModel
           }));
           
-          setBots(mappedBots.length > 0 ? mappedBots : deployedAgents);
+          console.log('🤖 Mapped bots:', mappedBots);
+          setBots(mappedBots);
         } else {
+          console.log('⚠️ No bots found, using mock data');
           setBots(deployedAgents);
         }
       } catch (error) {
-        console.error('Error fetching bots:', error);
+        console.error('❌ Error fetching bots:', error);
         setBots(deployedAgents);
       } finally {
         setLoading(false);
@@ -159,6 +169,17 @@ export default function Dashboard() {
     }
   };
 
+  console.log('🎯 Current bots state:', bots);
+  console.log('🎯 Number of bots:', bots.length);
+
+  // Calculate real stats from bots
+  const activeAgents = bots.length;
+  const runningBots = bots.filter(b => b.status === 'running').length;
+  const pausedBots = bots.filter(b => b.status === 'paused').length;
+  const errorBots = bots.filter(b => b.status === 'error').length;
+  const totalMessages = bots.reduce((sum, b) => sum + (b.messages || 0), 0);
+  const totalUsers = bots.reduce((sum, b) => sum + (b.users || 0), 0);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
@@ -170,18 +191,20 @@ export default function Dashboard() {
               <span className="text-xl font-bold text-foreground">ClawdWako</span>
             </div>
             <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="relative"
-              >
-                {theme === "dark" ? (
-                  <Sun className="h-5 w-5" />
-                ) : (
-                  <Moon className="h-5 w-5" />
-                )}
-              </Button>
+              {mounted && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className="relative"
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
+                </Button>
+              )}
               <Button variant="outline" size="sm" onClick={() => router.push('/settings')}>
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
@@ -215,8 +238,8 @@ export default function Dashboard() {
               <Bot className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">4</div>
-              <p className="text-xs text-muted-foreground">2 running, 1 paused, 1 error</p>
+              <div className="text-2xl font-bold">{activeAgents}</div>
+              <p className="text-xs text-muted-foreground">{runningBots} running, {pausedBots} paused, {errorBots} error</p>
             </CardContent>
           </Card>
           
@@ -226,8 +249,8 @@ export default function Dashboard() {
               <MessageSquare className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">6,264</div>
-              <p className="text-xs text-muted-foreground">+12% from last month</p>
+              <div className="text-2xl font-bold">{totalMessages.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">Across all agents</p>
             </CardContent>
           </Card>
           
@@ -237,8 +260,8 @@ export default function Dashboard() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">159</div>
-              <p className="text-xs text-muted-foreground">+8% from last month</p>
+              <div className="text-2xl font-bold">{totalUsers}</div>
+              <p className="text-xs text-muted-foreground">Total users served</p>
             </CardContent>
           </Card>
           
@@ -267,7 +290,7 @@ export default function Dashboard() {
           </div>
 
           <div className="grid gap-6">
-            {deployedAgents.map((agent) => {
+            {bots.map((agent) => {
               const StatusIcon = getStatusIcon(agent.status);
               return (
                 <Card key={agent.id} className="hover:shadow-md transition-shadow">
@@ -318,7 +341,7 @@ export default function Dashboard() {
                       <div>
                         <p className="text-sm text-gray-600">Channels</p>
                         <div className="flex flex-wrap gap-1">
-                          {agent.channels.map((channel, index) => (
+                          {agent.channels.map((channel: string, index: number) => (
                             <Badge key={index} variant="secondary" className="text-xs">
                               {channel}
                             </Badge>
