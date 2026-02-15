@@ -145,20 +145,38 @@ export async function POST(request: NextRequest) {
       userId = anonymousUser.id;
     }
 
-    // Save bot to database
-    const bot = await prisma.bot.create({
-      data: {
-        userId: userId,
-        name: deployment.botUsername,
-        telegramBotToken: deployment.botToken,
-        telegramBotUsername: deployment.botUsername,
-        selectedModel: deployment.selectedModel,
-        status: 'configured', // Not deployed yet, just configured
-        railwayProjectId: null,
-        railwayServiceId: null,
-        deployedAt: new Date(),
-      },
+    // Check if bot already exists
+    let bot = await prisma.bot.findFirst({
+      where: { telegramBotToken: deployment.botToken }
     });
+
+    if (bot) {
+      // Update existing bot
+      bot = await prisma.bot.update({
+        where: { id: bot.id },
+        data: {
+          name: deployment.botUsername,
+          selectedModel: deployment.selectedModel,
+          status: 'configured',
+          deployedAt: new Date(),
+        }
+      });
+    } else {
+      // Create new bot
+      bot = await prisma.bot.create({
+        data: {
+          userId: userId,
+          name: deployment.botUsername,
+          telegramBotToken: deployment.botToken,
+          telegramBotUsername: deployment.botUsername,
+          selectedModel: deployment.selectedModel,
+          status: 'configured', // Not deployed yet, just configured
+          railwayProjectId: null,
+          railwayServiceId: null,
+          deployedAt: new Date(),
+        },
+      });
+    }
 
     return NextResponse.json({
       success: true,
