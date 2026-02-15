@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -100,6 +101,7 @@ export default function Dashboard() {
   const [bots, setBots] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { theme, setTheme } = useTheme();
+  const router = useRouter();
 
   useEffect(() => {
     // Fetch user's bots from the database
@@ -149,7 +151,7 @@ export default function Dashboard() {
                   <Moon className="h-5 w-5" />
                 )}
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => router.push('/settings')}>
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
               </Button>
