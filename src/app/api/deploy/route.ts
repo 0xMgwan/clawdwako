@@ -123,18 +123,52 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // SKIP DATABASE - Just return success to get the modal working
+    // Save bot configuration to database (skip Railway deployment for now)
     console.log('Deployment request for:', deployment.botUsername, deployment.selectedModel);
     
+    // Create or get anonymous user
+    let userId = deployment.userId;
+    if (!userId) {
+      let anonymousUser = await prisma.user.findFirst({
+        where: { email: 'anonymous@clawdwako.com' }
+      });
+      
+      if (!anonymousUser) {
+        anonymousUser = await prisma.user.create({
+          data: {
+            email: 'anonymous@clawdwako.com',
+            name: 'Anonymous User',
+          }
+        });
+      }
+      
+      userId = anonymousUser.id;
+    }
+
+    // Save bot to database
+    const bot = await prisma.bot.create({
+      data: {
+        userId: userId,
+        name: deployment.botUsername,
+        telegramBotToken: deployment.botToken,
+        telegramBotUsername: deployment.botUsername,
+        selectedModel: deployment.selectedModel,
+        status: 'configured', // Not deployed yet, just configured
+        railwayProjectId: null,
+        railwayServiceId: null,
+        deployedAt: new Date(),
+      },
+    });
+
     return NextResponse.json({
       success: true,
       bot: {
-        id: `mock-${Date.now()}`,
-        username: deployment.botUsername,
-        status: 'active',
-        railwayProjectId: `mock-project-${Date.now()}`,
+        id: bot.id,
+        username: bot.telegramBotUsername,
+        status: bot.status,
+        railwayProjectId: null,
       },
-      message: 'Bot deployment started successfully',
+      message: 'Bot configured successfully',
     });
     
   } catch (error: any) {
