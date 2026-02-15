@@ -45,7 +45,12 @@ export async function POST(
     // Generate AI response based on selected model
     let aiResponse = '';
     
-    if (bot.selectedModel.includes('claude')) {
+    // Test mode: If no API keys are configured, return a test response
+    const hasApiKeys = process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY || process.env.GOOGLE_AI_API_KEY;
+    
+    if (!hasApiKeys) {
+      aiResponse = `🤖 Test Mode Response\n\nYou said: "${userMessage}"\n\nThis is a test response. The bot is working! Add API keys to enable AI responses.`;
+    } else if (bot.selectedModel.includes('claude')) {
       // Use Anthropic API
       try {
         const anthropic = new Anthropic({

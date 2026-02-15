@@ -179,7 +179,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Automatically set up Telegram webhook for all bots
-    const webhookUrl = `https://clawdwako.vercel.app/api/webhook/${bot.id}`;
+    // Use WEBHOOK_URL env var for local testing (e.g., ngrok URL), otherwise use production
+    const webhookUrl = process.env.WEBHOOK_URL 
+      ? `${process.env.WEBHOOK_URL}/api/webhook/${bot.id}`
+      : `https://clawdwako.vercel.app/api/webhook/${bot.id}`;
+    
+    console.log('Setting webhook to:', webhookUrl);
+    
     try {
       const webhookResponse = await fetch(
         `https://api.telegram.org/bot${deployment.botToken}/setWebhook`,
@@ -191,13 +197,15 @@ export async function POST(request: NextRequest) {
       );
 
       const webhookData = await webhookResponse.json();
-      console.log('Webhook setup result:', webhookData);
+      console.log('Webhook setup result:', JSON.stringify(webhookData, null, 2));
 
-      if (!webhookData.ok) {
-        console.error('Failed to set webhook:', webhookData);
+      if (webhookData.ok) {
+        console.log('✅ Webhook successfully configured!');
+      } else {
+        console.error('❌ Failed to set webhook:', webhookData);
       }
-    } catch (webhookError) {
-      console.error('Error setting webhook:', webhookError);
+    } catch (webhookError: any) {
+      console.error('❌ Error setting webhook:', webhookError.message);
       // Don't fail the deployment if webhook setup fails
     }
 
