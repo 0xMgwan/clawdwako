@@ -47,17 +47,22 @@ export async function POST(
     
     if (bot.selectedModel.includes('claude')) {
       // Use Anthropic API
-      const anthropic = new Anthropic({
-        apiKey: process.env.ANTHROPIC_API_KEY
-      });
+      try {
+        const anthropic = new Anthropic({
+          apiKey: process.env.ANTHROPIC_API_KEY
+        });
 
-      const response = await anthropic.messages.create({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 1024,
-        messages: [{ role: 'user', content: userMessage }]
-      });
+        const response = await anthropic.messages.create({
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 1024,
+          messages: [{ role: 'user', content: userMessage }]
+        });
 
-      aiResponse = response.content[0].type === 'text' ? response.content[0].text : 'Sorry, I could not generate a response.';
+        aiResponse = response.content[0].type === 'text' ? response.content[0].text : 'Sorry, I could not generate a response.';
+      } catch (error: any) {
+        console.error('Anthropic API error:', error.message);
+        aiResponse = `I received your message: "${userMessage}"\n\nNote: The Anthropic API is currently unavailable. Please add API credits or use a different model.`;
+      }
     } else if (bot.selectedModel.includes('gpt')) {
       // Use OpenAI API
       const openai = new OpenAI({
