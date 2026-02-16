@@ -7,6 +7,8 @@ import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ConfigureModal } from "@/components/ConfigureModal";
+import { ViewLogsModal } from "@/components/ViewLogsModal";
 import { 
   Bot, 
   Plus, 
@@ -108,6 +110,8 @@ export default function Dashboard() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [bots, setBots] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [configureBot, setConfigureBot] = useState<any>(null);
+  const [viewLogsBot, setViewLogsBot] = useState<any>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -157,13 +161,40 @@ export default function Dashboard() {
   }, []);
 
   const handleViewLogs = (botId: string) => {
-    // Show logs modal or navigate to logs page
-    alert('📊 Logs Feature\n\nThis will show:\n- Message history\n- API calls\n- Errors and warnings\n- Performance metrics\n\n(Feature coming in next update)');
+    const bot = bots.find(b => b.id === botId);
+    if (bot) setViewLogsBot(bot);
   };
 
   const handleConfigure = (botId: string) => {
-    // Navigate to configuration page
-    router.push(`/dashboard/configure/${botId}`);
+    const bot = bots.find(b => b.id === botId);
+    if (bot) setConfigureBot(bot);
+  };
+
+  const handleSaveConfig = async (botId: string, data: any) => {
+    try {
+      const response = await fetch(`/api/bots/${botId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (response.ok) {
+        // Refresh bots
+        const botsResponse = await fetch('/api/bots');
+        const botsData = await botsResponse.json();
+        if (botsData.success) {
+          setBots(botsData.bots.map((bot: any) => ({
+            ...bot,
+            type: 'AI Agent',
+            uptime: '99.9%',
+            lastActive: new Date(bot.updatedAt).toLocaleString(),
+            cost: '$0.00/mo',
+            channels: ['Telegram']
+          })));
+        }
+      }
+    } catch (error) {
+      console.error('Error saving config:', error);
+    }
   };
 
   const handlePause = async (botId: string) => {
@@ -387,64 +418,53 @@ export default function Dashboard() {
             {bots.map((agent) => {
               const StatusIcon = getStatusIcon(agent.status);
               return (
-                <div key={agent.id} className="glass-agent-card rounded-2xl p-6">
-                  {/* Header */}
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="p-3 bg-gradient-to-br from-primary/20 to-primary/5 rounded-xl">
-                        <Bot className="h-8 w-8 text-primary" />
+                <div key={agent.id} className="glass-agent-card rounded-xl p-5">
+                  {/* Compact Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg">
+                        <Bot className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold text-foreground">{agent.name}</h3>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <Badge variant="outline" className="text-xs">{agent.type}</Badge>
-                          <span className="text-xs text-muted-foreground">• Last active {agent.lastActive}</span>
+                        <h3 className="text-base font-bold text-foreground">{agent.name}</h3>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="outline" className="text-xs px-2 py-0.5">{agent.type}</Badge>
+                          <span className="text-xs text-muted-foreground">• {agent.lastActive}</span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge className={`${getStatusColor(agent.status)} px-3 py-1`}>
-                        <StatusIcon className="h-3 w-3 mr-1" />
-                        {agent.status}
-                      </Badge>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <Badge className={`${getStatusColor(agent.status)} px-2 py-1 text-xs`}>
+                      <StatusIcon className="h-3 w-3 mr-1" />
+                      {agent.status}
+                    </Badge>
                   </div>
 
-                  {/* Stats */}
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                  {/* Compact Stats */}
+                  <div className="grid grid-cols-5 gap-3 mb-4">
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">Uptime</p>
+                      <p className="text-xs text-muted-foreground">Uptime</p>
                       <p className="text-sm font-semibold text-foreground">{agent.uptime}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">Messages</p>
-                      <p className="text-sm font-semibold text-foreground">{agent.messages.toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground">Messages</p>
+                      <p className="text-sm font-semibold text-foreground">{agent.messages || 0}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">Users</p>
-                      <p className="text-sm font-semibold text-foreground">{agent.users}</p>
+                      <p className="text-xs text-muted-foreground">Users</p>
+                      <p className="text-sm font-semibold text-foreground">{agent.users || 0}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">Cost</p>
+                      <p className="text-xs text-muted-foreground">Cost</p>
                       <p className="text-sm font-semibold text-foreground">{agent.cost}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">Channels</p>
-                      <div className="flex flex-wrap gap-1">
-                        {agent.channels.map((channel: string, index: number) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {channel}
-                          </Badge>
-                        ))}
-                      </div>
+                      <p className="text-xs text-muted-foreground">Channels</p>
+                      <Badge variant="secondary" className="text-xs">Telegram</Badge>
                     </div>
                   </div>
                   
-                  {/* Actions */}
-                  <div className="flex flex-wrap gap-2">
+                  {/* Compact Actions */}
+                  <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => handleViewLogs(agent.id)}>
                       <Activity className="h-4 w-4 mr-2" />
                       View Logs
@@ -517,6 +537,22 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      {configureBot && (
+        <ConfigureModal
+          bot={configureBot}
+          onClose={() => setConfigureBot(null)}
+          onSave={handleSaveConfig}
+        />
+      )}
+      
+      {viewLogsBot && (
+        <ViewLogsModal
+          bot={viewLogsBot}
+          onClose={() => setViewLogsBot(null)}
+        />
+      )}
     </div>
   );
 }
