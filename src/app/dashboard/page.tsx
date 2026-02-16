@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,9 @@ import {
   ExternalLink,
   Key,
   Sun,
-  Moon
+  Moon,
+  LogOut,
+  User as UserIcon
 } from "lucide-react";
 
 const deployedAgents = [
@@ -98,11 +101,13 @@ const getStatusIcon = (status: string) => {
 };
 
 export default function Dashboard() {
+  const router = useRouter();
+  const { data: session, status } = useSession();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const [bots, setBots] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
-  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -246,8 +251,52 @@ export default function Dashboard() {
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
               </Button>
-              <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-primary-foreground text-sm font-medium">U</span>
+              
+              {/* User Profile Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="h-8 w-8 bg-primary rounded-full flex items-center justify-center hover:opacity-80 transition-opacity"
+                >
+                  <span className="text-primary-foreground text-sm font-medium">
+                    {session?.user?.name?.charAt(0).toUpperCase() || session?.user?.email?.charAt(0).toUpperCase() || 'U'}
+                  </span>
+                </button>
+                
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-64 bg-background border border-border rounded-lg shadow-lg z-50">
+                    <div className="p-4 border-b border-border">
+                      <p className="text-sm font-medium text-foreground">
+                        {session?.user?.name || 'User'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {session?.user?.email || 'Not signed in'}
+                      </p>
+                    </div>
+                    <div className="p-2">
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          router.push('/settings');
+                        }}
+                        className="w-full flex items-center px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md transition-colors"
+                      >
+                        <UserIcon className="h-4 w-4 mr-2" />
+                        Profile Settings
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          signOut({ callbackUrl: '/' });
+                        }}
+                        className="w-full flex items-center px-3 py-2 text-sm text-destructive hover:bg-accent rounded-md transition-colors"
+                      >
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
