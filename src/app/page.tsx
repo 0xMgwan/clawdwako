@@ -107,7 +107,7 @@ export default function Home() {
 
   const handleGoogleSignIn = () => {
     signIn("google", { 
-      callbackUrl: window.location.origin,
+      callbackUrl: `${window.location.origin}/dashboard`,
     });
   };
 
