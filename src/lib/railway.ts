@@ -165,7 +165,7 @@ export class RailwayClient {
       mutation ServiceUpdate($serviceId: String!, $rootDirectory: String) {
         serviceUpdate(
           id: $serviceId
-          input: { rootDirectory: $rootDirectory }
+          input: { deploymentSource: { repo: { rootDirectory: $rootDirectory } } }
         ) {
           id
         }
@@ -257,17 +257,15 @@ export class RailwayClient {
 
     console.log('Step 4: Deploying from GitHub...');
     // Deploy the bot code from your GitHub repo
+    // Use owner/repo format instead of full URL
     await this.deployFromGitHub(
       project.id,
       service.id,
-      'https://github.com/0xMgwan/clawdwako',
+      '0xMgwan/clawdwako',
       'main'
     );
     console.log('GitHub deployment initiated');
-
-    console.log('Step 5: Setting root directory to bot-runner...');
-    await this.setServiceSource(service.id, 'bot-runner');
-    console.log('Root directory set to bot-runner');
+    console.log('Railway will automatically detect the Dockerfile in bot-runner directory');
 
     return {
       projectId: project.id,

@@ -38,15 +38,11 @@ async function testRailwayDeployment() {
     await client.deployFromGitHub(
       project.id,
       service.id,
-      'https://github.com/0xMgwan/clawdwako',
+      '0xMgwan/clawdwako',
       'main'
     );
     console.log('✅ GitHub connected');
-    console.log('');
-
-    console.log('Step 5: Setting root directory...');
-    await client.setServiceSource(service.id, 'bot-runner');
-    console.log('✅ Root directory set');
+    console.log('Railway will auto-detect the Dockerfile in bot-runner directory');
     console.log('');
 
     console.log('🎉 All steps completed successfully!');
