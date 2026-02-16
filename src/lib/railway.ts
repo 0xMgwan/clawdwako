@@ -205,7 +205,10 @@ export class RailwayClient {
       mutation ServiceConnect($serviceId: String!, $repo: String!, $branch: String!) {
         serviceConnect(
           id: $serviceId
-          input: { repo: $repo, branch: $branch }
+          input: { 
+            repo: $repo, 
+            branch: $branch
+          }
         ) {
           id
         }
