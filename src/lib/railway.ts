@@ -175,6 +175,26 @@ export class RailwayClient {
     return await this.query(query, { serviceId, rootDirectory });
   }
 
+  async updateEnvironmentVariable(
+    projectId: string,
+    environmentId: string,
+    name: string,
+    value: string
+  ) {
+    const query = `
+      mutation {
+        variableUpsert(input: {
+          projectId: "${projectId}"
+          environmentId: "${environmentId}"
+          name: "${name}"
+          value: "${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"
+        })
+      }
+    `;
+
+    return await this.query(query);
+  }
+
   async deployFromGitHub(
     projectId: string,
     serviceId: string,
@@ -250,6 +270,8 @@ export class RailwayClient {
       ANTHROPIC_API_KEY: anthropicApiKey || process.env.ANTHROPIC_API_KEY || '',
       OPENAI_API_KEY: openaiApiKey || process.env.OPENAI_API_KEY || '',
       GOOGLE_AI_API_KEY: googleAiApiKey || process.env.GOOGLE_AI_API_KEY || '',
+      BOT_ID: '', // Will be set after bot is created in database
+      PLATFORM_URL: process.env.NEXT_PUBLIC_URL || 'https://clawdwako.vercel.app',
     };
 
     await this.setEnvironmentVariables(project.id, service.id, envVars);

@@ -213,6 +213,44 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Update Railway environment variable with BOT_ID
+    if (railwayProjectId && railwayServiceId) {
+      try {
+        console.log('Updating Railway BOT_ID environment variable...');
+        const railwayClient = getRailwayClient();
+        
+        // Get environment ID
+        const envQuery = `
+          query Project($id: String!) {
+            project(id: $id) {
+              environments(first: 1) {
+                edges {
+                  node {
+                    id
+                  }
+                }
+              }
+            }
+          }
+        `;
+        const envData = await railwayClient['query'](envQuery, { id: railwayProjectId });
+        const environmentId = envData.project.environments.edges[0]?.node.id;
+        
+        if (environmentId) {
+          await railwayClient.updateEnvironmentVariable(
+            railwayProjectId,
+            environmentId,
+            'BOT_ID',
+            bot.id
+          );
+          console.log('✅ BOT_ID updated in Railway');
+        }
+      } catch (error: any) {
+        console.error('Failed to update BOT_ID in Railway:', error.message);
+        // Continue even if this fails
+      }
+    }
+
     // Automatically set up Telegram webhook for all bots
     // Use WEBHOOK_URL env var for local testing (e.g., ngrok URL), otherwise use production
     const webhookUrl = process.env.WEBHOOK_URL 

@@ -2,6 +2,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const Anthropic = require('@anthropic-ai/sdk').default;
 const OpenAI = require('openai').default;
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const axios = require('axios');
 
 // Get environment variables
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -9,6 +10,46 @@ const SELECTED_MODEL = process.env.SELECTED_MODEL;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
+const BOT_ID = process.env.BOT_ID;
+const PLATFORM_URL = process.env.PLATFORM_URL || 'https://clawdwako.vercel.app';
+
+// Pricing per 1M tokens (approximate)
+const PRICING = {
+  'claude-3-5-sonnet-20241022': { input: 3.00, output: 15.00 },
+  'gpt-4o': { input: 2.50, output: 10.00 },
+  'gemini-pro': { input: 0.50, output: 1.50 },
+};
+
+// Track API usage
+async function trackUsage(model, provider, inputTokens, outputTokens, success, errorMessage = null) {
+  try {
+    const totalTokens = inputTokens + outputTokens;
+    
+    // Calculate estimated cost
+    const pricing = PRICING[model] || { input: 1.00, output: 3.00 };
+    const estimatedCost = (inputTokens / 1000000 * pricing.input) + (outputTokens / 1000000 * pricing.output);
+
+    await axios.post(`${PLATFORM_URL}/api/usage`, {
+      botId: BOT_ID,
+      model: SELECTED_MODEL,
+      provider,
+      inputTokens,
+      outputTokens,
+      totalTokens,
+      estimatedCost,
+      requestType: 'message',
+      success,
+      errorMessage,
+      metadata: {
+        modelVersion: model,
+        timestamp: new Date().toISOString(),
+      }
+    });
+  } catch (error) {
+    console.error('Failed to track usage:', error.message);
+    // Don't fail the bot if usage tracking fails
+  }
+}
 
 if (!TELEGRAM_BOT_TOKEN) {
   console.error('TELEGRAM_BOT_TOKEN is required');
@@ -52,9 +93,21 @@ bot.on('message', async (msg) => {
         });
 
         aiResponse = response.content[0].text;
+        
+        // Track usage
+        await trackUsage(
+          'claude-3-5-sonnet-20241022',
+          'anthropic',
+          response.usage.input_tokens,
+          response.usage.output_tokens,
+          true
+        );
       } catch (error) {
         console.error('Anthropic API error:', error);
         aiResponse = `I'm having trouble connecting to Claude right now. Error: ${error.message}`;
+        
+        // Track failed usage
+        await trackUsage('claude-3-5-sonnet-20241022', 'anthropic', 0, 0, false, error.message);
       }
     } else if (SELECTED_MODEL.includes('gpt')) {
       // Use OpenAI API
@@ -70,9 +123,21 @@ bot.on('message', async (msg) => {
         });
 
         aiResponse = response.choices[0].message.content;
+        
+        // Track usage
+        await trackUsage(
+          'gpt-4o',
+          'openai',
+          response.usage.prompt_tokens,
+          response.usage.completion_tokens,
+          true
+        );
       } catch (error) {
         console.error('OpenAI API error:', error);
         aiResponse = `I'm having trouble connecting to GPT right now. Error: ${error.message}`;
+        
+        // Track failed usage
+        await trackUsage('gpt-4o', 'openai', 0, 0, false, error.message);
       }
     } else if (SELECTED_MODEL.includes('gemini')) {
       // Use Google Generative AI API
@@ -83,9 +148,25 @@ bot.on('message', async (msg) => {
         const result = await model.generateContent(userMessage);
         const response = await result.response;
         aiResponse = response.text();
+        
+        // Gemini doesn't provide token counts in the same way, estimate based on text length
+        const inputTokens = Math.ceil(userMessage.length / 4);
+        const outputTokens = Math.ceil(aiResponse.length / 4);
+        
+        // Track usage
+        await trackUsage(
+          'gemini-pro',
+          'google',
+          inputTokens,
+          outputTokens,
+          true
+        );
       } catch (error) {
         console.error('Google AI API error:', error);
         aiResponse = `I'm having trouble connecting to Gemini right now. Error: ${error.message}`;
+        
+        // Track failed usage
+        await trackUsage('gemini-pro', 'google', 0, 0, false, error.message);
       }
     } else {
       aiResponse = `Model ${SELECTED_MODEL} is not configured properly.`;
