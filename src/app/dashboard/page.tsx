@@ -318,49 +318,57 @@ export default function Dashboard() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Agents</CardTitle>
-              <Bot className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{activeAgents}</div>
-              <p className="text-xs text-muted-foreground">{runningBots} running, {pausedBots} paused, {errorBots} error</p>
-            </CardContent>
-          </Card>
+          <div className="glass-stat-card rounded-2xl p-6 hover:scale-105 transition-transform duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-primary/10 rounded-xl">
+                <Bot className="h-6 w-6 text-primary" />
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground font-medium">Active Agents</p>
+                <p className="text-3xl font-bold text-foreground mt-1">{activeAgents}</p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">{runningBots} running • {pausedBots} paused • {errorBots} error</p>
+          </div>
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Messages</CardTitle>
-              <MessageSquare className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalMessages.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">Across all agents</p>
-            </CardContent>
-          </Card>
+          <div className="glass-stat-card rounded-2xl p-6 hover:scale-105 transition-transform duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-blue-500/10 rounded-xl">
+                <MessageSquare className="h-6 w-6 text-blue-500" />
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground font-medium">Total Messages</p>
+                <p className="text-3xl font-bold text-foreground mt-1">{totalMessages.toLocaleString()}</p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">Across all agents</p>
+          </div>
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalUsers}</div>
-              <p className="text-xs text-muted-foreground">Total users served</p>
-            </CardContent>
-          </Card>
+          <div className="glass-stat-card rounded-2xl p-6 hover:scale-105 transition-transform duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-purple-500/10 rounded-xl">
+                <Users className="h-6 w-6 text-purple-500" />
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground font-medium">Active Users</p>
+                <p className="text-3xl font-bold text-foreground mt-1">{totalUsers}</p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">Total users served</p>
+          </div>
           
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Monthly Cost</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">$57.70</div>
-              <p className="text-xs text-muted-foreground">Within budget limit</p>
-            </CardContent>
-          </Card>
+          <div className="glass-stat-card rounded-2xl p-6 hover:scale-105 transition-transform duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-green-500/10 rounded-xl">
+                <TrendingUp className="h-6 w-6 text-green-500" />
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground font-medium">Monthly Cost</p>
+                <p className="text-3xl font-bold text-foreground mt-1">$57.70</p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">Within budget limit</p>
+          </div>
         </div>
 
         {/* Agents List */}
@@ -379,90 +387,89 @@ export default function Dashboard() {
             {bots.map((agent) => {
               const StatusIcon = getStatusIcon(agent.status);
               return (
-                <Card key={agent.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <Bot className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-lg">{agent.name}</CardTitle>
-                          <CardDescription className="flex items-center space-x-2">
-                            <Badge variant="outline">{agent.type}</Badge>
-                            <span>•</span>
-                            <span>Last active {agent.lastActive}</span>
-                          </CardDescription>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge className={getStatusColor(agent.status)}>
-                          <StatusIcon className="h-3 w-3 mr-1" />
-                          {agent.status}
-                        </Badge>
-                        <Button variant="ghost" size="sm">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
-                      <div>
-                        <p className="text-sm text-gray-600">Uptime</p>
-                        <p className="font-semibold">{agent.uptime}</p>
+                <div key={agent.id} className="glass-agent-card rounded-2xl p-6">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center space-x-4">
+                      <div className="p-3 bg-gradient-to-br from-primary/20 to-primary/5 rounded-xl">
+                        <Bot className="h-8 w-8 text-primary" />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600">Messages</p>
-                        <p className="font-semibold">{agent.messages.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Users</p>
-                        <p className="font-semibold">{agent.users}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Cost</p>
-                        <p className="font-semibold">{agent.cost}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Channels</p>
-                        <div className="flex flex-wrap gap-1">
-                          {agent.channels.map((channel: string, index: number) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
-                              {channel}
-                            </Badge>
-                          ))}
+                        <h3 className="text-xl font-bold text-foreground">{agent.name}</h3>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Badge variant="outline" className="text-xs">{agent.type}</Badge>
+                          <span className="text-xs text-muted-foreground">• Last active {agent.lastActive}</span>
                         </div>
                       </div>
                     </div>
-                    
-                    <div className="flex space-x-2">
-                      <Button variant="outline" size="sm" onClick={() => handleViewLogs(agent.id)}>
-                        <Activity className="h-4 w-4 mr-2" />
-                        View Logs
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleConfigure(agent.id)}>
-                        <Settings className="h-4 w-4 mr-2" />
-                        Configure
-                      </Button>
-                      {agent.status === "running" ? (
-                        <Button variant="outline" size="sm" onClick={() => handlePause(agent.id)}>
-                          <Pause className="h-4 w-4 mr-2" />
-                          Pause
-                        </Button>
-                      ) : (
-                        <Button variant="outline" size="sm" onClick={() => handlePause(agent.id)}>
-                          <Play className="h-4 w-4 mr-2" />
-                          Resume
-                        </Button>
-                      )}
-                      <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" onClick={() => handleDelete(agent.id)}>
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
+                    <div className="flex items-center space-x-2">
+                      <Badge className={`${getStatusColor(agent.status)} px-3 py-1`}>
+                        <StatusIcon className="h-3 w-3 mr-1" />
+                        {agent.status}
+                      </Badge>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="h-4 w-4" />
                       </Button>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Uptime</p>
+                      <p className="text-sm font-semibold text-foreground">{agent.uptime}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Messages</p>
+                      <p className="text-sm font-semibold text-foreground">{agent.messages.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Users</p>
+                      <p className="text-sm font-semibold text-foreground">{agent.users}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Cost</p>
+                      <p className="text-sm font-semibold text-foreground">{agent.cost}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Channels</p>
+                      <div className="flex flex-wrap gap-1">
+                        {agent.channels.map((channel: string, index: number) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {channel}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Actions */}
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" size="sm" onClick={() => handleViewLogs(agent.id)}>
+                      <Activity className="h-4 w-4 mr-2" />
+                      View Logs
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleConfigure(agent.id)}>
+                      <Settings className="h-4 w-4 mr-2" />
+                      Configure
+                    </Button>
+                    {agent.status === "running" ? (
+                      <Button variant="outline" size="sm" onClick={() => handlePause(agent.id)}>
+                        <Pause className="h-4 w-4 mr-2" />
+                        Pause
+                      </Button>
+                    ) : (
+                      <Button variant="outline" size="sm" onClick={() => handlePause(agent.id)}>
+                        <Play className="h-4 w-4 mr-2" />
+                        Resume
+                      </Button>
+                    )}
+                    <Button variant="outline" size="sm" className="text-destructive hover:text-destructive" onClick={() => handleDelete(agent.id)}>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </Button>
+                  </div>
+                </div>
               );
             })}
           </div>
@@ -472,17 +479,17 @@ export default function Dashboard() {
         <div className="mt-12">
           <h2 className="text-xl font-semibold text-foreground mb-6">Quick Actions</h2>
           <div className="grid md:grid-cols-3 gap-6">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Plus className="h-5 w-5 mr-2 text-blue-600" />
-                  Deploy New Agent
-                </CardTitle>
-                <CardDescription>
-                  Choose from our template gallery or build custom
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            <div className="glass-card rounded-2xl p-6 hover:scale-105 transition-transform duration-300 cursor-pointer">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="p-3 bg-blue-500/10 rounded-xl">
+                  <Plus className="h-6 w-6 text-blue-500" />
+                </div>
+                <h3 className="text-lg font-bold text-foreground">Deploy New Agent</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Choose from our template gallery or build custom
+              </p>
+            </div>
             
             <Card className="hover:shadow-md transition-shadow cursor-pointer">
               <CardHeader>
