@@ -3,6 +3,7 @@ const Anthropic = require('@anthropic-ai/sdk').default;
 const OpenAI = require('openai').default;
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const axios = require('axios');
+const http = require('http');
 
 // Get environment variables
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -60,6 +61,22 @@ console.log('Starting Telegram bot...');
 console.log('Selected Model:', SELECTED_MODEL);
 console.log('Bot ID:', BOT_ID);
 console.log('Platform URL:', PLATFORM_URL);
+
+// Create minimal HTTP server for Railway (Railway requires a port)
+const PORT = process.env.PORT || 8080;
+const server = http.createServer((req, res) => {
+  if (req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok', bot: 'running' }));
+  } else {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('Telegram Bot is running');
+  }
+});
+
+server.listen(PORT, () => {
+  console.log(`HTTP server listening on port ${PORT} (for Railway)`);
+});
 
 // Create bot instance with polling
 const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true });
