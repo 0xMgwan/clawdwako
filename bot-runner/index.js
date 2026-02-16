@@ -78,8 +78,15 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`HTTP server listening on 0.0.0.0:${PORT} (for Railway)`);
 });
 
-// Create bot instance with polling
-const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true });
+// Create bot instance with polling (with error handling)
+let bot;
+try {
+  bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true });
+  console.log('Telegram bot polling started successfully');
+} catch (error) {
+  console.error('Failed to start Telegram polling:', error.message);
+  console.log('HTTP server will continue running for healthchecks');
+}
 
 // Keep process alive and log heartbeat
 setInterval(() => {
@@ -88,8 +95,9 @@ setInterval(() => {
 
 console.log('Bot is running and listening for messages...');
 
-// Handle incoming messages
-bot.on('message', async (msg) => {
+// Handle incoming messages (only if bot initialized successfully)
+if (bot) {
+  bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
   const userMessage = msg.text;
 
@@ -206,20 +214,23 @@ bot.on('message', async (msg) => {
   }
 });
 
-// Handle errors
-bot.on('polling_error', (error) => {
-  console.error('Polling error:', error);
-});
+  // Handle errors
+  bot.on('polling_error', (error) => {
+    console.error('Polling error:', error);
+  });
 
-// Graceful shutdown
-process.on('SIGINT', () => {
-  console.log('Shutting down bot...');
-  bot.stopPolling();
-  process.exit(0);
-});
+  // Graceful shutdown
+  process.on('SIGINT', () => {
+    console.log('Shutting down bot...');
+    bot.stopPolling();
+    process.exit(0);
+  });
 
-process.on('SIGTERM', () => {
-  console.log('Shutting down bot...');
-  bot.stopPolling();
-  process.exit(0);
-});
+  process.on('SIGTERM', () => {
+    console.log('Shutting down bot...');
+    bot.stopPolling();
+    process.exit(0);
+  });
+} else {
+  console.log('Bot not initialized - only HTTP server is running');
+}
