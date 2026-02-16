@@ -294,8 +294,6 @@ export class RailwayClient {
       GOOGLE_AI_API_KEY: googleAiApiKey || process.env.GOOGLE_AI_API_KEY || '',
       BOT_ID: '', // Will be set after bot is created in database
       PLATFORM_URL: process.env.NEXT_PUBLIC_URL || 'https://clawdwako.vercel.app',
-      RAILWAY_STATIC_URL: '', // Disable Railway's automatic port assignment
-      PORT: '', // Explicitly set no port
     };
 
     await this.setEnvironmentVariables(project.id, service.id, envVars);
