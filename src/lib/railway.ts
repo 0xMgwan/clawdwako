@@ -112,18 +112,39 @@ export class RailwayClient {
     serviceId: string,
     variables: Record<string, string>
   ) {
+    // Get the environment first
+    const envQuery = `
+      query Project($id: String!) {
+        project(id: $id) {
+          id
+          environments(first: 1) {
+            edges {
+              node {
+                id
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    const envData = await this.query(envQuery, { id: projectId });
+    const environmentId = envData.project.environments.edges[0]?.node.id;
+
+    if (!environmentId) {
+      throw new Error('No environment found for project');
+    }
+
     const mutations = Object.entries(variables).map(([key, value], index) => {
       // Escape special characters in values
       const escapedValue = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
       return `
         var${index}: variableUpsert(input: {
           projectId: "${projectId}"
-          serviceId: "${serviceId}"
+          environmentId: "${environmentId}"
           name: "${key}"
           value: "${escapedValue}"
-        }) {
-          id
-        }
+        })
       `;
     });
 
