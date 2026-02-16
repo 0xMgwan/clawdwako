@@ -113,12 +113,14 @@ export class RailwayClient {
     variables: Record<string, string>
   ) {
     const mutations = Object.entries(variables).map(([key, value], index) => {
+      // Escape special characters in values
+      const escapedValue = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
       return `
         var${index}: variableUpsert(input: {
           projectId: "${projectId}"
           serviceId: "${serviceId}"
           name: "${key}"
-          value: "${value}"
+          value: "${escapedValue}"
         }) {
           id
         }
@@ -132,6 +134,24 @@ export class RailwayClient {
     `;
 
     return await this.query(query);
+  }
+
+  async setServiceSource(
+    serviceId: string,
+    rootDirectory: string
+  ) {
+    const query = `
+      mutation ServiceUpdate($serviceId: String!, $rootDirectory: String) {
+        serviceUpdate(
+          id: $serviceId
+          input: { rootDirectory: $rootDirectory }
+        ) {
+          id
+        }
+      }
+    `;
+
+    return await this.query(query, { serviceId, rootDirectory });
   }
 
   async deployFromGitHub(
@@ -195,51 +215,44 @@ export class RailwayClient {
     } = options;
 
     console.log('Step 1: Creating Railway project...');
-    // Create project
     const project = await this.createProject(projectName);
     console.log('Project created:', project.id);
 
-    // For now, just return the project info without deploying service
-    // This will help us isolate if the issue is in service creation
-    return {
-      projectId: project.id,
-      serviceId: 'pending', // Temporary - service creation disabled for debugging
-      projectName: project.name,
-    };
-
-    /* Temporarily disabled to isolate the issue
     console.log('Step 2: Creating service...');
-    const service = await this.createService(project.id, 'openclaw-bot');
+    const service = await this.createService(project.id, 'telegram-bot');
     console.log('Service created:', service.id);
 
     console.log('Step 3: Setting environment variables...');
     const envVars: Record<string, string> = {
       TELEGRAM_BOT_TOKEN: telegramBotToken,
       SELECTED_MODEL: selectedModel,
+      ANTHROPIC_API_KEY: anthropicApiKey || process.env.ANTHROPIC_API_KEY || '',
+      OPENAI_API_KEY: openaiApiKey || process.env.OPENAI_API_KEY || '',
+      GOOGLE_AI_API_KEY: googleAiApiKey || process.env.GOOGLE_AI_API_KEY || '',
     };
-
-    if (anthropicApiKey) envVars.ANTHROPIC_API_KEY = anthropicApiKey;
-    if (openaiApiKey) envVars.OPENAI_API_KEY = openaiApiKey;
-    if (googleAiApiKey) envVars.GOOGLE_AI_API_KEY = googleAiApiKey;
 
     await this.setEnvironmentVariables(project.id, service.id, envVars);
     console.log('Environment variables set');
 
     console.log('Step 4: Deploying from GitHub...');
+    // Deploy the bot code from your GitHub repo
     await this.deployFromGitHub(
       project.id,
       service.id,
-      'https://github.com/anthropics/openclaw',
+      'https://github.com/0xMgwan/clawdwako',
       'main'
     );
     console.log('GitHub deployment initiated');
+
+    console.log('Step 5: Setting root directory to bot-runner...');
+    await this.setServiceSource(service.id, 'bot-runner');
+    console.log('Root directory set to bot-runner');
 
     return {
       projectId: project.id,
       serviceId: service.id,
       projectName: project.name,
     };
-    */
   }
 }
 

@@ -145,6 +145,39 @@ export async function POST(request: NextRequest) {
       userId = anonymousUser.id;
     }
 
+    // Deploy to Railway for 24/7 operation
+    let railwayProjectId = null;
+    let railwayServiceId = null;
+
+    try {
+      console.log('Deploying to Railway...');
+      const railwayClient = getRailwayClient();
+      
+      console.log('Railway client initialized, attempting deployment...');
+      const railwayDeployment = await railwayClient.deployOpenClaw({
+        projectName: `bot-${deployment.botUsername}`,
+        telegramBotToken: deployment.botToken,
+        selectedModel: deployment.selectedModel,
+        anthropicApiKey: deployment.userApiKeys?.anthropic,
+        openaiApiKey: deployment.userApiKeys?.openai,
+        googleAiApiKey: deployment.userApiKeys?.google,
+      });
+
+      railwayProjectId = railwayDeployment.projectId;
+      railwayServiceId = railwayDeployment.serviceId;
+      
+      console.log('✅ Railway deployment successful:', {
+        projectId: railwayProjectId,
+        serviceId: railwayServiceId,
+      });
+    } catch (railwayError: any) {
+      console.error('❌ Railway deployment failed');
+      console.error('Error message:', railwayError.message);
+      console.error('Error stack:', railwayError.stack);
+      console.error('Full error:', JSON.stringify(railwayError, null, 2));
+      // Continue with webhook setup even if Railway fails
+    }
+
     // Check if bot already exists
     let bot = await prisma.bot.findFirst({
       where: { telegramBotToken: deployment.botToken }
@@ -158,6 +191,8 @@ export async function POST(request: NextRequest) {
           name: deployment.botUsername,
           selectedModel: deployment.selectedModel,
           status: 'running',
+          railwayProjectId,
+          railwayServiceId,
           deployedAt: new Date(),
         }
       });
@@ -171,8 +206,8 @@ export async function POST(request: NextRequest) {
           telegramBotUsername: deployment.botUsername,
           selectedModel: deployment.selectedModel,
           status: 'running',
-          railwayProjectId: null,
-          railwayServiceId: null,
+          railwayProjectId,
+          railwayServiceId,
           deployedAt: new Date(),
         },
       });
@@ -215,9 +250,12 @@ export async function POST(request: NextRequest) {
         id: bot.id,
         username: bot.telegramBotUsername,
         status: bot.status,
-        railwayProjectId: null,
+        railwayProjectId: railwayProjectId,
+        railwayServiceId: railwayServiceId,
       },
-      message: 'Bot deployed successfully! You can now chat with it on Telegram.',
+      message: railwayProjectId 
+        ? 'Bot deployed successfully to Railway! It will run 24/7. You can now chat with it on Telegram.'
+        : 'Bot deployed successfully! You can now chat with it on Telegram.',
     });
     
   } catch (error: any) {
