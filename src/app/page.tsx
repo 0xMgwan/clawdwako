@@ -343,32 +343,31 @@ export default function Home() {
 
           <div className="text-center mb-5">
             {session ? (
-              <div className="glass-card px-6 py-5 rounded-2xl border border-border/50 max-w-md mx-auto">
+              <div className="glass-card px-4 py-3 rounded-xl border border-border/50 max-w-sm mx-auto">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="h-12 w-12 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center ring-2 ring-primary/20">
-                      <span className="text-primary-foreground text-lg font-bold">
+                  <div className="flex items-center space-x-3">
+                    <div className="h-10 w-10 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center ring-2 ring-primary/20">
+                      <span className="text-primary-foreground text-sm font-bold">
                         {session?.user?.name?.charAt(0).toUpperCase() || session?.user?.email?.charAt(0).toUpperCase() || 'U'}
                       </span>
                     </div>
                     <div className="text-left">
-                      <p className="text-base font-bold text-foreground">
+                      <p className="text-sm font-bold text-foreground">
                         {session?.user?.name || 'User'}
                       </p>
-                      <p className="text-sm text-muted-foreground flex items-center space-x-1">
+                      <p className="text-xs text-muted-foreground flex items-center space-x-1">
                         <Mail className="h-3 w-3" />
                         <span>{session?.user?.email}</span>
                       </p>
                     </div>
                   </div>
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
                     onClick={() => signOut({ callbackUrl: '/' })}
-                    className="border-red-500/50 text-red-500 hover:bg-red-500/10 hover:text-red-600 hover:border-red-500"
+                    className="text-red-500 hover:bg-red-500/10 hover:text-red-600 p-2"
                   >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sign Out
+                    <LogOut className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -389,7 +388,7 @@ export default function Home() {
                   Sign in with Google
                 </Button>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Authenticate to launch your bot and link communication channels.
+                  Connect Telegram first to proceed with deployment
                 </p>
               </>
             )}

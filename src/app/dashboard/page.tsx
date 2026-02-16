@@ -459,29 +459,29 @@ export default function Dashboard() {
                     </div>
                   </div>
                   
-                  {/* Actions */}
-                  <div className="flex flex-col gap-2 mt-auto">
-                    <Button variant="outline" size="sm" onClick={() => handleViewLogs(agent.id)}>
-                      <Activity className="h-4 w-4 mr-2" />
+                  {/* Actions - 2x2 Grid */}
+                  <div className="grid grid-cols-2 gap-2 mt-auto">
+                    <Button variant="outline" size="sm" onClick={() => handleViewLogs(agent.id)} className="text-xs py-1.5">
+                      <Activity className="h-3 w-3 mr-1.5" />
                       View Logs
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleConfigure(agent.id)}>
-                      <Settings className="h-4 w-4 mr-2" />
+                    <Button variant="outline" size="sm" onClick={() => handleConfigure(agent.id)} className="text-xs py-1.5">
+                      <Settings className="h-3 w-3 mr-1.5" />
                       Configure
                     </Button>
                     {agent.status === "running" ? (
-                      <Button variant="outline" size="sm" onClick={() => handlePause(agent.id)}>
-                        <Pause className="h-4 w-4 mr-2" />
+                      <Button variant="outline" size="sm" onClick={() => handlePause(agent.id)} className="text-xs py-1.5">
+                        <Pause className="h-3 w-3 mr-1.5" />
                         Pause
                       </Button>
                     ) : (
-                      <Button variant="outline" size="sm" onClick={() => handlePause(agent.id)}>
-                        <Play className="h-4 w-4 mr-2" />
+                      <Button variant="outline" size="sm" onClick={() => handlePause(agent.id)} className="text-xs py-1.5">
+                        <Play className="h-3 w-3 mr-1.5" />
                         Resume
                       </Button>
                     )}
-                    <Button variant="outline" size="sm" className="text-destructive hover:text-destructive" onClick={() => handleDelete(agent.id)}>
-                      <Trash2 className="h-4 w-4 mr-2" />
+                    <Button variant="outline" size="sm" className="text-destructive hover:text-destructive text-xs py-1.5" onClick={() => handleDelete(agent.id)}>
+                      <Trash2 className="h-3 w-3 mr-1.5" />
                       Delete
                     </Button>
                   </div>
