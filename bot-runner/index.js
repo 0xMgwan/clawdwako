@@ -58,9 +58,16 @@ if (!TELEGRAM_BOT_TOKEN) {
 
 console.log('Starting Telegram bot...');
 console.log('Selected Model:', SELECTED_MODEL);
+console.log('Bot ID:', BOT_ID);
+console.log('Platform URL:', PLATFORM_URL);
 
 // Create bot instance with polling
 const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true });
+
+// Keep process alive and log heartbeat
+setInterval(() => {
+  console.log('Bot is running... Polling for messages');
+}, 60000); // Log every minute
 
 console.log('Bot is running and listening for messages...');
 
