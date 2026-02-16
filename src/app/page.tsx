@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Bot, Mail, Moon, Sun } from "lucide-react";
+import { Bot, Mail, Moon, Sun, LogOut, User as UserIcon } from "lucide-react";
 import { TelegramBotModal } from "@/components/TelegramBotModal";
 import { DeploymentSuccessModal } from "@/components/DeploymentSuccessModal";
-import { signIn } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+  const { data: session } = useSession();
   const [selectedModel, setSelectedModel] = useState("claude-opus");
   const [showTelegramModal, setShowTelegramModal] = useState(false);
   const [telegramBotInfo, setTelegramBotInfo] = useState<any>(null);
@@ -18,6 +21,7 @@ export default function Home() {
   const [userApiKey, setUserApiKey] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [deploymentResult, setDeploymentResult] = useState<any>(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleTelegramSuccess = (data: any) => {
     setTelegramBotInfo(data);
@@ -141,6 +145,55 @@ export default function Home() {
                   Contact Support
                 </Button>
               </a>
+              
+              {/* User Profile or Sign In */}
+              {session ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="h-8 w-8 bg-primary rounded-full flex items-center justify-center hover:opacity-80 transition-opacity"
+                  >
+                    <span className="text-primary-foreground text-sm font-medium">
+                      {session?.user?.name?.charAt(0).toUpperCase() || session?.user?.email?.charAt(0).toUpperCase() || 'U'}
+                    </span>
+                  </button>
+                  
+                  {showUserMenu && (
+                    <div className="absolute right-0 mt-2 w-64 bg-background border border-border rounded-lg shadow-lg z-50">
+                      <div className="p-4 border-b border-border">
+                        <p className="text-sm font-medium text-foreground">
+                          {session?.user?.name || 'User'}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {session?.user?.email || 'Not signed in'}
+                        </p>
+                      </div>
+                      <div className="p-2">
+                        <button
+                          onClick={() => {
+                            setShowUserMenu(false);
+                            router.push('/dashboard');
+                          }}
+                          className="w-full flex items-center px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md transition-colors"
+                        >
+                          <UserIcon className="h-4 w-4 mr-2" />
+                          Dashboard
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowUserMenu(false);
+                            signOut({ callbackUrl: '/' });
+                          }}
+                          className="w-full flex items-center px-3 py-2 text-sm text-destructive hover:bg-accent rounded-md transition-colors"
+                        >
+                          <LogOut className="h-4 w-4 mr-2" />
+                          Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : null}
             </div>
           </div>
         </div>

@@ -228,10 +228,10 @@ export default function Dashboard() {
       <nav className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
+            <button onClick={() => router.push('/')} className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
               <Bot className="h-8 w-8 text-primary" />
               <span className="text-xl font-bold text-foreground">Clawdwako.ai</span>
-            </div>
+            </button>
             <div className="flex items-center space-x-4">
               {mounted && (
                 <Button
@@ -366,7 +366,7 @@ export default function Dashboard() {
         {/* Agents List */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900">Your AI Agents</h2>
+            <h2 className="text-xl font-semibold text-foreground">Your AI Agents</h2>
             <div className="flex space-x-2">
               <Button variant="outline" size="sm">All</Button>
               <Button variant="outline" size="sm">Running</Button>
@@ -470,7 +470,7 @@ export default function Dashboard() {
 
         {/* Quick Actions */}
         <div className="mt-12">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-6">Quick Actions</h2>
           <div className="grid md:grid-cols-3 gap-6">
             <Card className="hover:shadow-md transition-shadow cursor-pointer">
               <CardHeader>
