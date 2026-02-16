@@ -1,8 +1,8 @@
 [build]
-builder = "DOCKERFILE"
-dockerfilePath = "bot-runner/Dockerfile"
+builder = "NIXPACKS"
+buildCommand = "cd bot-runner && npm install"
 
 [deploy]
-startCommand = "npm start"
+startCommand = "cd bot-runner && npm start"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
