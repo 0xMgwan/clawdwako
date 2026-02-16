@@ -1,3 +1,19 @@
+// Catch any uncaught errors
+process.on('uncaughtException', (error) => {
+  console.error('UNCAUGHT EXCEPTION:', error);
+  console.error('Stack:', error.stack);
+  // Don't exit - keep HTTP server running
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('UNHANDLED REJECTION at:', promise, 'reason:', reason);
+  // Don't exit - keep HTTP server running
+});
+
+console.log('=== Bot Runner Starting ===');
+console.log('Node version:', process.version);
+console.log('Environment:', process.env.NODE_ENV || 'development');
+
 const TelegramBot = require('node-telegram-bot-api');
 const Anthropic = require('@anthropic-ai/sdk').default;
 const OpenAI = require('openai').default;
@@ -52,39 +68,53 @@ async function trackUsage(model, provider, inputTokens, outputTokens, success, e
   }
 }
 
-if (!TELEGRAM_BOT_TOKEN) {
-  console.error('TELEGRAM_BOT_TOKEN is required');
-  process.exit(1);
-}
+// Start HTTP server FIRST (before any bot initialization)
+const PORT = process.env.PORT || 8080;
+console.log('Starting HTTP server on port', PORT);
 
+const server = http.createServer((req, res) => {
+  console.log(`Received ${req.method} request to ${req.url}`);
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('OK');
+});
+
+server.listen(PORT, '0.0.0.0', (err) => {
+  if (err) {
+    console.error('Failed to start HTTP server:', err);
+    process.exit(1);
+  }
+  console.log(`✅ HTTP server listening on 0.0.0.0:${PORT}`);
+});
+
+// Handle server errors
+server.on('error', (err) => {
+  console.error('HTTP server error:', err);
+});
+
+// Now initialize bot
 console.log('Starting Telegram bot...');
 console.log('Selected Model:', SELECTED_MODEL);
 console.log('Bot ID:', BOT_ID);
 console.log('Platform URL:', PLATFORM_URL);
 
-// Create minimal HTTP server for Railway (Railway requires a port)
-const PORT = process.env.PORT || 8080;
-const server = http.createServer((req, res) => {
-  if (req.url === '/health') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ok', bot: 'running' }));
-  } else {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Telegram Bot is running');
-  }
-});
+if (!TELEGRAM_BOT_TOKEN) {
+  console.error('TELEGRAM_BOT_TOKEN is required');
+  console.log('HTTP server will continue running for healthchecks');
+  // Don't exit - keep HTTP server running
+}
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`HTTP server listening on 0.0.0.0:${PORT} (for Railway)`);
-});
-
-// Create bot instance with polling (with error handling)
+// Create bot instance with polling (only if token exists)
 let bot;
-try {
-  bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true });
-  console.log('Telegram bot polling started successfully');
-} catch (error) {
-  console.error('Failed to start Telegram polling:', error.message);
+if (TELEGRAM_BOT_TOKEN && TELEGRAM_BOT_TOKEN !== 'test-bot-token') {
+  try {
+    bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true });
+    console.log('✅ Telegram bot polling started successfully');
+  } catch (error) {
+    console.error('❌ Failed to start Telegram polling:', error.message);
+    console.log('HTTP server will continue running for healthchecks');
+  }
+} else {
+  console.log('⚠️  No valid Telegram token - skipping bot initialization');
   console.log('HTTP server will continue running for healthchecks');
 }
 
