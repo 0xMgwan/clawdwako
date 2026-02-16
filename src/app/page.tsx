@@ -112,6 +112,11 @@ export default function Home() {
   const handleGoogleSignIn = () => {
     signIn("google", { 
       callbackUrl: `${window.location.origin}/dashboard`,
+      redirect: false,
+    }).then((result) => {
+      if (result?.ok) {
+        router.push('/dashboard');
+      }
     });
   };
 
@@ -135,6 +140,16 @@ export default function Home() {
                 <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                 <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
               </Button>
+              {session && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push('/dashboard')}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Dashboard
+                </Button>
+              )}
               <a href="mailto:support@nedapay.xyz">
                 <Button 
                   variant="ghost" 
@@ -224,10 +239,7 @@ export default function Home() {
                 onClick={() => setSelectedModel("claude-opus")}
                 className={selectedModel === "claude-opus" ? "bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 text-sm" : "border-border hover:bg-accent px-4 py-2 text-sm"}
               >
-                <svg className="w-4 h-4 mr-1.5" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="#D97757" stroke="#D97757" strokeWidth="1"/>
-                  <circle cx="12" cy="12" r="3" fill="#1a1a1a"/>
-                </svg>
+                <img src="/Claude-ai-logo.png" alt="Claude" className="w-4 h-4 mr-1.5" />
                 Claude Opus 4.5
               </Button>
               <Button 
@@ -236,11 +248,7 @@ export default function Home() {
                 onClick={() => setSelectedModel("gpt-5")}
                 className={selectedModel === "gpt-5" ? "bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 text-sm" : "border-border hover:bg-accent px-4 py-2 text-sm"}
               >
-                <svg className="w-4 h-4 mr-1.5" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#6B6B6B"/>
-                  <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" fill="#6B6B6B"/>
-                  <circle cx="12" cy="12" r="2" fill="#6B6B6B"/>
-                </svg>
+                <img src="/gpt.png" alt="GPT" className="w-4 h-4 mr-1.5" />
                 GPT-5.2
               </Button>
               <Button 
@@ -249,16 +257,7 @@ export default function Home() {
                 onClick={() => setSelectedModel("gemini")}
                 className={selectedModel === "gemini" ? "bg-primary hover:bg-primary/90 text-white px-4 py-2 text-sm" : "border-border hover:bg-accent px-4 py-2 text-sm"}
               >
-                <svg className="w-4 h-4 mr-1.5" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2L16 8L22 12L16 16L12 22L8 16L2 12L8 8L12 2Z" fill="url(#gemini-gradient)"/>
-                  <defs>
-                    <linearGradient id="gemini-gradient" x1="2" y1="2" x2="22" y2="22">
-                      <stop offset="0%" stopColor="#4285F4"/>
-                      <stop offset="50%" stopColor="#9B72F2"/>
-                      <stop offset="100%" stopColor="#D96570"/>
-                    </linearGradient>
-                  </defs>
-                </svg>
+                <img src="/google gemini.png" alt="Gemini" className="w-4 h-4 mr-1.5" />
                 Gemini 3 Flash
               </Button>
             </div>
