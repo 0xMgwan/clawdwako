@@ -74,8 +74,8 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`HTTP server listening on port ${PORT} (for Railway)`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`HTTP server listening on 0.0.0.0:${PORT} (for Railway)`);
 });
 
 // Create bot instance with polling
