@@ -20,12 +20,15 @@ async function testRailwayDeployment() {
     console.log('✅ Project created:', project.id);
     console.log('');
 
-    console.log('Step 2: Creating service...');
+    console.log('\nStep 2: Creating service...');
     const service = await client.createService(project.id, 'telegram-bot');
     console.log('✅ Service created:', service.id);
-    console.log('');
 
-    console.log('Step 3: Setting environment variables...');
+    console.log('\nStep 2.5: Disabling service networking...');
+    await client.disableServiceNetworking(service.id);
+    console.log('✅ Networking disabled (worker service)');
+
+    console.log('\nStep 3: Setting environment variables...');
     await client.setEnvironmentVariables(project.id, service.id, {
       TELEGRAM_BOT_TOKEN: 'test-token',
       SELECTED_MODEL: 'claude-opus',

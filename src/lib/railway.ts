@@ -107,6 +107,22 @@ export class RailwayClient {
     return data.serviceCreate;
   }
 
+  async disableServiceNetworking(serviceId: string) {
+    const query = `
+      mutation ServiceDomainDelete($serviceId: String!) {
+        serviceDomainDelete(id: $serviceId)
+      }
+    `;
+
+    try {
+      await this.query(query, { serviceId });
+      console.log('Service networking disabled');
+    } catch (error: any) {
+      console.log('Note: Could not disable networking (may not be enabled yet):', error.message);
+      // Don't throw - this is optional
+    }
+  }
+
   async setEnvironmentVariables(
     projectId: string,
     serviceId: string,
@@ -265,6 +281,9 @@ export class RailwayClient {
     console.log('Step 2: Creating service...');
     const service = await this.createService(project.id, 'telegram-bot');
     console.log('Service created:', service.id);
+
+    console.log('Step 2.5: Disabling service networking (worker service)...');
+    await this.disableServiceNetworking(service.id);
 
     console.log('Step 3: Setting environment variables...');
     const envVars: Record<string, string> = {
