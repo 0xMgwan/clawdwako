@@ -414,11 +414,11 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="grid gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {bots.map((agent) => {
               const StatusIcon = getStatusIcon(agent.status);
               return (
-                <div key={agent.id} className="glass-agent-card rounded-xl p-5">
+                <div key={agent.id} className="glass-agent-card rounded-xl p-5 flex flex-col">
                   {/* Compact Header */}
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-3">
@@ -439,32 +439,28 @@ export default function Dashboard() {
                     </Badge>
                   </div>
 
-                  {/* Compact Stats */}
-                  <div className="grid grid-cols-5 gap-3 mb-4">
-                    <div>
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="glass-stat-card rounded-lg p-2">
                       <p className="text-xs text-muted-foreground">Uptime</p>
-                      <p className="text-sm font-semibold text-foreground">{agent.uptime}</p>
+                      <p className="text-sm font-bold text-foreground">{agent.uptime}</p>
                     </div>
-                    <div>
+                    <div className="glass-stat-card rounded-lg p-2">
                       <p className="text-xs text-muted-foreground">Messages</p>
-                      <p className="text-sm font-semibold text-foreground">{agent.messages || 0}</p>
+                      <p className="text-sm font-bold text-foreground">{agent.messages || 0}</p>
                     </div>
-                    <div>
+                    <div className="glass-stat-card rounded-lg p-2">
                       <p className="text-xs text-muted-foreground">Users</p>
-                      <p className="text-sm font-semibold text-foreground">{agent.users || 0}</p>
+                      <p className="text-sm font-bold text-foreground">{agent.users || 0}</p>
                     </div>
-                    <div>
+                    <div className="glass-stat-card rounded-lg p-2">
                       <p className="text-xs text-muted-foreground">Cost</p>
-                      <p className="text-sm font-semibold text-foreground">{agent.cost}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Channels</p>
-                      <Badge variant="secondary" className="text-xs">Telegram</Badge>
+                      <p className="text-sm font-bold text-foreground">{agent.cost}</p>
                     </div>
                   </div>
                   
-                  {/* Compact Actions */}
-                  <div className="flex gap-2">
+                  {/* Actions */}
+                  <div className="flex flex-col gap-2 mt-auto">
                     <Button variant="outline" size="sm" onClick={() => handleViewLogs(agent.id)}>
                       <Activity className="h-4 w-4 mr-2" />
                       View Logs

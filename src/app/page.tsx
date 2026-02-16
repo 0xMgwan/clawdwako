@@ -202,8 +202,8 @@ export default function Home() {
       {/* Hero Header */}
       <section className="pt-16 pb-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            Launch Your AI Agent in <span className="text-green-500">Under 60 Seconds</span>
+          <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight">
+            Launch Your AI Agent in <span className="text-green-500 font-black">Under 60 Seconds</span>
           </h1>
           <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
             Skip the technical setup entirely. Get your personal AI assistant running 
@@ -216,7 +216,7 @@ export default function Home() {
       <section className="pb-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto glass-card rounded-2xl p-6 md:p-8">
           <div className="mb-5">
-            <h2 className="text-base font-semibold mb-3 text-center">Select your preferred AI model</h2>
+            <h2 className="text-xl font-black mb-3 text-center tracking-tight">Select your preferred AI model</h2>
             <div className="flex flex-wrap justify-center gap-2">
               <Button 
                 variant={selectedModel === "claude-opus" ? "default" : "outline"}
@@ -296,7 +296,7 @@ export default function Home() {
           </div>
 
           <div className="mb-5">
-            <h2 className="text-base font-semibold mb-3 text-center">Choose your messaging platform</h2>
+            <h2 className="text-xl font-black mb-3 text-center tracking-tight">Choose your messaging platform</h2>
             <div className="flex flex-wrap justify-center gap-2">
               <Button 
                 variant="default" 
@@ -343,30 +343,32 @@ export default function Home() {
 
           <div className="text-center mb-5">
             {session ? (
-              <div className="glass-card px-6 py-4 rounded-xl border border-border/50 max-w-md mx-auto">
+              <div className="glass-card px-6 py-5 rounded-2xl border border-border/50 max-w-md mx-auto">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="h-10 w-10 bg-primary rounded-full flex items-center justify-center">
-                      <span className="text-primary-foreground text-sm font-medium">
+                  <div className="flex items-center space-x-4">
+                    <div className="h-12 w-12 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center ring-2 ring-primary/20">
+                      <span className="text-primary-foreground text-lg font-bold">
                         {session?.user?.name?.charAt(0).toUpperCase() || session?.user?.email?.charAt(0).toUpperCase() || 'U'}
                       </span>
                     </div>
                     <div className="text-left">
-                      <p className="text-sm font-medium text-foreground">
+                      <p className="text-base font-bold text-foreground">
                         {session?.user?.name || 'User'}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        {session?.user?.email}
+                      <p className="text-sm text-muted-foreground flex items-center space-x-1">
+                        <Mail className="h-3 w-3" />
+                        <span>{session?.user?.email}</span>
                       </p>
                     </div>
                   </div>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => signOut({ callbackUrl: '/' })}
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    className="border-red-500/50 text-red-500 hover:bg-red-500/10 hover:text-red-600 hover:border-red-500"
                   >
-                    <LogOut className="h-4 w-4" />
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
                   </Button>
                 </div>
               </div>
