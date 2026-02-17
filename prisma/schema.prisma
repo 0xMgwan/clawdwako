@@ -68,6 +68,9 @@ model Bot {
   railwayServiceId    String?
   deploymentUrl       String?
   deployedAt          DateTime?
+  anthropicApiKey     String?     // User's Anthropic API key
+  openaiApiKey        String?     // User's OpenAI API key
+  googleApiKey        String?     // User's Google AI API key
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
   deployment          Deployment?

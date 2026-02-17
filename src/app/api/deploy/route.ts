@@ -217,13 +217,16 @@ export async function POST(request: NextRequest) {
       bot = await prisma.bot.update({
         where: { id: bot.id },
         data: {
-          userId: userId, // ✅ Fix: Update userId too when updating existing bot
+          userId: userId,
           name: deployment.botUsername,
           selectedModel: deployment.selectedModel,
           status: 'running',
           railwayProjectId,
           railwayServiceId,
           deployedAt: new Date(),
+          anthropicApiKey: deployment.userApiKeys?.anthropic || null,
+          openaiApiKey: deployment.userApiKeys?.openai || null,
+          googleApiKey: deployment.userApiKeys?.google || null,
         }
       });
     } else {
@@ -239,6 +242,9 @@ export async function POST(request: NextRequest) {
           railwayProjectId,
           railwayServiceId,
           deployedAt: new Date(),
+          anthropicApiKey: deployment.userApiKeys?.anthropic || null,
+          openaiApiKey: deployment.userApiKeys?.openai || null,
+          googleApiKey: deployment.userApiKeys?.google || null,
         },
       });
     }

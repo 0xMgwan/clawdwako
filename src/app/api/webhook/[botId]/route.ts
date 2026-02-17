@@ -50,8 +50,13 @@ export async function POST(
     // Generate AI response based on selected model
     let aiResponse = '';
     
+    // Use user's API key if available, otherwise fall back to platform key
+    const anthropicKey = bot.anthropicApiKey || process.env.ANTHROPIC_API_KEY;
+    const openaiKey = bot.openaiApiKey || process.env.OPENAI_API_KEY;
+    const googleKey = bot.googleApiKey || process.env.GOOGLE_AI_API_KEY;
+    
     // Test mode: If no API keys are configured, return a test response
-    const hasApiKeys = process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY || process.env.GOOGLE_AI_API_KEY;
+    const hasApiKeys = anthropicKey || openaiKey || googleKey;
     
     if (!hasApiKeys) {
       aiResponse = `🤖 Test Mode Response\n\nYou said: "${userMessage}"\n\nThis is a test response. The bot is working! Add API keys to enable AI responses.`;
@@ -59,7 +64,7 @@ export async function POST(
       // Use Anthropic API
       try {
         const anthropic = new Anthropic({
-          apiKey: process.env.ANTHROPIC_API_KEY
+          apiKey: anthropicKey
         });
 
         const response = await anthropic.messages.create({
@@ -77,7 +82,7 @@ export async function POST(
       // Use OpenAI API
       try {
         const openai = new OpenAI({
-          apiKey: process.env.OPENAI_API_KEY
+          apiKey: openaiKey
         });
 
         const response = await openai.chat.completions.create({
@@ -93,7 +98,7 @@ export async function POST(
     } else if (bot.selectedModel.includes('gemini')) {
       // Use Google Generative AI SDK
       try {
-        const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '');
+        const genAI = new GoogleGenerativeAI(googleKey || '');
         const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
         const result = await model.generateContent(userMessage);
