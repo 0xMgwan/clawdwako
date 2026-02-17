@@ -1,0 +1,27 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="48" fill="#10b981" stroke="#059669" stroke-width="2"/>
+  
+  <!-- Claw main pad (center) -->
+  <ellipse cx="50" cy="60" rx="12" ry="16" fill="white"/>
+  
+  <!-- Top left claw -->
+  <path d="M 35 45 Q 30 35 28 20" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <circle cx="28" cy="20" r="3.5" fill="white"/>
+  
+  <!-- Top center claw -->
+  <path d="M 50 42 Q 50 28 50 10" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <circle cx="50" cy="10" r="3.5" fill="white"/>
+  
+  <!-- Top right claw -->
+  <path d="M 65 45 Q 70 35 72 20" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <circle cx="72" cy="20" r="3.5" fill="white"/>
+  
+  <!-- Bottom left claw -->
+  <path d="M 38 72 Q 32 82 28 95" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <circle cx="28" cy="95" r="3.5" fill="white"/>
+  
+  <!-- Bottom right claw -->
+  <path d="M 62 72 Q 68 82 72 95" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <circle cx="72" cy="95" r="3.5" fill="white"/>
+</svg>

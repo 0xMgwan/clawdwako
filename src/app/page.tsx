@@ -127,7 +127,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <Bot className="h-6 w-6 text-primary" />
+              <img src="/claw-logo.svg" alt="Clawdwako" className="h-8 w-8 object-contain" />
               <span className="text-lg font-bold">Clawdwako<span className="text-muted-foreground">.ai</span></span>
             </div>
             
