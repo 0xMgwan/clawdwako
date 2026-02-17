@@ -9,6 +9,25 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 
+// Helper function to get user ID by email
+async function getUserIdByEmail(email: string): Promise<string | null> {
+  try {
+    const response = await fetch('/api/user/by-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      return data.userId;
+    }
+  } catch (error) {
+    console.error('Failed to get user ID:', error);
+  }
+  return null;
+}
+
 export default function Home() {
   const router = useRouter();
   const { data: session } = useSession();
@@ -53,6 +72,7 @@ export default function Home() {
         botToken: telegramBotInfo.token,
         botUsername: telegramBotInfo.botInfo?.username,
         selectedModel: selectedModel,
+        userId: session?.user?.email ? await getUserIdByEmail(session.user.email) : null,
         userApiKeys: hasAnyUserKey ? combinedApiKeys : null,
       };
 
