@@ -86,10 +86,10 @@ const deployedAgents = [
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case "running": return "text-green-600 bg-green-100";
-    case "paused": return "text-yellow-600 bg-yellow-100";
-    case "error": return "text-red-600 bg-red-100";
-    default: return "text-gray-600 bg-gray-100";
+    case "running": return "text-green-400 bg-green-500/10 border border-green-500/20";
+    case "paused": return "text-yellow-400 bg-yellow-500/10 border border-yellow-500/20";
+    case "error": return "text-red-400 bg-red-500/10 border border-red-500/20";
+    default: return "text-gray-400 bg-gray-500/10 border border-gray-500/20";
   }
 };
 
@@ -334,78 +334,54 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-16">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-            <p className="text-muted-foreground mt-1">Manage your AI agents and monitor performance</p>
+            <div className="text-xs tracking-[0.3em] text-muted-foreground mb-3">CONTROL CENTER</div>
+            <h1 className="text-6xl font-light tracking-tight text-foreground">Dashboard</h1>
+            <p className="text-muted-foreground mt-4 text-lg">Manage your AI agents and monitor performance</p>
           </div>
-          <Button onClick={() => window.location.href = '/'}>
+          <Button onClick={() => window.location.href = '/'} className="px-6 py-3 bg-foreground text-background rounded-full text-sm font-medium hover:bg-green-400 transition-all">
             <Plus className="h-4 w-4 mr-2" />
-            Deploy New Agent
+            DEPLOY NEW AGENT
           </Button>
         </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="glass-stat-card rounded-2xl p-6 hover:scale-105 transition-transform duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-primary/10 rounded-xl">
-                <Bot className="h-6 w-6 text-primary" />
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-muted-foreground font-medium">Active Agents</p>
-                <p className="text-3xl font-bold text-foreground mt-1">{activeAgents}</p>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground">{runningBots} running • {pausedBots} paused • {errorBots} error</p>
+        {/* Stats Overview - Minimalist */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
+          <div className="border-l-2 border-green-400 pl-6 py-4">
+            <div className="text-xs tracking-wider text-muted-foreground mb-2">ACTIVE AGENTS</div>
+            <div className="text-4xl font-light mb-2">{activeAgents}</div>
+            <p className="text-xs text-muted-foreground">{runningBots} running • {pausedBots} paused</p>
           </div>
           
-          <div className="glass-stat-card rounded-2xl p-6 hover:scale-105 transition-transform duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-blue-500/10 rounded-xl">
-                <MessageSquare className="h-6 w-6 text-blue-500" />
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-muted-foreground font-medium">Total Messages</p>
-                <p className="text-3xl font-bold text-foreground mt-1">{totalMessages.toLocaleString()}</p>
-              </div>
-            </div>
+          <div className="border-l-2 border-green-400 pl-6 py-4">
+            <div className="text-xs tracking-wider text-muted-foreground mb-2">TOTAL MESSAGES</div>
+            <div className="text-4xl font-light mb-2">{totalMessages.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Across all agents</p>
           </div>
           
-          <div className="glass-stat-card rounded-2xl p-6 hover:scale-105 transition-transform duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-purple-500/10 rounded-xl">
-                <Users className="h-6 w-6 text-purple-500" />
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-muted-foreground font-medium">Active Users</p>
-                <p className="text-3xl font-bold text-foreground mt-1">{totalUsers}</p>
-              </div>
-            </div>
+          <div className="border-l-2 border-green-400 pl-6 py-4">
+            <div className="text-xs tracking-wider text-muted-foreground mb-2">ACTIVE USERS</div>
+            <div className="text-4xl font-light mb-2">{totalUsers}</div>
             <p className="text-xs text-muted-foreground">Total users served</p>
           </div>
           
-          <div className="glass-stat-card rounded-2xl p-6 hover:scale-105 transition-transform duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-green-500/10 rounded-xl">
-                <TrendingUp className="h-6 w-6 text-green-500" />
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-muted-foreground font-medium">Monthly Cost</p>
-                <p className="text-3xl font-bold text-foreground mt-1">$57.70</p>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground">Within budget limit</p>
+          <div className="border-l-2 border-green-400 pl-6 py-4">
+            <div className="text-xs tracking-wider text-muted-foreground mb-2">MONTHLY COST</div>
+            <div className="text-4xl font-light mb-2">$57.70</div>
+            <p className="text-xs text-muted-foreground">Within budget</p>
           </div>
         </div>
 
         {/* Agents List */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-foreground">Your AI Agents</h2>
+        <div className="space-y-8">
+          <div className="flex items-center justify-between border-b border-border pb-4">
+            <div>
+              <div className="text-xs tracking-[0.3em] text-muted-foreground mb-2">DEPLOYED UNITS</div>
+              <h2 className="text-3xl font-light text-foreground">Your AI Agents</h2>
+            </div>
             <div className="flex space-x-2">
               <Button variant="outline" size="sm">All</Button>
               <Button variant="outline" size="sm">Running</Button>
@@ -491,45 +467,48 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="mt-12">
-          <h2 className="text-xl font-semibold text-foreground mb-6">Quick Actions</h2>
+        {/* Quick Actions - Minimalist */}
+        <div className="mt-16">
+          <div className="text-xs tracking-[0.3em] text-muted-foreground mb-6">QUICK ACTIONS</div>
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="glass-card rounded-2xl p-6 hover:scale-105 transition-transform duration-300 cursor-pointer">
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="p-3 bg-blue-500/10 rounded-xl">
-                  <Plus className="h-6 w-6 text-blue-500" />
+            {/* Deploy New Agent */}
+            <div className="group border border-border hover:border-green-400 rounded-lg p-8 transition-all cursor-pointer">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-green-400/10 flex items-center justify-center">
+                  <Plus className="h-5 w-5 text-green-400" />
                 </div>
-                <h3 className="text-lg font-bold text-foreground">Deploy New Agent</h3>
+                <h3 className="text-lg font-medium text-foreground">Deploy New Agent</h3>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Choose from our template gallery or build custom
               </p>
             </div>
             
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Settings className="h-5 w-5 mr-2 text-blue-600" />
-                  Manage Integrations
-                </CardTitle>
-                <CardDescription>
-                  Connect new channels and services
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            {/* Manage Integrations */}
+            <div className="group border border-border hover:border-green-400 rounded-lg p-8 transition-all cursor-pointer">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-green-400/10 flex items-center justify-center">
+                  <Settings className="h-5 w-5 text-green-400" />
+                </div>
+                <h3 className="text-lg font-medium text-foreground">Manage Integrations</h3>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Connect new channels and services
+              </p>
+            </div>
             
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <TrendingUp className="h-5 w-5 mr-2 text-blue-600" />
-                  View Analytics
-                </CardTitle>
-                <CardDescription>
-                  Detailed performance metrics and insights
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            {/* View Analytics */}
+            <div className="group border border-border hover:border-green-400 rounded-lg p-8 transition-all cursor-pointer">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-green-400/10 flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-green-400" />
+                </div>
+                <h3 className="text-lg font-medium text-foreground">View Analytics</h3>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Detailed performance metrics and insights
+              </p>
+            </div>
           </div>
         </div>
       </div>
