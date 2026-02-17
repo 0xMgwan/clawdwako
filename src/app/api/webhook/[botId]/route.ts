@@ -75,24 +75,34 @@ export async function POST(
       }
     } else if (bot.selectedModel.includes('gpt')) {
       // Use OpenAI API
-      const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY
-      });
+      try {
+        const openai = new OpenAI({
+          apiKey: process.env.OPENAI_API_KEY
+        });
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o',
-        messages: [{ role: 'user', content: userMessage }]
-      });
+        const response = await openai.chat.completions.create({
+          model: 'gpt-4o',
+          messages: [{ role: 'user', content: userMessage }]
+        });
 
-      aiResponse = response.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
+        aiResponse = response.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
+      } catch (error: any) {
+        console.error('OpenAI API error:', error.message);
+        aiResponse = `I received your message: "${userMessage}"\n\nNote: The OpenAI API is currently unavailable. Please add API credits or use a different model.`;
+      }
     } else if (bot.selectedModel.includes('gemini')) {
       // Use Google Generative AI SDK
-      const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '');
-      const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+      try {
+        const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '');
+        const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
-      const result = await model.generateContent(userMessage);
-      const response = await result.response;
-      aiResponse = response.text() || 'Sorry, I could not generate a response.';
+        const result = await model.generateContent(userMessage);
+        const response = await result.response;
+        aiResponse = response.text() || 'Sorry, I could not generate a response.';
+      } catch (error: any) {
+        console.error('Google AI API error:', error.message);
+        aiResponse = `I received your message: "${userMessage}"\n\nNote: The Google AI API is currently unavailable. Please add API credits or use a different model.`;
+      }
     }
 
     // Send response back to Telegram
