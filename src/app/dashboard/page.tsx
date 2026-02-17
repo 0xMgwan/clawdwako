@@ -33,56 +33,7 @@ import {
   User as UserIcon
 } from "lucide-react";
 
-const deployedAgents = [
-  {
-    id: 1,
-    name: "Personal Assistant",
-    type: "Productivity",
-    status: "running",
-    uptime: "99.9%",
-    messages: 1247,
-    users: 1,
-    lastActive: "2 min ago",
-    cost: "$8.50/mo",
-    channels: ["Telegram", "WhatsApp"]
-  },
-  {
-    id: 2,
-    name: "Customer Support Bot",
-    type: "Business",
-    status: "running",
-    uptime: "98.7%",
-    messages: 3891,
-    users: 156,
-    lastActive: "1 min ago",
-    cost: "$15.20/mo",
-    channels: ["Discord", "Slack"]
-  },
-  {
-    id: 3,
-    name: "Crypto Trading Bot",
-    type: "Finance",
-    status: "paused",
-    uptime: "95.2%",
-    messages: 892,
-    users: 1,
-    lastActive: "1 hour ago",
-    cost: "$22.00/mo",
-    channels: ["Telegram"]
-  },
-  {
-    id: 4,
-    name: "Content Creator",
-    type: "Content",
-    status: "error",
-    uptime: "89.1%",
-    messages: 234,
-    users: 1,
-    lastActive: "3 hours ago",
-    cost: "$12.00/mo",
-    channels: ["Twitter", "LinkedIn"]
-  }
-];
+// Removed hardcoded demo data - dashboard now shows real user bots from database
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -126,32 +77,35 @@ export default function Dashboard() {
         const data = await response.json();
         console.log('📦 API Response:', data);
         
-        if (data.success && data.bots.length > 0) {
+        if (data.success) {
           console.log('✅ Found', data.bots.length, 'bots in database');
-          // Map database bots to dashboard format
-          const mappedBots = data.bots.map((bot: any) => ({
-            id: bot.id,
-            name: bot.name || bot.telegramBotUsername,
-            type: 'AI Agent',
-            status: bot.status === 'configured' ? 'paused' : bot.status,
-            uptime: '99.9%',
-            messages: 0,
-            users: 0,
-            cost: '$0.00/mo',
-            channels: ['Telegram'],
-            lastActive: new Date(bot.deployedAt).toLocaleString(),
-            model: bot.selectedModel
-          }));
           
-          console.log('🤖 Mapped bots:', mappedBots);
-          setBots(mappedBots);
-        } else {
-          console.log('⚠️ No bots found, using mock data');
-          setBots(deployedAgents);
+          if (data.bots.length > 0) {
+            // Map database bots to dashboard format
+            const mappedBots = data.bots.map((bot: any) => ({
+              id: bot.id,
+              name: bot.name || bot.telegramBotUsername,
+              type: 'AI Agent',
+              status: bot.status === 'configured' ? 'paused' : bot.status,
+              uptime: '99.9%',
+              messages: 0,
+              users: 0,
+              cost: '$0.00/mo',
+              channels: ['Telegram'],
+              lastActive: new Date(bot.deployedAt || bot.createdAt).toLocaleString(),
+              model: bot.selectedModel
+            }));
+            
+            console.log('🤖 Mapped bots:', mappedBots);
+            setBots(mappedBots);
+          } else {
+            console.log('📭 No bots found - showing empty state');
+            setBots([]);
+          }
         }
       } catch (error) {
         console.error('❌ Error fetching bots:', error);
-        setBots(deployedAgents);
+        setBots([]);
       } finally {
         setLoading(false);
       }
