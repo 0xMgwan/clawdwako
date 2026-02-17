@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, Bot, Activity, TrendingUp } from "lucide-react";
+import { Users, Bot, Activity, TrendingUp, DollarSign, CreditCard, BarChart3, Download, Calendar, Zap } from "lucide-react";
 
 interface User {
   id: string;
@@ -23,6 +23,10 @@ interface Stats {
   totalBots: number;
   activeUsers: number;
   newUsersToday: number;
+  totalRevenue: number;
+  monthlyRevenue: number;
+  totalApiCalls: number;
+  avgBotsPerUser: number;
 }
 
 export default function AdminPage() {
@@ -79,50 +83,138 @@ export default function AdminPage() {
           <p className="text-muted-foreground">Manage users and monitor platform activity</p>
         </div>
 
-        {/* Stats Cards */}
+        {/* Revenue & Earnings Section */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalUsers}</div>
-              </CardContent>
-            </Card>
+          <>
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <DollarSign className="h-6 w-6 text-green-400" />
+                Revenue & Earnings
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card className="border-green-400/20 bg-green-400/5">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                    <DollarSign className="h-4 w-4 text-green-400" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-green-400">${stats.totalRevenue.toFixed(2)}</div>
+                    <p className="text-xs text-muted-foreground mt-1">All-time earnings</p>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Bots</CardTitle>
-                <Bot className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalBots}</div>
-              </CardContent>
-            </Card>
+                <Card className="border-blue-400/20 bg-blue-400/5">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
+                    <Calendar className="h-4 w-4 text-blue-400" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-blue-400">${stats.monthlyRevenue.toFixed(2)}</div>
+                    <p className="text-xs text-muted-foreground mt-1">This month</p>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-                <Activity className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.activeUsers}</div>
-              </CardContent>
-            </Card>
+                <Card className="border-purple-400/20 bg-purple-400/5">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Avg Revenue/User</CardTitle>
+                    <CreditCard className="h-4 w-4 text-purple-400" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-purple-400">
+                      ${stats.totalUsers > 0 ? (stats.totalRevenue / stats.totalUsers).toFixed(2) : '0.00'}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">Per user</p>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">New Today</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.newUsersToday}</div>
-              </CardContent>
-            </Card>
-          </div>
+                <Card className="border-emerald-400/20 bg-emerald-400/5">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total API Calls</CardTitle>
+                    <Zap className="h-4 w-4 text-emerald-400" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-emerald-400">{stats.totalApiCalls.toLocaleString()}</div>
+                    <p className="text-xs text-muted-foreground mt-1">All platforms</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            {/* Platform Stats */}
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                <BarChart3 className="h-6 w-6 text-blue-400" />
+                Platform Analytics
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats.totalUsers}</div>
+                    <p className="text-xs text-muted-foreground mt-1">Registered accounts</p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Bots</CardTitle>
+                    <Bot className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats.totalBots}</div>
+                    <p className="text-xs text-muted-foreground mt-1">Deployed agents</p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+                    <Activity className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats.activeUsers}</div>
+                    <p className="text-xs text-muted-foreground mt-1">With active bots</p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">New Today</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stats.newUsersToday}</div>
+                    <p className="text-xs text-muted-foreground mt-1">Signups today</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </>
         )}
+
+        {/* Quick Actions */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold">Quick Actions</h2>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              Export Users CSV
+            </Button>
+            <Button variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              Export Revenue Report
+            </Button>
+            <Button variant="outline" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              View Analytics
+            </Button>
+          </div>
+        </div>
 
         {/* Users Table */}
         <Card>

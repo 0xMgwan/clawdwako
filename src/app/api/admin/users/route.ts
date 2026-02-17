@@ -42,6 +42,35 @@ export async function GET() {
       (user) => new Date(user.createdAt) >= today
     ).length;
 
+    // Calculate revenue (placeholder - will be real when Stripe is integrated)
+    // For now, simulate revenue based on active bots
+    const totalRevenue = totalBots * 29.99; // $29.99 per bot/month (example pricing)
+    
+    // Monthly revenue (current month)
+    const firstDayOfMonth = new Date();
+    firstDayOfMonth.setDate(1);
+    firstDayOfMonth.setHours(0, 0, 0, 0);
+    const botsThisMonth = await prisma.bot.count({
+      where: {
+        createdAt: {
+          gte: firstDayOfMonth,
+        },
+      },
+    });
+    const monthlyRevenue = botsThisMonth * 29.99;
+
+    // Total API calls (will be 0 until API usage tracking is active)
+    let totalApiCalls = 0;
+    try {
+      totalApiCalls = await prisma.apiUsage.count();
+    } catch (error) {
+      // API usage table might not have data yet
+      totalApiCalls = 0;
+    }
+
+    // Average bots per user
+    const avgBotsPerUser = totalUsers > 0 ? totalBots / totalUsers : 0;
+
     return NextResponse.json({
       users,
       stats: {
@@ -49,6 +78,10 @@ export async function GET() {
         totalBots,
         activeUsers,
         newUsersToday,
+        totalRevenue,
+        monthlyRevenue,
+        totalApiCalls,
+        avgBotsPerUser,
       },
     });
   } catch (error) {
