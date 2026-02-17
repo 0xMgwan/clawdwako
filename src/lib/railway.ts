@@ -309,7 +309,11 @@ export class RailwayClient {
       'main'
     );
     console.log('GitHub deployment initiated');
-    console.log('Railway will automatically detect the Dockerfile in bot-runner directory');
+    
+    console.log('Step 5: Setting root directory to bot-runner...');
+    await this.setServiceSource(service.id, 'bot-runner');
+    console.log('Root directory set to bot-runner');
+    console.log('Railway will now detect the Dockerfile in bot-runner directory');
 
     return {
       projectId: project.id,
