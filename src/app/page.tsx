@@ -127,7 +127,16 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <img src="/claw-logo.svg" alt="Clawdwako" className="h-8 w-8 object-contain" />
+              <div className="h-8 w-8 rounded-lg overflow-hidden">
+                <img 
+                  src="/claw.jpg" 
+                  alt="Clawdwako" 
+                  className="h-full w-full object-cover"
+                  style={{
+                    filter: 'hue-rotate(100deg) saturate(1.2) brightness(1.1)'
+                  }}
+                />
+              </div>
               <span className="text-lg font-bold">Clawdwako<span className="text-muted-foreground">.ai</span></span>
             </div>
             
