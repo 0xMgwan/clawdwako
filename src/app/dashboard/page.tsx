@@ -73,7 +73,12 @@ export default function Dashboard() {
     const fetchBots = async () => {
       console.log('🔍 FETCHING BOTS FROM DATABASE...');
       try {
-        const response = await fetch('/api/bots');
+        const response = await fetch('/api/bots', {
+          cache: 'no-store', // Force fresh data
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        });
         const data = await response.json();
         console.log('📦 API Response:', data);
         

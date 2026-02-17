@@ -132,29 +132,30 @@ export async function POST(request: NextRequest) {
     console.log('🔍 DEBUG: userEmail received:', deployment.userEmail);
     console.log('🔍 DEBUG: userId received:', deployment.userId);
     
-    // Get user ID from email or userId
-    let userId = deployment.userId;
+    // Get user ID - ALWAYS prefer userEmail over userId
+    let userId = null;
     
-    if (!userId && deployment.userEmail) {
-      console.log('🔍 DEBUG: Looking up user by email:', deployment.userEmail);
-      // Find user by email
+    if (deployment.userEmail) {
+      console.log('🔍 Looking up user by email:', deployment.userEmail);
       const user = await prisma.user.findUnique({
         where: { email: deployment.userEmail },
         select: { id: true }
       });
       
-      console.log('🔍 DEBUG: User found:', user);
       if (user) {
         userId = user.id;
-        console.log('✅ DEBUG: Using userId:', userId);
+        console.log('✅ Found user by email, using userId:', userId);
       } else {
-        console.log('❌ DEBUG: No user found for email:', deployment.userEmail);
+        console.log('❌ No user found for email:', deployment.userEmail);
       }
+    } else if (deployment.userId) {
+      userId = deployment.userId;
+      console.log('✅ Using provided userId:', userId);
     }
     
-    // Fallback to anonymous user if no user found
+    // Fallback to anonymous user ONLY if no user found
     if (!userId) {
-      console.log('⚠️ WARNING: No userId found, falling back to anonymous user');
+      console.log('⚠️ No user found, creating/using anonymous user');
       let anonymousUser = await prisma.user.findFirst({
         where: { email: 'anonymous@clawdwako.com' }
       });
@@ -169,10 +170,9 @@ export async function POST(request: NextRequest) {
       }
       
       userId = anonymousUser.id;
-      console.log('⚠️ Using anonymous user ID:', userId);
-    } else {
-      console.log('✅ Using user ID:', userId);
     }
+    
+    console.log('🎯 FINAL userId for bot:', userId);
 
     // Deploy to Railway for 24/7 operation
     let railwayProjectId = null;
