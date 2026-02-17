@@ -286,15 +286,34 @@ export class RailwayClient {
     await this.disableServiceNetworking(service.id);
 
     console.log('Step 3: Setting environment variables...');
+    
+    // Determine which API key to use based on selected model
+    let apiKeyToUse = '';
+    let apiKeyName = '';
+    
+    if (selectedModel.includes('claude')) {
+      apiKeyToUse = anthropicApiKey || process.env.ANTHROPIC_API_KEY || '';
+      apiKeyName = 'ANTHROPIC_API_KEY';
+    } else if (selectedModel.includes('gpt')) {
+      apiKeyToUse = openaiApiKey || process.env.OPENAI_API_KEY || '';
+      apiKeyName = 'OPENAI_API_KEY';
+    } else if (selectedModel.includes('gemini')) {
+      apiKeyToUse = googleAiApiKey || process.env.GOOGLE_AI_API_KEY || '';
+      apiKeyName = 'GOOGLE_AI_API_KEY';
+    }
+    
     const envVars: Record<string, string> = {
       TELEGRAM_BOT_TOKEN: telegramBotToken,
       SELECTED_MODEL: selectedModel,
-      ANTHROPIC_API_KEY: anthropicApiKey || process.env.ANTHROPIC_API_KEY || '',
-      OPENAI_API_KEY: openaiApiKey || process.env.OPENAI_API_KEY || '',
-      GOOGLE_AI_API_KEY: googleAiApiKey || process.env.GOOGLE_AI_API_KEY || '',
       BOT_ID: '', // Will be set after bot is created in database
       PLATFORM_URL: process.env.NEXT_PUBLIC_URL || 'https://clawdwako.vercel.app',
     };
+    
+    // Only set the API key that matches the selected model
+    if (apiKeyToUse && apiKeyName) {
+      envVars[apiKeyName] = apiKeyToUse;
+      console.log(`Setting ${apiKeyName} for model ${selectedModel}`);
+    }
 
     await this.setEnvironmentVariables(project.id, service.id, envVars);
     console.log('Environment variables set');
