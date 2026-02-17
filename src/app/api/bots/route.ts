@@ -8,6 +8,8 @@ export async function GET(request: NextRequest) {
     // Get the authenticated user's session
     const session = await getServerSession(authOptions);
 
+    console.log('🔍 /api/bots: Session email:', session?.user?.email);
+
     if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'Unauthorized - Please sign in' },
@@ -20,6 +22,8 @@ export async function GET(request: NextRequest) {
       where: { email: session.user.email },
       select: { id: true }
     });
+
+    console.log('🔍 /api/bots: User found:', user);
 
     if (!user) {
       return NextResponse.json(
@@ -48,6 +52,9 @@ export async function GET(request: NextRequest) {
         railwayServiceId: true,
       }
     });
+
+    console.log('🔍 /api/bots: Found', bots.length, 'bots for user', user.id);
+    console.log('🔍 /api/bots: Bots:', bots);
 
     return NextResponse.json({
       success: true,

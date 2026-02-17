@@ -94,12 +94,15 @@ export async function POST(request: NextRequest) {
   try {
     const deployment: DeploymentRequest = await request.json();
     
+    console.log('=== DEPLOYMENT REQUEST ===');
+    console.log('Full deployment object:', JSON.stringify(deployment, null, 2));
     console.log('Deployment request received:', {
       hasBotToken: !!deployment.botToken,
       hasBotUsername: !!deployment.botUsername,
       hasSelectedModel: !!deployment.selectedModel,
       botUsername: deployment.botUsername,
-      selectedModel: deployment.selectedModel
+      selectedModel: deployment.selectedModel,
+      userEmail: deployment.userEmail
     });
     
     // Validate deployment request
@@ -126,24 +129,32 @@ export async function POST(request: NextRequest) {
 
     // Save bot configuration to database (skip Railway deployment for now)
     console.log('Deployment request for:', deployment.botUsername, deployment.selectedModel);
+    console.log('🔍 DEBUG: userEmail received:', deployment.userEmail);
+    console.log('🔍 DEBUG: userId received:', deployment.userId);
     
     // Get user ID from email or userId
     let userId = deployment.userId;
     
     if (!userId && deployment.userEmail) {
+      console.log('🔍 DEBUG: Looking up user by email:', deployment.userEmail);
       // Find user by email
       const user = await prisma.user.findUnique({
         where: { email: deployment.userEmail },
         select: { id: true }
       });
       
+      console.log('🔍 DEBUG: User found:', user);
       if (user) {
         userId = user.id;
+        console.log('✅ DEBUG: Using userId:', userId);
+      } else {
+        console.log('❌ DEBUG: No user found for email:', deployment.userEmail);
       }
     }
     
     // Fallback to anonymous user if no user found
     if (!userId) {
+      console.log('⚠️ WARNING: No userId found, falling back to anonymous user');
       let anonymousUser = await prisma.user.findFirst({
         where: { email: 'anonymous@clawdwako.com' }
       });
@@ -158,6 +169,9 @@ export async function POST(request: NextRequest) {
       }
       
       userId = anonymousUser.id;
+      console.log('⚠️ Using anonymous user ID:', userId);
+    } else {
+      console.log('✅ Using user ID:', userId);
     }
 
     // Deploy to Railway for 24/7 operation
@@ -199,10 +213,11 @@ export async function POST(request: NextRequest) {
     });
 
     if (bot) {
-      // Update existing bot
+      // Update existing bot AND transfer ownership to correct user
       bot = await prisma.bot.update({
         where: { id: bot.id },
         data: {
+          userId: userId, // ✅ Fix: Update userId too when updating existing bot
           name: deployment.botUsername,
           selectedModel: deployment.selectedModel,
           status: 'running',

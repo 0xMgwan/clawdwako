@@ -61,8 +61,12 @@ export default function Home() {
         hasBotToken: !!deploymentPayload.botToken,
         botUsername: deploymentPayload.botUsername,
         selectedModel: deploymentPayload.selectedModel,
+        userEmail: deploymentPayload.userEmail,
         hasUserApiKeys: !!deploymentPayload.userApiKeys
       });
+      
+      console.log('🔍 DEBUG Frontend: Session user email:', session?.user?.email);
+      console.log('🔍 DEBUG Frontend: Deployment payload:', deploymentPayload);
 
       const response = await fetch("/api/deploy", {
         method: "POST",
