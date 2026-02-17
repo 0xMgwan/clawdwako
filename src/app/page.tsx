@@ -130,6 +130,39 @@ export default function Home() {
               <Bot className="h-6 w-6 text-primary" />
               <span className="text-lg font-bold">Clawdwako<span className="text-muted-foreground">.ai</span></span>
             </div>
+            
+            {/* Mobile Navigation */}
+            <div className="flex md:hidden items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="text-muted-foreground hover:text-foreground relative"
+              >
+                <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              </Button>
+              {!session && (
+                <button
+                  onClick={() => signIn('google')}
+                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-semibold text-sm transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                >
+                  Sign In
+                </button>
+              )}
+              {session && (
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="h-8 w-8 bg-primary rounded-full flex items-center justify-center hover:opacity-80 transition-opacity"
+                >
+                  <span className="text-primary-foreground text-sm font-medium">
+                    {session?.user?.name?.charAt(0).toUpperCase() || session?.user?.email?.charAt(0).toUpperCase() || 'U'}
+                  </span>
+                </button>
+              )}
+            </div>
+            
+            {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-4">
               <Button
                 variant="ghost"
@@ -162,6 +195,14 @@ export default function Home() {
               </a>
               
               {/* User Profile or Sign In */}
+              {!session && (
+                <button
+                  onClick={() => signIn('google')}
+                  className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                >
+                  Sign In
+                </button>
+              )}
               {session ? (
                 <div className="relative">
                   <button
@@ -216,19 +257,19 @@ export default function Home() {
 
       {/* Minimalist Hero - Robot Inspired */}
       <section className="relative min-h-screen bg-background px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto pt-32 pb-20">
+        <div className="max-w-7xl mx-auto pt-8 lg:pt-12 pb-12 lg:pb-20">
           {/* Top Section - Title */}
-          <div className="mb-20">
+          <div className="mb-12 lg:mb-20">
             <div className="flex items-start justify-between mb-8">
               <div>
                 <div className="text-sm tracking-[0.3em] text-muted-foreground mb-4">MEET CLAWDWAKO</div>
-                <h1 className="text-[120px] leading-none font-light tracking-tight">
-                  <span className="block text-foreground">SAFE</span>
-                  <span className="block text-foreground">HUMANOID</span>
+                <h1 className="text-5xl lg:text-[120px] leading-none font-light tracking-tight">
+                  <span className="block text-foreground">YOUR</span>
+                  <span className="block text-foreground">OWN</span>
                   <span className="block bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">AI AGENTS</span>
                 </h1>
               </div>
-              <div className="text-right space-y-2">
+              <div className="hidden lg:block text-right space-y-2">
                 <div className="flex items-center justify-end gap-2">
                   <div className="w-3 h-3 rounded-full border-2 border-foreground" />
                   <div className="w-px h-32 bg-foreground" />
@@ -249,13 +290,13 @@ export default function Home() {
           </div>
 
           {/* Main Content Grid */}
-          <div className="grid lg:grid-cols-2 gap-16 items-start">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
             {/* Left - Agent Showcase */}
-            <div className="space-y-12">
+            <div className="space-y-8 lg:space-y-12">
               <div>
-                <h2 className="text-6xl font-light mb-4">Clawdwako.</h2>
-                <div className="text-sm tracking-[0.2em] text-muted-foreground mb-8">THE WORLD'S LEADING</div>
-                <div className="flex gap-2 mb-8">
+                <h2 className="text-4xl lg:text-6xl font-light mb-3 lg:mb-4">Clawdwako.</h2>
+                <div className="text-xs lg:text-sm tracking-[0.2em] text-muted-foreground mb-6 lg:mb-8">THE WORLD'S LEADING</div>
+                <div className="flex gap-2 mb-6 lg:mb-8">
                   <div className="w-2 h-2 rounded-full bg-green-400" />
                   <div className="w-2 h-2 rounded-full bg-green-400" />
                   <div className="w-8 h-2 rounded-full bg-green-400" />
@@ -272,7 +313,7 @@ export default function Home() {
               </div>
 
               {/* Specs Grid */}
-              <div className="grid grid-cols-2 gap-8">
+              <div className="grid grid-cols-2 gap-4 lg:gap-8">
                 <div>
                   <div className="text-xs tracking-wider text-muted-foreground mb-2">RESPONSE TIME</div>
                   <div className="text-2xl font-light">&lt; 2s <span className="text-sm text-muted-foreground">(avg)</span></div>
@@ -346,7 +387,7 @@ export default function Home() {
               </div>
 
               {/* Configuration Section */}
-              <div className="space-y-6 pt-6 border-t border-border mt-6">
+              <div className="space-y-6 pt-6 border-t border-border mt-6 lg:border-0 lg:pt-6 lg:mt-6 rounded-lg lg:rounded-none border lg:border-0 p-4 lg:p-0 bg-background/50 lg:bg-transparent">
                 {/* Choose AI Model */}
                 <div>
                   <div className="flex items-center gap-2 mb-3">
@@ -355,7 +396,7 @@ export default function Home() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-4">Pick the most powerful AI model for your needs</p>
                   
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <button
                       onClick={() => setSelectedModel('claude-opus')}
                       className={`p-3 rounded-lg border-2 transition-all flex items-center gap-2 ${
@@ -431,7 +472,7 @@ export default function Home() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-4">Start with Telegram, more platforms coming soon</p>
                   
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <button
                       onClick={() => setShowTelegramModal(true)}
                       className="p-3 rounded-lg border-2 border-green-400 bg-green-400/5 transition-all flex items-center gap-2"
