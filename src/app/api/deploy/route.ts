@@ -7,6 +7,7 @@ interface DeploymentRequest {
   botUsername: string;
   selectedModel: string;
   userId?: string;
+  userEmail?: string;
   userApiKeys?: {
     anthropic?: string;
     openai?: string;
@@ -126,8 +127,22 @@ export async function POST(request: NextRequest) {
     // Save bot configuration to database (skip Railway deployment for now)
     console.log('Deployment request for:', deployment.botUsername, deployment.selectedModel);
     
-    // Create or get anonymous user
+    // Get user ID from email or userId
     let userId = deployment.userId;
+    
+    if (!userId && deployment.userEmail) {
+      // Find user by email
+      const user = await prisma.user.findUnique({
+        where: { email: deployment.userEmail },
+        select: { id: true }
+      });
+      
+      if (user) {
+        userId = user.id;
+      }
+    }
+    
+    // Fallback to anonymous user if no user found
     if (!userId) {
       let anonymousUser = await prisma.user.findFirst({
         where: { email: 'anonymous@clawdwako.com' }
