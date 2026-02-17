@@ -13,8 +13,13 @@ export async function POST(
     const botId = params.botId;
     const update = await request.json();
 
-    console.log('Webhook received for bot:', botId);
-    console.log('Update:', JSON.stringify(update, null, 2));
+    console.log('🔔 Webhook received for bot:', botId);
+    console.log('📨 Update:', JSON.stringify(update, null, 2));
+    console.log('🔑 Available API keys:', {
+      anthropic: !!process.env.ANTHROPIC_API_KEY,
+      openai: !!process.env.OPENAI_API_KEY,
+      google: !!process.env.GOOGLE_AI_API_KEY
+    });
 
     // Get bot from database
     const bot = await prisma.bot.findUnique({
