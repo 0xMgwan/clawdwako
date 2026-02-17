@@ -32,9 +32,9 @@ const PLATFORM_URL = process.env.PLATFORM_URL || 'https://clawdwako.vercel.app';
 
 // Pricing per 1M tokens (approximate)
 const PRICING = {
-  'claude-3-5-sonnet-20241022': { input: 3.00, output: 15.00 },
-  'gpt-4o': { input: 2.50, output: 10.00 },
-  'gemini-pro': { input: 0.50, output: 1.50 },
+  'claude-opus-4-20250514': { input: 15.00, output: 75.00 },
+  'gpt-5': { input: 5.00, output: 15.00 },
+  'gemini-2.0-flash-exp': { input: 0.00, output: 0.00 }, // Free during preview
 };
 
 // Track API usage
@@ -149,7 +149,7 @@ if (bot) {
         });
 
         const response = await anthropic.messages.create({
-          model: 'claude-3-5-sonnet-20241022',
+          model: 'claude-opus-4-20250514',
           max_tokens: 1024,
           messages: [{ role: 'user', content: userMessage }]
         });
@@ -158,7 +158,7 @@ if (bot) {
         
         // Track usage
         await trackUsage(
-          'claude-3-5-sonnet-20241022',
+          'claude-opus-4-20250514',
           'anthropic',
           response.usage.input_tokens,
           response.usage.output_tokens,
@@ -169,7 +169,7 @@ if (bot) {
         aiResponse = `I'm having trouble connecting to Claude right now. Error: ${error.message}`;
         
         // Track failed usage
-        await trackUsage('claude-3-5-sonnet-20241022', 'anthropic', 0, 0, false, error.message);
+        await trackUsage('claude-opus-4-20250514', 'anthropic', 0, 0, false, error.message);
       }
     } else if (SELECTED_MODEL.includes('gpt')) {
       // Use OpenAI API
@@ -179,7 +179,7 @@ if (bot) {
         });
 
         const response = await openai.chat.completions.create({
-          model: 'gpt-4o',
+          model: 'gpt-5',
           messages: [{ role: 'user', content: userMessage }],
           max_tokens: 1024
         });
@@ -188,7 +188,7 @@ if (bot) {
         
         // Track usage
         await trackUsage(
-          'gpt-4o',
+          'gpt-5',
           'openai',
           response.usage.prompt_tokens,
           response.usage.completion_tokens,
@@ -199,13 +199,13 @@ if (bot) {
         aiResponse = `I'm having trouble connecting to GPT right now. Error: ${error.message}`;
         
         // Track failed usage
-        await trackUsage('gpt-4o', 'openai', 0, 0, false, error.message);
+        await trackUsage('gpt-5', 'openai', 0, 0, false, error.message);
       }
     } else if (SELECTED_MODEL.includes('gemini')) {
       // Use Google Generative AI API
       try {
         const genAI = new GoogleGenerativeAI(GOOGLE_AI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
 
         const result = await model.generateContent(userMessage);
         const response = await result.response;
@@ -217,7 +217,7 @@ if (bot) {
         
         // Track usage
         await trackUsage(
-          'gemini-pro',
+          'gemini-2.0-flash-exp',
           'google',
           inputTokens,
           outputTokens,
@@ -228,7 +228,7 @@ if (bot) {
         aiResponse = `I'm having trouble connecting to Gemini right now. Error: ${error.message}`;
         
         // Track failed usage
-        await trackUsage('gemini-pro', 'google', 0, 0, false, error.message);
+        await trackUsage('gemini-2.0-flash-exp', 'google', 0, 0, false, error.message);
       }
     } else {
       aiResponse = `Model ${SELECTED_MODEL} is not configured properly.`;
