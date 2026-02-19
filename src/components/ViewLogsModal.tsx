@@ -85,12 +85,12 @@ export function ViewLogsModal({ bot, onClose }: ViewLogsModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="glass-card rounded-2xl p-6 w-full max-w-4xl max-h-[90vh] flex flex-col">
+      <div className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl p-6 w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Activity Logs</h2>
-            <p className="text-sm text-muted-foreground mt-1">{bot.name}</p>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Activity Logs</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{bot.name}</p>
           </div>
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm" onClick={fetchLogs}>
@@ -105,25 +105,25 @@ export function ViewLogsModal({ bot, onClose }: ViewLogsModalProps) {
 
         {/* Stats */}
         <div className="grid grid-cols-4 gap-3 mb-6">
-          <div className="glass-stat-card rounded-xl p-3">
-            <p className="text-xs text-muted-foreground mb-1">Total Events</p>
-            <p className="text-xl font-bold text-foreground">{logs.length}</p>
+          <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3">
+            <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Total Events</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white">{logs.length}</p>
           </div>
-          <div className="glass-stat-card rounded-xl p-3">
-            <p className="text-xs text-muted-foreground mb-1">Messages</p>
-            <p className="text-xl font-bold text-foreground">
+          <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3">
+            <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Messages</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white">
               {logs.filter(l => l.type === 'message').length}
             </p>
           </div>
-          <div className="glass-stat-card rounded-xl p-3">
-            <p className="text-xs text-muted-foreground mb-1">API Calls</p>
-            <p className="text-xl font-bold text-foreground">
+          <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3">
+            <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">API Calls</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white">
               {logs.filter(l => l.type === 'api_call').length}
             </p>
           </div>
-          <div className="glass-stat-card rounded-xl p-3">
-            <p className="text-xs text-muted-foreground mb-1">Errors</p>
-            <p className="text-xl font-bold text-foreground">
+          <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3">
+            <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Errors</p>
+            <p className="text-xl font-bold text-gray-900 dark:text-white">
               {logs.filter(l => l.type === 'error').length}
             </p>
           </div>
@@ -137,27 +137,27 @@ export function ViewLogsModal({ bot, onClose }: ViewLogsModalProps) {
             </div>
           ) : logs.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">No logs yet</p>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-gray-600 dark:text-gray-400">No logs yet</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 Logs will appear here once your bot starts receiving messages
               </p>
             </div>
           ) : (
             logs.map((log) => (
-              <div key={log.id} className="glass-stat-card rounded-xl p-4 hover:bg-white/5 transition-colors">
+              <div key={log.id} className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:bg-gray-100 dark:hover:bg-gray-750 transition-colors">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center space-x-2">
                     <Badge className={`${getLogTypeColor(log.type)} text-xs px-2 py-1`}>
                       {log.type.replace('_', ' ')}
                     </Badge>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
                       {new Date(log.timestamp).toLocaleTimeString()}
                     </span>
                   </div>
                 </div>
-                <p className="text-sm text-foreground">{log.content}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">{log.content}</p>
                 {log.metadata && (
-                  <pre className="text-xs text-muted-foreground mt-2 bg-black/20 rounded p-2 overflow-x-auto">
+                  <pre className="text-xs font-mono text-gray-700 dark:text-gray-300 mt-2 bg-gray-200 dark:bg-gray-900 rounded p-2 overflow-x-auto">
                     {JSON.stringify(log.metadata, null, 2)}
                   </pre>
                 )}
@@ -167,8 +167,8 @@ export function ViewLogsModal({ bot, onClose }: ViewLogsModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-between items-center mt-6 pt-4 border-t border-border/50">
-          <p className="text-xs text-muted-foreground">
+        <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
             Showing last 50 events
           </p>
           <Button variant="outline" size="sm">

@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function PATCH(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ botId: string }> }
 ) {
   try {
     // Verify user is authenticated
@@ -19,7 +19,7 @@ export async function PATCH(
 
     const { status } = await request.json();
     const params = await context.params;
-    const botId = params.id;
+    const botId = params.botId;
 
     // Find the user
     const user = await prisma.user.findUnique({
@@ -77,7 +77,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ botId: string }> }
 ) {
   try {
     // Verify user is authenticated
@@ -90,7 +90,7 @@ export async function DELETE(
     }
 
     const params = await context.params;
-    const botId = params.id;
+    const botId = params.botId;
 
     // Find the user
     const user = await prisma.user.findUnique({
