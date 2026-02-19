@@ -149,7 +149,7 @@ if (bot) {
         });
 
         const response = await anthropic.messages.create({
-          model: 'claude-opus-4-20250514',
+          model: SELECTED_MODEL,
           max_tokens: 1024,
           messages: [{ role: 'user', content: userMessage }]
         });
@@ -158,7 +158,7 @@ if (bot) {
         
         // Track usage
         await trackUsage(
-          'claude-opus-4-20250514',
+          SELECTED_MODEL,
           'anthropic',
           response.usage.input_tokens,
           response.usage.output_tokens,
@@ -169,7 +169,7 @@ if (bot) {
         aiResponse = `I'm having trouble connecting to Claude right now. Error: ${error.message}`;
         
         // Track failed usage
-        await trackUsage('claude-opus-4-20250514', 'anthropic', 0, 0, false, error.message);
+        await trackUsage(SELECTED_MODEL, 'anthropic', 0, 0, false, error.message);
       }
     } else if (SELECTED_MODEL.includes('gpt')) {
       // Use OpenAI API
@@ -179,7 +179,7 @@ if (bot) {
         });
 
         const response = await openai.chat.completions.create({
-          model: 'gpt-5',
+          model: SELECTED_MODEL,
           messages: [{ role: 'user', content: userMessage }],
           max_tokens: 1024
         });
@@ -188,7 +188,7 @@ if (bot) {
         
         // Track usage
         await trackUsage(
-          'gpt-5',
+          SELECTED_MODEL,
           'openai',
           response.usage.prompt_tokens,
           response.usage.completion_tokens,
@@ -199,13 +199,13 @@ if (bot) {
         aiResponse = `I'm having trouble connecting to GPT right now. Error: ${error.message}`;
         
         // Track failed usage
-        await trackUsage('gpt-5', 'openai', 0, 0, false, error.message);
+        await trackUsage(SELECTED_MODEL, 'openai', 0, 0, false, error.message);
       }
     } else if (SELECTED_MODEL.includes('gemini')) {
       // Use Google Generative AI API
       try {
         const genAI = new GoogleGenerativeAI(GOOGLE_AI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+        const model = genAI.getGenerativeModel({ model: SELECTED_MODEL });
 
         const result = await model.generateContent(userMessage);
         const response = await result.response;
@@ -217,7 +217,7 @@ if (bot) {
         
         // Track usage
         await trackUsage(
-          'gemini-2.0-flash-exp',
+          SELECTED_MODEL,
           'google',
           inputTokens,
           outputTokens,
@@ -228,7 +228,7 @@ if (bot) {
         aiResponse = `I'm having trouble connecting to Gemini right now. Error: ${error.message}`;
         
         // Track failed usage
-        await trackUsage('gemini-2.0-flash-exp', 'google', 0, 0, false, error.message);
+        await trackUsage(SELECTED_MODEL, 'google', 0, 0, false, error.message);
       }
     } else {
       aiResponse = `Model ${SELECTED_MODEL} is not configured properly.`;

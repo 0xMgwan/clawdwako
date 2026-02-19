@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 export default function Home() {
   const router = useRouter();
   const { data: session } = useSession();
-  const [selectedModel, setSelectedModel] = useState("claude-opus");
+  const [selectedModel, setSelectedModel] = useState("claude-opus-4-20250514");
   const [showTelegramModal, setShowTelegramModal] = useState(false);
   const [telegramBotInfo, setTelegramBotInfo] = useState<any>(null);
   const [deploying, setDeploying] = useState(false);
@@ -328,49 +328,69 @@ export default function Home() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-4">Pick the most powerful AI model for your needs</p>
                   
-                  <div className="grid grid-cols-1 gap-2">
-                    <button
-                      onClick={() => setSelectedModel('claude-opus')}
-                      className={`p-3 rounded-lg border-2 transition-all flex items-center gap-2 ${
-                        selectedModel === 'claude-opus'
-                          ? 'border-green-400 bg-green-400/5'
-                          : 'border-border hover:border-green-400/50'
-                      }`}
-                    >
-                      <img src="/Claude-ai-logo.png" alt="Claude" className="w-4 h-4" />
-                      <div className="text-left">
-                        <div className="text-xs font-bold">Claude</div>
-                        <div className="text-[10px] text-muted-foreground">Opus 4.5</div>
+                  <div className="grid grid-cols-1 gap-3">
+                    {/* Claude Models */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <img src="/Claude-ai-logo.png" alt="Claude" className="w-4 h-4" />
+                        <span className="text-xs font-semibold">Claude (Anthropic)</span>
                       </div>
-                    </button>
-                    <button
-                      onClick={() => setSelectedModel('gpt-4')}
-                      className={`p-3 rounded-lg border-2 transition-all flex items-center gap-2 ${
-                        selectedModel === 'gpt-4'
-                          ? 'border-green-400 bg-green-400/5'
-                          : 'border-border hover:border-green-400/50'
-                      }`}
-                    >
-                      <img src="/gpt.png" alt="GPT" className="w-4 h-4" />
-                      <div className="text-left">
-                        <div className="text-xs font-bold">GPT</div>
-                        <div className="text-[10px] text-muted-foreground">5.2</div>
+                      <select
+                        value={selectedModel.includes('claude') ? selectedModel : ''}
+                        onChange={(e) => setSelectedModel(e.target.value)}
+                        className="w-full p-2 rounded-lg border-2 border-border bg-background text-xs focus:border-green-400 focus:outline-none"
+                      >
+                        <option value="claude-opus-4-20250514">Claude Opus 4 - Most capable</option>
+                        <option value="claude-3-7-sonnet-20250219">Claude 3.7 Sonnet - Latest balanced</option>
+                        <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet - Balanced</option>
+                        <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku - Fast</option>
+                        <option value="claude-3-opus-20240229">Claude 3 Opus - Previous flagship</option>
+                        <option value="claude-3-sonnet-20240229">Claude 3 Sonnet - Previous balanced</option>
+                        <option value="claude-3-haiku-20240307">Claude 3 Haiku - Efficient</option>
+                      </select>
+                    </div>
+
+                    {/* GPT Models */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <img src="/gpt.png" alt="GPT" className="w-4 h-4" />
+                        <span className="text-xs font-semibold">GPT (OpenAI)</span>
                       </div>
-                    </button>
-                    <button
-                      onClick={() => setSelectedModel('gemini-pro')}
-                      className={`p-3 rounded-lg border-2 transition-all flex items-center gap-2 ${
-                        selectedModel === 'gemini-pro'
-                          ? 'border-green-400 bg-green-400/5'
-                          : 'border-border hover:border-green-400/50'
-                      }`}
-                    >
-                      <img src="/google gemini.png" alt="Gemini" className="w-4 h-4" />
-                      <div className="text-left">
-                        <div className="text-xs font-bold">Gemini</div>
-                        <div className="text-[10px] text-muted-foreground">3 Flash</div>
+                      <select
+                        value={selectedModel.includes('gpt') ? selectedModel : ''}
+                        onChange={(e) => setSelectedModel(e.target.value)}
+                        className="w-full p-2 rounded-lg border-2 border-border bg-background text-xs focus:border-green-400 focus:outline-none"
+                      >
+                        <option value="gpt-5">GPT-5 - Latest flagship (if available)</option>
+                        <option value="gpt-4o">GPT-4o - Multimodal optimized</option>
+                        <option value="gpt-4o-mini">GPT-4o Mini - Fast & affordable</option>
+                        <option value="gpt-4-turbo">GPT-4 Turbo - Advanced reasoning</option>
+                        <option value="gpt-4">GPT-4 - Powerful & reliable</option>
+                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo - Fast & efficient</option>
+                        <option value="gpt-3.5-turbo-16k">GPT-3.5 Turbo 16K - Extended context</option>
+                      </select>
+                    </div>
+
+                    {/* Gemini Models */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <img src="/google gemini.png" alt="Gemini" className="w-4 h-4" />
+                        <span className="text-xs font-semibold">Gemini (Google)</span>
                       </div>
-                    </button>
+                      <select
+                        value={selectedModel.includes('gemini') ? selectedModel : ''}
+                        onChange={(e) => setSelectedModel(e.target.value)}
+                        className="w-full p-2 rounded-lg border-2 border-border bg-background text-xs focus:border-green-400 focus:outline-none"
+                      >
+                        <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash - Experimental</option>
+                        <option value="gemini-exp-1206">Gemini Exp 1206 - Experimental</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro - Most capable</option>
+                        <option value="gemini-1.5-pro-exp-0827">Gemini 1.5 Pro Exp - Extended</option>
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash - Fast</option>
+                        <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B - Ultra fast</option>
+                        <option value="gemini-1.0-pro">Gemini 1.0 Pro - Stable</option>
+                      </select>
+                    </div>
                   </div>
                   
                   <div className="text-center mt-3">
@@ -602,49 +622,69 @@ export default function Home() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-4">Pick the most powerful AI model for your needs</p>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <button
-                      onClick={() => setSelectedModel('claude-opus')}
-                      className={`p-3 rounded-lg border-2 transition-all flex items-center gap-2 ${
-                        selectedModel === 'claude-opus'
-                          ? 'border-green-400 bg-green-400/5'
-                          : 'border-border hover:border-green-400/50'
-                      }`}
-                    >
-                      <img src="/Claude-ai-logo.png" alt="Claude" className="w-4 h-4" />
-                      <div className="text-left">
-                        <div className="text-xs font-bold">Claude</div>
-                        <div className="text-[10px] text-muted-foreground">Opus 4.5</div>
+                  <div className="grid grid-cols-1 gap-3">
+                    {/* Claude Models */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <img src="/Claude-ai-logo.png" alt="Claude" className="w-4 h-4" />
+                        <span className="text-xs font-semibold">Claude (Anthropic)</span>
                       </div>
-                    </button>
-                    <button
-                      onClick={() => setSelectedModel('gpt-4')}
-                      className={`p-3 rounded-lg border-2 transition-all flex items-center gap-2 ${
-                        selectedModel === 'gpt-4'
-                          ? 'border-green-400 bg-green-400/5'
-                          : 'border-border hover:border-green-400/50'
-                      }`}
-                    >
-                      <img src="/gpt.png" alt="GPT" className="w-4 h-4" />
-                      <div className="text-left">
-                        <div className="text-xs font-bold">GPT</div>
-                        <div className="text-[10px] text-muted-foreground">5.2</div>
+                      <select
+                        value={selectedModel.includes('claude') ? selectedModel : ''}
+                        onChange={(e) => setSelectedModel(e.target.value)}
+                        className="w-full p-2 rounded-lg border-2 border-border bg-background text-xs focus:border-green-400 focus:outline-none"
+                      >
+                        <option value="claude-opus-4-20250514">Claude Opus 4 - Most capable</option>
+                        <option value="claude-3-7-sonnet-20250219">Claude 3.7 Sonnet - Latest balanced</option>
+                        <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet - Balanced</option>
+                        <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku - Fast</option>
+                        <option value="claude-3-opus-20240229">Claude 3 Opus - Previous flagship</option>
+                        <option value="claude-3-sonnet-20240229">Claude 3 Sonnet - Previous balanced</option>
+                        <option value="claude-3-haiku-20240307">Claude 3 Haiku - Efficient</option>
+                      </select>
+                    </div>
+
+                    {/* GPT Models */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <img src="/gpt.png" alt="GPT" className="w-4 h-4" />
+                        <span className="text-xs font-semibold">GPT (OpenAI)</span>
                       </div>
-                    </button>
-                    <button
-                      onClick={() => setSelectedModel('gemini-pro')}
-                      className={`p-3 rounded-lg border-2 transition-all flex items-center gap-2 ${
-                        selectedModel === 'gemini-pro'
-                          ? 'border-green-400 bg-green-400/5'
-                          : 'border-border hover:border-green-400/50'
-                      }`}
-                    >
-                      <img src="/google gemini.png" alt="Gemini" className="w-4 h-4" />
-                      <div className="text-left">
-                        <div className="text-xs font-bold">Gemini</div>
-                        <div className="text-[10px] text-muted-foreground">3 Flash</div>
+                      <select
+                        value={selectedModel.includes('gpt') ? selectedModel : ''}
+                        onChange={(e) => setSelectedModel(e.target.value)}
+                        className="w-full p-2 rounded-lg border-2 border-border bg-background text-xs focus:border-green-400 focus:outline-none"
+                      >
+                        <option value="gpt-5">GPT-5 - Latest flagship (if available)</option>
+                        <option value="gpt-4o">GPT-4o - Multimodal optimized</option>
+                        <option value="gpt-4o-mini">GPT-4o Mini - Fast & affordable</option>
+                        <option value="gpt-4-turbo">GPT-4 Turbo - Advanced reasoning</option>
+                        <option value="gpt-4">GPT-4 - Powerful & reliable</option>
+                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo - Fast & efficient</option>
+                        <option value="gpt-3.5-turbo-16k">GPT-3.5 Turbo 16K - Extended context</option>
+                      </select>
+                    </div>
+
+                    {/* Gemini Models */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <img src="/google gemini.png" alt="Gemini" className="w-4 h-4" />
+                        <span className="text-xs font-semibold">Gemini (Google)</span>
                       </div>
-                    </button>
+                      <select
+                        value={selectedModel.includes('gemini') ? selectedModel : ''}
+                        onChange={(e) => setSelectedModel(e.target.value)}
+                        className="w-full p-2 rounded-lg border-2 border-border bg-background text-xs focus:border-green-400 focus:outline-none"
+                      >
+                        <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash - Experimental</option>
+                        <option value="gemini-exp-1206">Gemini Exp 1206 - Experimental</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro - Most capable</option>
+                        <option value="gemini-1.5-pro-exp-0827">Gemini 1.5 Pro Exp - Extended</option>
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash - Fast</option>
+                        <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B - Ultra fast</option>
+                        <option value="gemini-1.0-pro">Gemini 1.0 Pro - Stable</option>
+                      </select>
+                    </div>
                   </div>
                   
                   <div className="text-center mt-3">

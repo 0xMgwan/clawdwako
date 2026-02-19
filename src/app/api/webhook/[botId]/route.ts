@@ -68,7 +68,7 @@ export async function POST(
         });
 
         const response = await anthropic.messages.create({
-          model: 'claude-opus-4-20250514',
+          model: bot.selectedModel,
           max_tokens: 1024,
           messages: [{ role: 'user', content: userMessage }]
         });
@@ -86,7 +86,7 @@ export async function POST(
         });
 
         const response = await openai.chat.completions.create({
-          model: 'gpt-5',
+          model: bot.selectedModel,
           messages: [{ role: 'user', content: userMessage }]
         });
 
@@ -99,7 +99,7 @@ export async function POST(
       // Use Google Generative AI SDK
       try {
         const genAI = new GoogleGenerativeAI(googleKey || '');
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+        const model = genAI.getGenerativeModel({ model: bot.selectedModel });
 
         const result = await model.generateContent(userMessage);
         const response = await result.response;
