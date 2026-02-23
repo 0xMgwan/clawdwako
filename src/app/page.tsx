@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Bot, Mail, Moon, Sun, LogOut, User as UserIcon, Sparkles, Zap, Shield, Rocket, ArrowRight, Check, Star, Cpu, Globe, Lock, TrendingUp, Users, MessageSquare, BarChart3, Layers, Send } from "lucide-react";
 import { TelegramBotModal } from "@/components/TelegramBotModal";
 import { DeploymentSuccessModal } from "@/components/DeploymentSuccessModal";
+import { PaymentPackageModal } from "@/components/PaymentPackageModal";
+import { CustomSelect } from "@/components/CustomSelect";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
@@ -14,6 +16,7 @@ export default function Home() {
   const { data: session } = useSession();
   const [selectedModel, setSelectedModel] = useState("claude-opus-4-20250514");
   const [showTelegramModal, setShowTelegramModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [telegramBotInfo, setTelegramBotInfo] = useState<any>(null);
   const [deploying, setDeploying] = useState(false);
   const { theme, setTheme } = useTheme();
@@ -31,6 +34,22 @@ export default function Home() {
     console.log("Bot connected - token:", data.token);
   };
 
+  const handlePaymentSuccess = (packageType: string, checkoutUrl: string) => {
+    // User will be redirected to Snippe checkout
+    // After payment, they'll be redirected back to /payment/success
+    console.log("Redirecting to payment:", packageType, checkoutUrl);
+  };
+
+  const handleInitiateDeploy = () => {
+    if (!telegramBotInfo) {
+      alert("Please connect your Telegram bot first");
+      return;
+    }
+    
+    // Show payment modal before deployment
+    setShowPaymentModal(true);
+  };
+
   const handleDeploy = async () => {
     if (!telegramBotInfo) {
       alert("Please connect your Telegram bot first");
@@ -40,7 +59,10 @@ export default function Home() {
     setDeploying(true);
 
     try {
-      // Combine API keys from both sources (homepage and modal)
+      // API Key Priority Logic:
+      // 1. Landing page API key (userApiKey) takes PRIORITY if provided for the selected model
+      // 2. Falls back to Telegram modal API keys (telegramBotInfo.apiKeys) if landing page key is empty
+      // This allows users to override modal keys with a single key on the landing page
       const combinedApiKeys = {
         anthropic: userApiKey && selectedModel.includes("claude") ? userApiKey : (telegramBotInfo.apiKeys?.anthropic || ""),
         openai: userApiKey && selectedModel.includes("gpt") ? userApiKey : (telegramBotInfo.apiKeys?.openai || ""),
@@ -331,65 +353,83 @@ export default function Home() {
                   <div className="grid grid-cols-1 gap-3">
                     {/* Claude Models */}
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <img src="/Claude-ai-logo.png" alt="Claude" className="w-4 h-4" />
-                        <span className="text-xs font-semibold">Claude (Anthropic)</span>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <img src="/Claude-ai-logo.png" alt="Claude" className="w-4 h-4" />
+                          <span className="text-sm font-semibold text-foreground">Claude (Anthropic)</span>
+                        </div>
+                        {selectedModel.includes('claude') && (
+                          <span className="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded-full">SELECTED</span>
+                        )}
                       </div>
-                      <select
+                      <CustomSelect
+                        options={[
+                          { value: 'claude-opus-4-20250514', label: 'Claude Opus 4 - Most capable' },
+                          { value: 'claude-3-7-sonnet-20250219', label: 'Claude 3.7 Sonnet - Latest balanced' },
+                          { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet - Balanced' },
+                          { value: 'claude-3-5-haiku-20241022', label: 'Claude 3.5 Haiku - Fast' },
+                          { value: 'claude-3-opus-20240229', label: 'Claude 3 Opus - Previous flagship' },
+                          { value: 'claude-3-sonnet-20240229', label: 'Claude 3 Sonnet - Previous balanced' },
+                          { value: 'claude-3-haiku-20240307', label: 'Claude 3 Haiku - Efficient' }
+                        ]}
                         value={selectedModel.includes('claude') ? selectedModel : ''}
-                        onChange={(e) => setSelectedModel(e.target.value)}
-                        className="w-full p-2 rounded-lg border-2 border-border bg-background text-xs focus:border-green-400 focus:outline-none"
-                      >
-                        <option value="claude-opus-4-20250514">Claude Opus 4 - Most capable</option>
-                        <option value="claude-3-7-sonnet-20250219">Claude 3.7 Sonnet - Latest balanced</option>
-                        <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet - Balanced</option>
-                        <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku - Fast</option>
-                        <option value="claude-3-opus-20240229">Claude 3 Opus - Previous flagship</option>
-                        <option value="claude-3-sonnet-20240229">Claude 3 Sonnet - Previous balanced</option>
-                        <option value="claude-3-haiku-20240307">Claude 3 Haiku - Efficient</option>
-                      </select>
+                        onChange={setSelectedModel}
+                        isActive={selectedModel.includes('claude')}
+                      />
                     </div>
 
                     {/* GPT Models */}
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <img src="/gpt.png" alt="GPT" className="w-4 h-4" />
-                        <span className="text-xs font-semibold">GPT (OpenAI)</span>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <img src="/gpt.png" alt="GPT" className="w-4 h-4" />
+                          <span className="text-sm font-semibold text-foreground">GPT (OpenAI)</span>
+                        </div>
+                        {selectedModel.includes('gpt') && (
+                          <span className="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded-full">SELECTED</span>
+                        )}
                       </div>
-                      <select
+                      <CustomSelect
+                        options={[
+                          { value: 'gpt-5', label: 'GPT-5 - Latest flagship (if available)' },
+                          { value: 'gpt-4o', label: 'GPT-4o - Multimodal optimized' },
+                          { value: 'gpt-4o-mini', label: 'GPT-4o Mini - Fast & affordable' },
+                          { value: 'gpt-4-turbo', label: 'GPT-4 Turbo - Advanced reasoning' },
+                          { value: 'gpt-4', label: 'GPT-4 - Powerful & reliable' },
+                          { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo - Fast & efficient' },
+                          { value: 'gpt-3.5-turbo-16k', label: 'GPT-3.5 Turbo 16K - Extended context' }
+                        ]}
                         value={selectedModel.includes('gpt') ? selectedModel : ''}
-                        onChange={(e) => setSelectedModel(e.target.value)}
-                        className="w-full p-2 rounded-lg border-2 border-border bg-background text-xs focus:border-green-400 focus:outline-none"
-                      >
-                        <option value="gpt-5">GPT-5 - Latest flagship (if available)</option>
-                        <option value="gpt-4o">GPT-4o - Multimodal optimized</option>
-                        <option value="gpt-4o-mini">GPT-4o Mini - Fast & affordable</option>
-                        <option value="gpt-4-turbo">GPT-4 Turbo - Advanced reasoning</option>
-                        <option value="gpt-4">GPT-4 - Powerful & reliable</option>
-                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo - Fast & efficient</option>
-                        <option value="gpt-3.5-turbo-16k">GPT-3.5 Turbo 16K - Extended context</option>
-                      </select>
+                        onChange={setSelectedModel}
+                        isActive={selectedModel.includes('gpt')}
+                      />
                     </div>
 
                     {/* Gemini Models */}
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <img src="/google gemini.png" alt="Gemini" className="w-4 h-4" />
-                        <span className="text-xs font-semibold">Gemini (Google)</span>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <img src="/google gemini.png" alt="Gemini" className="w-4 h-4" />
+                          <span className="text-sm font-semibold text-foreground">Gemini (Google)</span>
+                        </div>
+                        {selectedModel.includes('gemini') && (
+                          <span className="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded-full">SELECTED</span>
+                        )}
                       </div>
-                      <select
+                      <CustomSelect
+                        options={[
+                          { value: 'gemini-2.0-flash-exp', label: 'Gemini 2.0 Flash - Experimental' },
+                          { value: 'gemini-exp-1206', label: 'Gemini Exp 1206 - Experimental' },
+                          { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro - Most capable' },
+                          { value: 'gemini-1.5-pro-exp-0827', label: 'Gemini 1.5 Pro Exp - Extended' },
+                          { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash - Fast' },
+                          { value: 'gemini-1.5-flash-8b', label: 'Gemini 1.5 Flash 8B - Ultra fast' },
+                          { value: 'gemini-1.0-pro', label: 'Gemini 1.0 Pro - Stable' }
+                        ]}
                         value={selectedModel.includes('gemini') ? selectedModel : ''}
-                        onChange={(e) => setSelectedModel(e.target.value)}
-                        className="w-full p-2 rounded-lg border-2 border-border bg-background text-xs focus:border-green-400 focus:outline-none"
-                      >
-                        <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash - Experimental</option>
-                        <option value="gemini-exp-1206">Gemini Exp 1206 - Experimental</option>
-                        <option value="gemini-1.5-pro">Gemini 1.5 Pro - Most capable</option>
-                        <option value="gemini-1.5-pro-exp-0827">Gemini 1.5 Pro Exp - Extended</option>
-                        <option value="gemini-1.5-flash">Gemini 1.5 Flash - Fast</option>
-                        <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B - Ultra fast</option>
-                        <option value="gemini-1.0-pro">Gemini 1.0 Pro - Stable</option>
-                      </select>
+                        onChange={setSelectedModel}
+                        isActive={selectedModel.includes('gemini')}
+                      />
                     </div>
                   </div>
                   
@@ -495,7 +535,7 @@ export default function Home() {
 
                     {/* Deploy Agent Button */}
                     <button
-                      onClick={handleDeploy}
+                      onClick={handleInitiateDeploy}
                       disabled={!telegramBotInfo || deploying}
                       className={`w-full py-3 rounded-lg font-semibold transition-all ${
                         !telegramBotInfo
@@ -625,65 +665,83 @@ export default function Home() {
                   <div className="grid grid-cols-1 gap-3">
                     {/* Claude Models */}
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <img src="/Claude-ai-logo.png" alt="Claude" className="w-4 h-4" />
-                        <span className="text-xs font-semibold">Claude (Anthropic)</span>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <img src="/Claude-ai-logo.png" alt="Claude" className="w-4 h-4" />
+                          <span className="text-sm font-semibold text-foreground">Claude (Anthropic)</span>
+                        </div>
+                        {selectedModel.includes('claude') && (
+                          <span className="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded-full">SELECTED</span>
+                        )}
                       </div>
-                      <select
+                      <CustomSelect
+                        options={[
+                          { value: 'claude-opus-4-20250514', label: 'Claude Opus 4 - Most capable' },
+                          { value: 'claude-3-7-sonnet-20250219', label: 'Claude 3.7 Sonnet - Latest balanced' },
+                          { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet - Balanced' },
+                          { value: 'claude-3-5-haiku-20241022', label: 'Claude 3.5 Haiku - Fast' },
+                          { value: 'claude-3-opus-20240229', label: 'Claude 3 Opus - Previous flagship' },
+                          { value: 'claude-3-sonnet-20240229', label: 'Claude 3 Sonnet - Previous balanced' },
+                          { value: 'claude-3-haiku-20240307', label: 'Claude 3 Haiku - Efficient' }
+                        ]}
                         value={selectedModel.includes('claude') ? selectedModel : ''}
-                        onChange={(e) => setSelectedModel(e.target.value)}
-                        className="w-full p-2 rounded-lg border-2 border-border bg-background text-xs focus:border-green-400 focus:outline-none"
-                      >
-                        <option value="claude-opus-4-20250514">Claude Opus 4 - Most capable</option>
-                        <option value="claude-3-7-sonnet-20250219">Claude 3.7 Sonnet - Latest balanced</option>
-                        <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet - Balanced</option>
-                        <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku - Fast</option>
-                        <option value="claude-3-opus-20240229">Claude 3 Opus - Previous flagship</option>
-                        <option value="claude-3-sonnet-20240229">Claude 3 Sonnet - Previous balanced</option>
-                        <option value="claude-3-haiku-20240307">Claude 3 Haiku - Efficient</option>
-                      </select>
+                        onChange={setSelectedModel}
+                        isActive={selectedModel.includes('claude')}
+                      />
                     </div>
 
                     {/* GPT Models */}
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <img src="/gpt.png" alt="GPT" className="w-4 h-4" />
-                        <span className="text-xs font-semibold">GPT (OpenAI)</span>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <img src="/gpt.png" alt="GPT" className="w-4 h-4" />
+                          <span className="text-sm font-semibold text-foreground">GPT (OpenAI)</span>
+                        </div>
+                        {selectedModel.includes('gpt') && (
+                          <span className="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded-full">SELECTED</span>
+                        )}
                       </div>
-                      <select
+                      <CustomSelect
+                        options={[
+                          { value: 'gpt-5', label: 'GPT-5 - Latest flagship (if available)' },
+                          { value: 'gpt-4o', label: 'GPT-4o - Multimodal optimized' },
+                          { value: 'gpt-4o-mini', label: 'GPT-4o Mini - Fast & affordable' },
+                          { value: 'gpt-4-turbo', label: 'GPT-4 Turbo - Advanced reasoning' },
+                          { value: 'gpt-4', label: 'GPT-4 - Powerful & reliable' },
+                          { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo - Fast & efficient' },
+                          { value: 'gpt-3.5-turbo-16k', label: 'GPT-3.5 Turbo 16K - Extended context' }
+                        ]}
                         value={selectedModel.includes('gpt') ? selectedModel : ''}
-                        onChange={(e) => setSelectedModel(e.target.value)}
-                        className="w-full p-2 rounded-lg border-2 border-border bg-background text-xs focus:border-green-400 focus:outline-none"
-                      >
-                        <option value="gpt-5">GPT-5 - Latest flagship (if available)</option>
-                        <option value="gpt-4o">GPT-4o - Multimodal optimized</option>
-                        <option value="gpt-4o-mini">GPT-4o Mini - Fast & affordable</option>
-                        <option value="gpt-4-turbo">GPT-4 Turbo - Advanced reasoning</option>
-                        <option value="gpt-4">GPT-4 - Powerful & reliable</option>
-                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo - Fast & efficient</option>
-                        <option value="gpt-3.5-turbo-16k">GPT-3.5 Turbo 16K - Extended context</option>
-                      </select>
+                        onChange={setSelectedModel}
+                        isActive={selectedModel.includes('gpt')}
+                      />
                     </div>
 
                     {/* Gemini Models */}
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <img src="/google gemini.png" alt="Gemini" className="w-4 h-4" />
-                        <span className="text-xs font-semibold">Gemini (Google)</span>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <img src="/google gemini.png" alt="Gemini" className="w-4 h-4" />
+                          <span className="text-sm font-semibold text-foreground">Gemini (Google)</span>
+                        </div>
+                        {selectedModel.includes('gemini') && (
+                          <span className="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded-full">SELECTED</span>
+                        )}
                       </div>
-                      <select
+                      <CustomSelect
+                        options={[
+                          { value: 'gemini-2.0-flash-exp', label: 'Gemini 2.0 Flash - Experimental' },
+                          { value: 'gemini-exp-1206', label: 'Gemini Exp 1206 - Experimental' },
+                          { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro - Most capable' },
+                          { value: 'gemini-1.5-pro-exp-0827', label: 'Gemini 1.5 Pro Exp - Extended' },
+                          { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash - Fast' },
+                          { value: 'gemini-1.5-flash-8b', label: 'Gemini 1.5 Flash 8B - Ultra fast' },
+                          { value: 'gemini-1.0-pro', label: 'Gemini 1.0 Pro - Stable' }
+                        ]}
                         value={selectedModel.includes('gemini') ? selectedModel : ''}
-                        onChange={(e) => setSelectedModel(e.target.value)}
-                        className="w-full p-2 rounded-lg border-2 border-border bg-background text-xs focus:border-green-400 focus:outline-none"
-                      >
-                        <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash - Experimental</option>
-                        <option value="gemini-exp-1206">Gemini Exp 1206 - Experimental</option>
-                        <option value="gemini-1.5-pro">Gemini 1.5 Pro - Most capable</option>
-                        <option value="gemini-1.5-pro-exp-0827">Gemini 1.5 Pro Exp - Extended</option>
-                        <option value="gemini-1.5-flash">Gemini 1.5 Flash - Fast</option>
-                        <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B - Ultra fast</option>
-                        <option value="gemini-1.0-pro">Gemini 1.0 Pro - Stable</option>
-                      </select>
+                        onChange={setSelectedModel}
+                        isActive={selectedModel.includes('gemini')}
+                      />
                     </div>
                   </div>
                   
@@ -791,7 +849,7 @@ export default function Home() {
                           {telegramBotInfo ? 'Ready to deploy!' : 'Connect Telegram first to proceed with deployment'}
                         </p>
                         <button
-                          onClick={handleDeploy}
+                          onClick={handleInitiateDeploy}
                           disabled={!telegramBotInfo || deploying}
                           className="w-full py-3 rounded-lg bg-gradient-to-r from-green-400 via-emerald-500 to-green-500 text-white font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all"
                         >
@@ -1147,6 +1205,13 @@ export default function Home() {
           railwayProjectId={deploymentResult.railwayProjectId}
         />
       )}
+
+      {/* Payment Package Modal */}
+      <PaymentPackageModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onPackageSelected={handlePaymentSuccess}
+      />
     </div>
   );
 }

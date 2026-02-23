@@ -108,3 +108,23 @@ model ApiUsage {
   @@index([createdAt])
   @@index([model])
 }
+
+model Payment {
+  id                String   @id @default(cuid())
+  userId            String
+  sessionId         String   @unique // Snippe session ID
+  reference         String?  // Snippe payment reference
+  amount            Int      // Amount in cents (e.g., 2000 = $20)
+  currency          String   @default("USD")
+  package           String   // "starter", "professional", "enterprise"
+  status            String   @default("pending") // pending, completed, failed
+  checkoutUrl       String?  // Snippe checkout URL
+  metadata          Json?    // Additional payment data
+  completedAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([status])
+}
