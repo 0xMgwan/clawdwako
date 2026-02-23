@@ -128,3 +128,16 @@ model Payment {
   @@index([sessionId])
   @@index([status])
 }
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  botId     String
+  type      String   // message, api_call, error, webhook
+  content   String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([botId])
+  @@index([createdAt])
+  @@index([type])
+}

@@ -16,6 +16,19 @@ export async function POST(
     console.log('🔔 Webhook received for bot:', botId);
     console.log('📨 Update:', JSON.stringify(update, null, 2));
 
+    // Log webhook event
+    await prisma.activityLog.create({
+      data: {
+        botId,
+        type: 'webhook',
+        content: 'Webhook received from Telegram',
+        metadata: { 
+          chatId: update.message?.chat?.id?.toString() || 'unknown',
+          updateId: update.update_id 
+        }
+      }
+    });
+
     // Get bot from database
     const bot = await prisma.bot.findUnique({
       where: { id: botId }
@@ -55,6 +68,20 @@ export async function POST(
 
     console.log('Processing message:', userMessage);
 
+    // Log user message
+    await prisma.activityLog.create({
+      data: {
+        botId,
+        type: 'message',
+        content: `User message: "${userMessage}"`,
+        metadata: {
+          userId: message.from?.id?.toString() || 'unknown',
+          messageId: message.message_id?.toString() || 'unknown',
+          chatId: chatId.toString()
+        }
+      }
+    });
+
     // Generate AI response based on selected model
     let aiResponse = '';
     
@@ -89,6 +116,20 @@ export async function POST(
         });
 
         aiResponse = response.content[0].type === 'text' ? response.content[0].text : 'Sorry, I could not generate a response.';
+        
+        // Log successful API call
+        await prisma.activityLog.create({
+          data: {
+            botId,
+            type: 'api_call',
+            content: `${bot.selectedModel} API call successful`,
+            metadata: {
+              model: bot.selectedModel,
+              inputTokens: response.usage.input_tokens,
+              outputTokens: response.usage.output_tokens
+            }
+          }
+        });
       } catch (error: any) {
         console.error('Anthropic API error:', error.message);
         aiResponse = `I received your message: "${userMessage}"\n\nNote: The Anthropic API is currently unavailable. Please add API credits or use a different model.`;
@@ -106,9 +147,37 @@ export async function POST(
         });
 
         aiResponse = response.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
+        
+        // Log successful API call
+        await prisma.activityLog.create({
+          data: {
+            botId,
+            type: 'api_call',
+            content: `${bot.selectedModel} API call successful`,
+            metadata: {
+              model: bot.selectedModel,
+              inputTokens: response.usage?.prompt_tokens || 0,
+              outputTokens: response.usage?.completion_tokens || 0
+            }
+          }
+        });
       } catch (error: any) {
         console.error('❌ OpenAI API error:', error.message);
         console.error('Full error:', JSON.stringify(error, null, 2));
+        
+        // Log API error
+        await prisma.activityLog.create({
+          data: {
+            botId,
+            type: 'error',
+            content: `OpenAI API error: ${error.message}`,
+            metadata: {
+              model: bot.selectedModel,
+              errorType: error.type || 'unknown'
+            }
+          }
+        });
+        
         aiResponse = `I received your message: "${userMessage}"\n\nNote: The OpenAI API is currently unavailable. Please add API credits or use a different model.`;
       }
     } else if (bot.selectedModel.includes('gemini')) {
