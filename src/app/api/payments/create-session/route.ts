@@ -43,12 +43,13 @@ export async function POST(request: NextRequest) {
     }
 
     const pkg = PACKAGES[packageType as keyof typeof PACKAGES];
-    const amountInCents = pkg.amount * 100; // Convert to cents
+    const amountInTZS = pkg.amount * 2500; // Convert USD to TZS (1 USD = 2,500 TZS)
 
     console.log('Creating Snippe payment session:', {
       package: packageType,
-      amount: amountInCents,
-      currency: 'USD'
+      amountUSD: pkg.amount,
+      amountTZS: amountInTZS,
+      currency: 'TZS'
     });
 
     // Validate phone number for mobile money
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
     const requestBody = {
       phone_number: phoneNumber || '+255000000000',
       details: {
-        amount: amountInCents,
+        amount: amountInTZS,
         currency: 'TZS',
         description: `${pkg.name} - Bot Deployment`
       },
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         sessionId: snippeData.data?.id || snippeData.data?.reference,
         reference: snippeData.data?.reference,
-        amount: amountInCents,
+        amount: amountInTZS,
         currency: 'TZS',
         package: packageType,
         status: 'pending',

@@ -110,8 +110,45 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
 
       // Handle different payment methods
       if (data.paymentMethod === 'card' && data.checkoutUrl) {
-        // Redirect to Snippe checkout for card payments
-        window.location.href = data.checkoutUrl;
+        // Open Snippe checkout in new window for card payments
+        const paymentWindow = window.open(data.checkoutUrl, '_blank', 'width=600,height=700');
+        
+        // Show waiting message
+        setProcessing(false);
+        setPaymentComplete(true);
+        
+        // Poll for payment status
+        const paymentReference = data.reference;
+        const pollInterval = setInterval(async () => {
+          try {
+            const statusResponse = await fetch(`/api/payments/status?reference=${paymentReference}`);
+            const statusData = await statusResponse.json();
+            
+            if (statusData.status === 'completed') {
+              clearInterval(pollInterval);
+              if (paymentWindow && !paymentWindow.closed) {
+                paymentWindow.close();
+              }
+              onPaymentSuccess();
+              // Redirect to dashboard
+              window.location.href = '/dashboard';
+            } else if (statusData.status === 'failed') {
+              clearInterval(pollInterval);
+              if (paymentWindow && !paymentWindow.closed) {
+                paymentWindow.close();
+              }
+              alert('Payment failed. Please try again.');
+              onClose();
+            }
+          } catch (error) {
+            console.error('Error checking payment status:', error);
+          }
+        }, 3000);
+        
+        // Stop polling after 10 minutes
+        setTimeout(() => {
+          clearInterval(pollInterval);
+        }, 600000);
         return;
       }
 
@@ -228,13 +265,19 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
           {paymentComplete && (
             <div className="text-center py-12">
               <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full mb-6 shadow-lg">
-                <Smartphone className="w-12 h-12 text-white animate-pulse" />
+                {paymentMethod === 'card' ? (
+                  <CreditCard className="w-12 h-12 text-white animate-pulse" />
+                ) : (
+                  <Smartphone className="w-12 h-12 text-white animate-pulse" />
+                )}
               </div>
               <h3 className="text-3xl font-bold text-gray-900 mb-3">
-                Check Your Phone
+                {paymentMethod === 'card' ? 'Complete Payment' : 'Check Your Phone'}
               </h3>
               <p className="text-gray-600 mb-6 text-lg">
-                A USSD prompt has been sent to your phone. Please complete the payment to continue.
+                {paymentMethod === 'card' 
+                  ? 'Please complete the payment in the popup window to continue.'
+                  : 'A USSD prompt has been sent to your phone. Please complete the payment to continue.'}
               </p>
               <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500"></div>
