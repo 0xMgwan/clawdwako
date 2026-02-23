@@ -63,31 +63,30 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [configureBot, setConfigureBot] = useState<any>(null);
   const [viewLogsBot, setViewLogsBot] = useState<any>(null);
+  const [userPackage, setUserPackage] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    // Fetch user's bots from the database
-    const fetchBots = async () => {
+    // Fetch user's bots and payment info from the database
+    const fetchData = async () => {
       console.log('🔍 FETCHING BOTS FROM DATABASE...');
       try {
-        const response = await fetch('/api/bots', {
-          cache: 'no-store', // Force fresh data
-          headers: {
-            'Cache-Control': 'no-cache'
-          }
+        // Fetch bots
+        const botsResponse = await fetch('/api/bots', {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' }
         });
-        const data = await response.json();
-        console.log('📦 API Response:', data);
+        const botsData = await botsResponse.json();
+        console.log('📦 API Response:', botsData);
         
-        if (data.success) {
-          console.log('✅ Found', data.bots.length, 'bots in database');
+        if (botsData.success) {
+          console.log('✅ Found', botsData.bots.length, 'bots in database');
           
-          if (data.bots.length > 0) {
-            // Map database bots to dashboard format
-            const mappedBots = data.bots.map((bot: any) => ({
+          if (botsData.bots.length > 0) {
+            const mappedBots = botsData.bots.map((bot: any) => ({
               id: bot.id,
               name: bot.name || bot.telegramBotUsername,
               type: 'AI Agent',
@@ -108,15 +107,28 @@ export default function Dashboard() {
             setBots([]);
           }
         }
+
+        // Fetch user's payment/package info
+        try {
+          const paymentResponse = await fetch('/api/user/payment');
+          if (paymentResponse.ok) {
+            const paymentData = await paymentResponse.json();
+            if (paymentData.package) {
+              setUserPackage(paymentData.package);
+            }
+          }
+        } catch (err) {
+          console.log('No payment info found, using default');
+        }
       } catch (error) {
-        console.error('❌ Error fetching bots:', error);
+        console.error('❌ Error fetching data:', error);
         setBots([]);
       } finally {
         setLoading(false);
       }
     };
     
-    fetchBots();
+    fetchData();
   }, []);
 
   const handleViewLogs = (botId: string) => {
@@ -338,7 +350,9 @@ export default function Dashboard() {
           
           <div className="border-l-2 border-green-400 pl-3 sm:pl-4 lg:pl-6 py-2 sm:py-3 lg:py-4">
             <div className="text-[10px] sm:text-xs tracking-wider text-muted-foreground mb-1 sm:mb-2">MONTHLY COST</div>
-            <div className="text-2xl sm:text-3xl lg:text-4xl font-light mb-1 sm:mb-2">$57.70</div>
+            <div className="text-2xl sm:text-3xl lg:text-4xl font-light mb-1 sm:mb-2">
+              ${userPackage === 'starter' ? '20.00' : userPackage === 'professional' ? '50.00' : userPackage === 'enterprise' ? '100.00' : '20.00'}
+            </div>
             <p className="text-[10px] sm:text-xs text-muted-foreground">Within budget</p>
           </div>
         </div>
