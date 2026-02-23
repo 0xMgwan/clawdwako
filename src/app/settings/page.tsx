@@ -61,67 +61,68 @@ export default function SettingsPage() {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-12 gap-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
           {/* Sidebar */}
-          <div className="col-span-3">
-            <Card>
-              <CardContent className="p-4">
-                <nav className="space-y-2">
+          <div className="lg:col-span-3">
+            <Card className="bg-gradient-to-br from-background via-background to-green-500/5">
+              <CardContent className="p-2 sm:p-4">
+                <nav className="flex lg:flex-col overflow-x-auto lg:overflow-visible space-x-2 lg:space-x-0 lg:space-y-2 pb-2 lg:pb-0">
                   <button
                     onClick={() => setActiveTab("profile")}
-                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm ${
+                    className={`flex-shrink-0 lg:w-full flex items-center justify-center lg:justify-start space-x-2 lg:space-x-3 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                       activeTab === "profile"
-                        ? "bg-primary text-primary-foreground"
-                        : "hover:bg-accent"
+                        ? "bg-green-400 text-white shadow-md"
+                        : "hover:bg-accent text-muted-foreground"
                     }`}
                   >
-                    <User className="h-4 w-4" />
-                    <span>Profile</span>
+                    <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="whitespace-nowrap">Profile</span>
                   </button>
                   <button
                     onClick={() => setActiveTab("api-keys")}
-                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm ${
+                    className={`flex-shrink-0 lg:w-full flex items-center justify-center lg:justify-start space-x-2 lg:space-x-3 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                       activeTab === "api-keys"
-                        ? "bg-primary text-primary-foreground"
-                        : "hover:bg-accent"
+                        ? "bg-green-400 text-white shadow-md"
+                        : "hover:bg-accent text-muted-foreground"
                     }`}
                   >
-                    <Key className="h-4 w-4" />
-                    <span>API Keys</span>
+                    <Key className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="whitespace-nowrap">API Keys</span>
                   </button>
                   <button
                     onClick={() => setActiveTab("billing")}
-                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm ${
+                    className={`flex-shrink-0 lg:w-full flex items-center justify-center lg:justify-start space-x-2 lg:space-x-3 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                       activeTab === "billing"
-                        ? "bg-primary text-primary-foreground"
-                        : "hover:bg-accent"
+                        ? "bg-green-400 text-white shadow-md"
+                        : "hover:bg-accent text-muted-foreground"
                     }`}
                   >
-                    <CreditCard className="h-4 w-4" />
-                    <span>Billing</span>
+                    <CreditCard className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="whitespace-nowrap">Billing</span>
                   </button>
                   <button
                     onClick={() => setActiveTab("notifications")}
-                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm ${
+                    className={`flex-shrink-0 lg:w-full flex items-center justify-center lg:justify-start space-x-2 lg:space-x-3 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                       activeTab === "notifications"
-                        ? "bg-primary text-primary-foreground"
-                        : "hover:bg-accent"
+                        ? "bg-green-400 text-white shadow-md"
+                        : "hover:bg-accent text-muted-foreground"
                     }`}
                   >
-                    <Bell className="h-4 w-4" />
-                    <span>Notifications</span>
+                    <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="whitespace-nowrap hidden sm:inline">Notifications</span>
+                    <span className="whitespace-nowrap sm:hidden">Notif</span>
                   </button>
                   <button
                     onClick={() => setActiveTab("security")}
-                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm ${
+                    className={`flex-shrink-0 lg:w-full flex items-center justify-center lg:justify-start space-x-2 lg:space-x-3 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                       activeTab === "security"
-                        ? "bg-primary text-primary-foreground"
-                        : "hover:bg-accent"
+                        ? "bg-green-400 text-white shadow-md"
+                        : "hover:bg-accent text-muted-foreground"
                     }`}
                   >
-                    <Shield className="h-4 w-4" />
-                    <span>Security</span>
+                    <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="whitespace-nowrap">Security</span>
                   </button>
                 </nav>
               </CardContent>
@@ -129,34 +130,34 @@ export default function SettingsPage() {
           </div>
 
           {/* Main Content */}
-          <div className="col-span-9">
+          <div className="lg:col-span-9">
             {activeTab === "profile" && (
               <div className="space-y-6">
-                <Card>
+                <Card className="bg-gradient-to-br from-background via-background to-green-500/5">
                   <CardHeader>
-                    <CardTitle>Profile Information</CardTitle>
-                    <CardDescription>Update your account profile information</CardDescription>
+                    <CardTitle className="text-lg sm:text-xl">Profile Information</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">Update your account profile information</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-3 sm:space-y-4">
                     <div>
-                      <label className="text-sm font-medium">Name</label>
+                      <label className="text-xs sm:text-sm font-medium">Name</label>
                       <input
                         type="text"
-                        className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+                        className="w-full mt-1 px-3 py-2 text-sm border border-border rounded-lg bg-background focus:ring-2 focus:ring-green-400 focus:outline-none"
                         placeholder="Your name"
                         defaultValue="Anonymous User"
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium">Email</label>
+                      <label className="text-xs sm:text-sm font-medium">Email</label>
                       <input
                         type="email"
-                        className="w-full mt-1 px-3 py-2 border border-border rounded-md bg-background"
+                        className="w-full mt-1 px-3 py-2 text-sm border border-border rounded-lg bg-background focus:ring-2 focus:ring-green-400 focus:outline-none"
                         placeholder="your@email.com"
                         defaultValue="anonymous@clawdwako.com"
                       />
                     </div>
-                    <Button>Save Changes</Button>
+                    <Button className="bg-green-500 hover:bg-green-600 text-white">Save Changes</Button>
                   </CardContent>
                 </Card>
               </div>

@@ -8,6 +8,7 @@ import { DeploymentSuccessModal } from "@/components/DeploymentSuccessModal";
 import { PaymentPackageModal } from "@/components/PaymentPackageModal";
 import { CustomSelect } from "@/components/CustomSelect";
 import { MobileConfigSection } from "@/components/MobileConfigSection";
+import { AIBrainSelector } from "@/components/AIBrainSelector";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
@@ -709,118 +710,14 @@ export default function Home() {
               {/* Configuration Section - Desktop Only */}
               <div className="hidden lg:block space-y-6 pt-6 border-t border-border mt-6 lg:border-0 lg:pt-6 lg:mt-6">
                 {/* Choose AI Model */}
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Star className="w-4 h-4 text-green-400" />
-                    <h3 className="text-lg font-bold tracking-tight">Choose Your AI Brain</h3>
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-4">Pick the most powerful AI model for your needs</p>
-                  
-                  <div className="grid grid-cols-1 gap-3">
-                    {/* Claude Models */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <img src="/Claude-ai-logo.png" alt="Claude" className="w-4 h-4" />
-                          <span className="text-sm font-semibold text-foreground">Claude (Anthropic)</span>
-                        </div>
-                        {selectedModel.includes('claude') && (
-                          <span className="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded-full">SELECTED</span>
-                        )}
-                      </div>
-                      <CustomSelect
-                        options={[
-                          { value: 'claude-opus-4-20250514', label: 'Claude Opus 4 - Most capable' },
-                          { value: 'claude-3-7-sonnet-20250219', label: 'Claude 3.7 Sonnet - Latest balanced' },
-                          { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet - Balanced' },
-                          { value: 'claude-3-5-haiku-20241022', label: 'Claude 3.5 Haiku - Fast' },
-                          { value: 'claude-3-opus-20240229', label: 'Claude 3 Opus - Previous flagship' },
-                          { value: 'claude-3-sonnet-20240229', label: 'Claude 3 Sonnet - Previous balanced' },
-                          { value: 'claude-3-haiku-20240307', label: 'Claude 3 Haiku - Efficient' }
-                        ]}
-                        value={selectedModel.includes('claude') ? selectedModel : ''}
-                        onChange={setSelectedModel}
-                        isActive={selectedModel.includes('claude')}
-                      />
-                    </div>
-
-                    {/* GPT Models */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <img src="/gpt.png" alt="GPT" className="w-4 h-4" />
-                          <span className="text-sm font-semibold text-foreground">GPT (OpenAI)</span>
-                        </div>
-                        {selectedModel.includes('gpt') && (
-                          <span className="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded-full">SELECTED</span>
-                        )}
-                      </div>
-                      <CustomSelect
-                        options={[
-                          { value: 'gpt-5', label: 'GPT-5 - Latest flagship (if available)' },
-                          { value: 'gpt-4o', label: 'GPT-4o - Multimodal optimized' },
-                          { value: 'gpt-4o-mini', label: 'GPT-4o Mini - Fast & affordable' },
-                          { value: 'gpt-4-turbo', label: 'GPT-4 Turbo - Advanced reasoning' },
-                          { value: 'gpt-4', label: 'GPT-4 - Powerful & reliable' },
-                          { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo - Fast & efficient' },
-                          { value: 'gpt-3.5-turbo-16k', label: 'GPT-3.5 Turbo 16K - Extended context' }
-                        ]}
-                        value={selectedModel.includes('gpt') ? selectedModel : ''}
-                        onChange={setSelectedModel}
-                        isActive={selectedModel.includes('gpt')}
-                      />
-                    </div>
-
-                    {/* Gemini Models */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <img src="/google gemini.png" alt="Gemini" className="w-4 h-4" />
-                          <span className="text-sm font-semibold text-foreground">Gemini (Google)</span>
-                        </div>
-                        {selectedModel.includes('gemini') && (
-                          <span className="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded-full">SELECTED</span>
-                        )}
-                      </div>
-                      <CustomSelect
-                        options={[
-                          { value: 'gemini-2.0-flash-exp', label: 'Gemini 2.0 Flash - Experimental' },
-                          { value: 'gemini-exp-1206', label: 'Gemini Exp 1206 - Experimental' },
-                          { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro - Most capable' },
-                          { value: 'gemini-1.5-pro-exp-0827', label: 'Gemini 1.5 Pro Exp - Extended' },
-                          { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash - Fast' },
-                          { value: 'gemini-1.5-flash-8b', label: 'Gemini 1.5 Flash 8B - Ultra fast' },
-                          { value: 'gemini-1.0-pro', label: 'Gemini 1.0 Pro - Stable' }
-                        ]}
-                        value={selectedModel.includes('gemini') ? selectedModel : ''}
-                        onChange={setSelectedModel}
-                        isActive={selectedModel.includes('gemini')}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="text-center mt-3">
-                    <button
-                      type="button"
-                      onClick={() => setShowApiKeyInput(!showApiKeyInput)}
-                      className="text-[10px] text-muted-foreground hover:text-green-400 transition-colors underline"
-                    >
-                      Got your own API key? Add it here
-                    </button>
-                  </div>
-                  
-                  {showApiKeyInput && (
-                    <div className="mt-3">
-                      <input
-                        type="password"
-                        value={userApiKey}
-                        onChange={(e) => setUserApiKey(e.target.value)}
-                        placeholder="Enter your API key"
-                        className="w-full px-3 py-2 text-xs border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-green-400"
-                      />
-                    </div>
-                  )}
-                </div>
+                <AIBrainSelector
+                  selectedModel={selectedModel}
+                  setSelectedModel={setSelectedModel}
+                  showApiKeyInput={showApiKeyInput}
+                  setShowApiKeyInput={setShowApiKeyInput}
+                  userApiKey={userApiKey}
+                  setUserApiKey={setUserApiKey}
+                />
 
                 {/* Connect Platform */}
                 <div>
