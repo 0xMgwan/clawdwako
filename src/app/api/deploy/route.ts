@@ -180,6 +180,13 @@ export async function POST(request: NextRequest) {
 
     try {
       console.log('Deploying to Railway...');
+      console.log('🔑 User API Keys being sent to Railway:', {
+        anthropic: deployment.userApiKeys?.anthropic ? `${deployment.userApiKeys.anthropic.substring(0, 10)}...` : 'NOT PROVIDED',
+        openai: deployment.userApiKeys?.openai ? `${deployment.userApiKeys.openai.substring(0, 10)}...` : 'NOT PROVIDED',
+        google: deployment.userApiKeys?.google ? `${deployment.userApiKeys.google.substring(0, 10)}...` : 'NOT PROVIDED',
+        selectedModel: deployment.selectedModel
+      });
+      
       const railwayClient = getRailwayClient();
       
       console.log('Railway client initialized, attempting deployment...');

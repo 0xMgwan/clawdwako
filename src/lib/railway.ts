@@ -128,6 +128,9 @@ export class RailwayClient {
     serviceId: string,
     variables: Record<string, string>
   ) {
+    console.log('🔧 Setting environment variables for project:', projectId);
+    console.log('📝 Variables to set:', Object.keys(variables));
+    
     // Get the environment first
     const envQuery = `
       query Project($id: String!) {
@@ -137,6 +140,7 @@ export class RailwayClient {
             edges {
               node {
                 id
+                name
               }
             }
           }
@@ -146,14 +150,18 @@ export class RailwayClient {
 
     const envData = await this.query(envQuery, { id: projectId });
     const environmentId = envData.project.environments.edges[0]?.node.id;
+    const environmentName = envData.project.environments.edges[0]?.node.name;
 
     if (!environmentId) {
       throw new Error('No environment found for project');
     }
+    
+    console.log(`✅ Found environment: ${environmentName} (${environmentId})`);
 
     const mutations = Object.entries(variables).map(([key, value], index) => {
       // Escape special characters in values
       const escapedValue = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
+      console.log(`  Setting ${key} = ${key.includes('KEY') || key.includes('TOKEN') ? '[REDACTED]' : value}`);
       return `
         var${index}: variableUpsert(input: {
           projectId: "${projectId}"
@@ -170,7 +178,10 @@ export class RailwayClient {
       }
     `;
 
-    return await this.query(query);
+    console.log('🚀 Executing mutation to set variables...');
+    const result = await this.query(query);
+    console.log('✅ Mutation executed successfully');
+    return result;
   }
 
   async setServiceSource(
@@ -286,6 +297,12 @@ export class RailwayClient {
     await this.disableServiceNetworking(service.id);
 
     console.log('Step 3: Setting environment variables...');
+    console.log('🔑 API Keys received:', {
+      anthropic: anthropicApiKey ? `${anthropicApiKey.substring(0, 10)}...` : 'NOT PROVIDED',
+      openai: openaiApiKey ? `${openaiApiKey.substring(0, 10)}...` : 'NOT PROVIDED',
+      google: googleAiApiKey ? `${googleAiApiKey.substring(0, 10)}...` : 'NOT PROVIDED',
+      selectedModel
+    });
     
     // Determine which API key to use based on selected model
     let apiKeyToUse = '';
@@ -302,6 +319,8 @@ export class RailwayClient {
       apiKeyName = 'GOOGLE_AI_API_KEY';
     }
     
+    console.log(`🎯 Selected API key: ${apiKeyName} = ${apiKeyToUse ? `${apiKeyToUse.substring(0, 10)}...` : 'EMPTY'}`);
+    
     const envVars: Record<string, string> = {
       TELEGRAM_BOT_TOKEN: telegramBotToken,
       SELECTED_MODEL: selectedModel,
@@ -312,11 +331,20 @@ export class RailwayClient {
     // Only set the API key that matches the selected model
     if (apiKeyToUse && apiKeyName) {
       envVars[apiKeyName] = apiKeyToUse;
-      console.log(`Setting ${apiKeyName} for model ${selectedModel}`);
+      console.log(`✅ Setting ${apiKeyName} for model ${selectedModel}`);
+    } else {
+      console.warn(`⚠️ No API key found for model ${selectedModel}! Bot will not work.`);
     }
 
-    await this.setEnvironmentVariables(project.id, service.id, envVars);
-    console.log('Environment variables set');
+    try {
+      await this.setEnvironmentVariables(project.id, service.id, envVars);
+      console.log('✅ Environment variables set successfully');
+      console.log('📋 Variables that were set:', Object.keys(envVars));
+    } catch (error: any) {
+      console.error('❌ FAILED to set environment variables!');
+      console.error('Error:', error.message);
+      throw new Error(`Failed to set Railway environment variables: ${error.message}`);
+    }
 
     console.log('Step 4: Deploying from GitHub...');
     // Deploy the bot code from your GitHub repo
