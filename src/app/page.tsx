@@ -48,8 +48,21 @@ export default function Home() {
       return;
     }
     
-    // Show payment modal before deployment
-    setShowPaymentModal(true);
+    // Check if user has API key
+    const combinedApiKeys = {
+      anthropic: userApiKey && selectedModel.includes("claude") ? userApiKey : (telegramBotInfo.apiKeys?.anthropic || ""),
+      openai: userApiKey && selectedModel.includes("gpt") ? userApiKey : (telegramBotInfo.apiKeys?.openai || ""),
+      google: userApiKey && selectedModel.includes("gemini") ? userApiKey : (telegramBotInfo.apiKeys?.google || ""),
+    };
+
+    const hasAnyUserKey = combinedApiKeys.anthropic || combinedApiKeys.openai || combinedApiKeys.google;
+
+    // If user has API key, deploy directly. Otherwise, show payment modal
+    if (hasAnyUserKey) {
+      handleDeploy();
+    } else {
+      setShowPaymentModal(true);
+    }
   };
 
   const handleDeploy = async () => {
