@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { packageType } = await request.json();
+    const { packageType, phoneNumber, paymentMethod, provider } = await request.json();
 
     if (!packageType || !PACKAGES[packageType as keyof typeof PACKAGES]) {
       return NextResponse.json({ error: 'Invalid package type' }, { status: 400 });
@@ -51,32 +51,41 @@ export async function POST(request: NextRequest) {
       currency: 'USD'
     });
 
-    // Create Snippe payment session
+    // Validate phone number for mobile money
+    if (paymentMethod === 'mobile' && !phoneNumber) {
+      return NextResponse.json({ error: 'Phone number is required for mobile money payments' }, { status: 400 });
+    }
+
+    // Create Snippe payment
+    const nameParts = (user.name || 'Customer Name').split(' ');
     const requestBody = {
-      amount: amountInCents,
-      currency: 'TZS', // Snippe uses TZS (Tanzanian Shilling)
-      allowed_methods: ['mobile_money', 'card', 'qr'],
-      customer: {
-        name: user.name || 'Customer',
-        email: user.email,
+      phone_number: phoneNumber || '+255000000000',
+      details: {
+        amount: amountInCents,
+        currency: 'TZS',
+        description: `${pkg.name} - Bot Deployment`
       },
-      redirect_url: `${process.env.NEXT_PUBLIC_URL}/payment/success`,
-      webhook_url: `${process.env.NEXT_PUBLIC_URL}/api/webhooks/snippe`,
-      description: `${pkg.name} - Bot Deployment`,
+      customer: {
+        firstname: nameParts[0] || 'Customer',
+        lastname: nameParts[1] || 'Name',
+        email: user.email
+      },
+      callback_url: `${process.env.NEXT_PUBLIC_URL}/api/webhooks/snippe`,
       metadata: {
         userId: user.id,
         package: packageType,
-        email: user.email
-      },
-      expires_in: 3600
+        email: user.email,
+        paymentMethod: paymentMethod,
+        provider: provider
+      }
     };
 
     console.log('Snippe API request:', {
-      url: `${SNIPPE_API_URL}/v1/sessions`,
+      url: `${SNIPPE_API_URL}/v1/payments`,
       body: requestBody
     });
 
-    const snippeResponse = await fetch(`${SNIPPE_API_URL}/v1/sessions`, {
+    const snippeResponse = await fetch(`${SNIPPE_API_URL}/v1/payments`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${SNIPPE_API_KEY}`,
@@ -103,25 +112,30 @@ export async function POST(request: NextRequest) {
     await prisma.payment.create({
       data: {
         userId: user.id,
-        sessionId: snippeData.data.id,
-        reference: snippeData.data.reference,
+        sessionId: snippeData.data?.id || snippeData.data?.reference,
+        reference: snippeData.data?.reference,
         amount: amountInCents,
         currency: 'TZS',
         package: packageType,
         status: 'pending',
-        checkoutUrl: snippeData.data.checkout_url,
-        metadata: {
-          reference: snippeData.data.reference,
-          shortCode: snippeData.data.short_code
-        }
+        checkoutUrl: snippeData.data?.payment_url || snippeData.data?.checkout_url,
+        metadata: snippeData.data || {}
       }
     });
 
+    // For mobile money, the user should receive USSD prompt
+    // For card, redirect to payment URL
     return NextResponse.json({
       success: true,
-      checkoutUrl: snippeData.data.checkout_url,
-      sessionId: snippeData.data.id,
-      reference: snippeData.data.reference
+      paymentMethod: paymentMethod,
+      message: paymentMethod === 'mobile' 
+        ? 'USSD prompt sent to your phone. Please check your phone to complete payment.'
+        : 'Redirecting to payment page...',
+      checkoutUrl: paymentMethod === 'card' ? (snippeData.data?.payment_url || snippeData.data?.checkout_url) : null,
+      sessionId: snippeData.data?.id || snippeData.data?.reference,
+      reference: snippeData.data?.reference,
+      status: snippeData.data?.status,
+      data: snippeData.data
     });
   } catch (error: any) {
     console.error('Error creating payment session:', error);

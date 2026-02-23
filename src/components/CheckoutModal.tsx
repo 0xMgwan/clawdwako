@@ -108,20 +108,43 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
         throw new Error(data.error || 'Payment failed');
       }
 
-      // If Snippe returns a checkout URL, redirect to it
-      if (data.checkoutUrl) {
+      // Handle different payment methods
+      if (data.paymentMethod === 'card' && data.checkoutUrl) {
+        // Redirect to Snippe checkout for card payments
         window.location.href = data.checkoutUrl;
         return;
       }
 
-      // Otherwise show success (for testing/fallback)
+      // For mobile money, show waiting message and poll for payment status
       setProcessing(false);
       setPaymentComplete(true);
       
+      // Poll for payment status
+      const paymentReference = data.reference;
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusResponse = await fetch(`/api/payments/status?reference=${paymentReference}`);
+          const statusData = await statusResponse.json();
+          
+          if (statusData.status === 'completed') {
+            clearInterval(pollInterval);
+            onPaymentSuccess();
+            // Redirect to dashboard
+            window.location.href = '/dashboard';
+          } else if (statusData.status === 'failed') {
+            clearInterval(pollInterval);
+            alert('Payment failed. Please try again.');
+            onClose();
+          }
+        } catch (error) {
+          console.error('Error checking payment status:', error);
+        }
+      }, 3000); // Check every 3 seconds
+      
+      // Stop polling after 5 minutes
       setTimeout(() => {
-        onPaymentSuccess();
-        onClose();
-      }, 2000);
+        clearInterval(pollInterval);
+      }, 300000);
     } catch (error: any) {
       setProcessing(false);
       alert(`Payment error: ${error.message}`);
@@ -205,14 +228,18 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
           {paymentComplete && (
             <div className="text-center py-12">
               <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full mb-6 shadow-lg">
-                <Check className="w-12 h-12 text-white" />
+                <Smartphone className="w-12 h-12 text-white animate-pulse" />
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
-                Payment Successful!
+              <h3 className="text-3xl font-bold text-gray-900 mb-3">
+                Check Your Phone
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg">
-                Your payment has been processed successfully. You can now deploy your AI bot.
+              <p className="text-gray-600 mb-6 text-lg">
+                A USSD prompt has been sent to your phone. Please complete the payment to continue.
               </p>
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500"></div>
+                <span>Waiting for payment confirmation...</span>
+              </div>
             </div>
           )}
 
