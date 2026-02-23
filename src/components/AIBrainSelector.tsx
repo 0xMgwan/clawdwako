@@ -108,11 +108,26 @@ export function AIBrainSelector({
         <CustomSelect
           options={[
             { value: 'gpt-5', label: 'GPT-5 - Latest flagship (if available)' },
+            { value: 'o1', label: 'o1 - Advanced reasoning model' },
+            { value: 'o1-mini', label: 'o1-mini - Fast reasoning' },
+            { value: 'o1-preview', label: 'o1-preview - Reasoning preview' },
             { value: 'gpt-4o', label: 'GPT-4o - Multimodal optimized' },
             { value: 'gpt-4o-mini', label: 'GPT-4o Mini - Fast & affordable' },
+            { value: 'gpt-4o-2024-11-20', label: 'GPT-4o (Nov 2024) - Latest' },
+            { value: 'gpt-4o-2024-08-06', label: 'GPT-4o (Aug 2024)' },
+            { value: 'gpt-4o-2024-05-13', label: 'GPT-4o (May 2024)' },
+            { value: 'chatgpt-4o-latest', label: 'ChatGPT-4o Latest - Dynamic' },
             { value: 'gpt-4-turbo', label: 'GPT-4 Turbo - Advanced reasoning' },
+            { value: 'gpt-4-turbo-2024-04-09', label: 'GPT-4 Turbo (Apr 2024)' },
+            { value: 'gpt-4-turbo-preview', label: 'GPT-4 Turbo Preview' },
+            { value: 'gpt-4-0125-preview', label: 'GPT-4 0125 Preview' },
+            { value: 'gpt-4-1106-preview', label: 'GPT-4 1106 Preview' },
             { value: 'gpt-4', label: 'GPT-4 - Powerful & reliable' },
+            { value: 'gpt-4-0613', label: 'GPT-4 (Jun 2023)' },
+            { value: 'gpt-4-32k', label: 'GPT-4 32K - Extended context' },
             { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo - Fast & efficient' },
+            { value: 'gpt-3.5-turbo-0125', label: 'GPT-3.5 Turbo (Jan 2024)' },
+            { value: 'gpt-3.5-turbo-1106', label: 'GPT-3.5 Turbo (Nov 2023)' },
             { value: 'gpt-3.5-turbo-16k', label: 'GPT-3.5 Turbo 16K - Extended context' }
           ]}
           value={selectedModel}
@@ -124,13 +139,24 @@ export function AIBrainSelector({
       {activeTab === 'gemini' && (
         <CustomSelect
           options={[
-            { value: 'gemini-2.0-flash-exp', label: 'Gemini 2.0 Flash - Experimental' },
+            { value: 'gemini-2.0-flash-exp', label: 'Gemini 2.0 Flash Exp - Latest experimental' },
+            { value: 'gemini-2.0-flash-thinking-exp-1219', label: 'Gemini 2.0 Flash Thinking - Reasoning' },
             { value: 'gemini-exp-1206', label: 'Gemini Exp 1206 - Experimental' },
+            { value: 'gemini-exp-1121', label: 'Gemini Exp 1121 - Experimental' },
             { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro - Most capable' },
-            { value: 'gemini-1.5-pro-exp-0827', label: 'Gemini 1.5 Pro Exp - Extended' },
+            { value: 'gemini-1.5-pro-002', label: 'Gemini 1.5 Pro 002 - Latest stable' },
+            { value: 'gemini-1.5-pro-001', label: 'Gemini 1.5 Pro 001' },
+            { value: 'gemini-1.5-pro-exp-0827', label: 'Gemini 1.5 Pro Exp 0827' },
+            { value: 'gemini-1.5-pro-exp-0801', label: 'Gemini 1.5 Pro Exp 0801' },
             { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash - Fast' },
+            { value: 'gemini-1.5-flash-002', label: 'Gemini 1.5 Flash 002 - Latest fast' },
+            { value: 'gemini-1.5-flash-001', label: 'Gemini 1.5 Flash 001' },
             { value: 'gemini-1.5-flash-8b', label: 'Gemini 1.5 Flash 8B - Ultra fast' },
-            { value: 'gemini-1.0-pro', label: 'Gemini 1.0 Pro - Stable' }
+            { value: 'gemini-1.5-flash-8b-001', label: 'Gemini 1.5 Flash 8B 001' },
+            { value: 'gemini-1.5-flash-8b-exp-0924', label: 'Gemini 1.5 Flash 8B Exp' },
+            { value: 'gemini-1.0-pro', label: 'Gemini 1.0 Pro - Stable' },
+            { value: 'gemini-1.0-pro-001', label: 'Gemini 1.0 Pro 001' },
+            { value: 'gemini-1.0-pro-vision', label: 'Gemini 1.0 Pro Vision - Multimodal' }
           ]}
           value={selectedModel}
           onChange={setSelectedModel}

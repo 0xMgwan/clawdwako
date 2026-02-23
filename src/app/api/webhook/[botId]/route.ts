@@ -143,7 +143,13 @@ export async function POST(
 
         const response = await openai.chat.completions.create({
           model: bot.selectedModel,
-          messages: [{ role: 'user', content: userMessage }]
+          messages: [
+            { 
+              role: 'system', 
+              content: `You are a helpful AI assistant powered by ${bot.selectedModel}. Be concise, friendly, and helpful.`
+            },
+            { role: 'user', content: userMessage }
+          ]
         });
 
         aiResponse = response.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
