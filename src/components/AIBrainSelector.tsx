@@ -114,10 +114,18 @@ export function AIBrainSelector({
       {activeTab === 'gpt' && (
         <CustomSelect
           options={[
-            { value: 'o3-pro', label: 'o3-pro - Latest pro reasoning (Feb 2026)' },
+            { value: 'gpt-5.3-codex-spark', label: 'GPT-5.3 Codex Spark - Latest coding (Feb 2026)' },
+            { value: 'gpt-5.2', label: 'GPT-5.2 - Smarter & more precise (2026)' },
+            { value: 'gpt-5.1-codex-max', label: 'GPT-5.1 Codex Max - Agentic coding' },
+            { value: 'gpt-5.1-codex', label: 'GPT-5.1 Codex - Long running tasks' },
+            { value: 'gpt-5.1-thinking', label: 'GPT-5.1 Thinking - Complex reasoning' },
+            { value: 'gpt-5.1-instant', label: 'GPT-5.1 Instant - Fast responses' },
+            { value: 'gpt-5.1', label: 'GPT-5.1 - Latest flagship (Nov 2025)' },
+            { value: 'gpt-5', label: 'GPT-5 - Flagship model' },
+            { value: 'o3-pro', label: 'o3-pro - Pro reasoning (Feb 2026)' },
             { value: 'o3', label: 'o3 - Advanced reasoning (Feb 2026)' },
             { value: 'o3-mini', label: 'o3-mini - Fast reasoning (Feb 2026)' },
-            { value: 'gpt-4.1', label: 'GPT-4.1 - Latest flagship (2026)' },
+            { value: 'gpt-4.1', label: 'GPT-4.1 - Latest GPT-4 (2026)' },
             { value: 'computer-use-preview', label: 'Computer Use Preview - Specialized' },
             { value: 'gpt-4o-search-preview', label: 'GPT-4o Search - Web search' },
             { value: 'gpt-4o-mini-search-preview', label: 'GPT-4o Mini Search - Fast search' },
@@ -128,17 +136,10 @@ export function AIBrainSelector({
             { value: 'gpt-4o', label: 'GPT-4o - Multimodal optimized' },
             { value: 'gpt-4o-mini', label: 'GPT-4o Mini - Fast & affordable' },
             { value: 'gpt-4o-2024-11-20', label: 'GPT-4o (Nov 2024)' },
-            { value: 'gpt-4o-2024-08-06', label: 'GPT-4o (Aug 2024)' },
-            { value: 'gpt-4o-2024-05-13', label: 'GPT-4o (May 2024)' },
             { value: 'chatgpt-4o-latest', label: 'ChatGPT-4o Latest - Dynamic' },
             { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
-            { value: 'gpt-4-turbo-2024-04-09', label: 'GPT-4 Turbo (Apr 2024)' },
             { value: 'gpt-4', label: 'GPT-4' },
-            { value: 'gpt-4-0613', label: 'GPT-4 (Jun 2023)' },
-            { value: 'gpt-4-32k', label: 'GPT-4 32K' },
-            { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
-            { value: 'gpt-3.5-turbo-0125', label: 'GPT-3.5 Turbo (Jan 2024)' },
-            { value: 'gpt-3.5-turbo-16k', label: 'GPT-3.5 Turbo 16K' }
+            { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' }
           ]}
           value={selectedModel}
           onChange={setSelectedModel}
