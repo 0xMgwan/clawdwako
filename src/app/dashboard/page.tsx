@@ -293,69 +293,69 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 lg:py-16">
         {/* Header */}
-        <div className="flex justify-between items-center mb-16">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-12 lg:mb-16">
           <div>
-            <div className="text-xs tracking-[0.3em] text-muted-foreground mb-3">CONTROL CENTER</div>
-            <h1 className="text-6xl font-light tracking-tight text-foreground">Dashboard</h1>
-            <p className="text-muted-foreground mt-4 text-lg">Manage your AI agents and monitor performance</p>
+            <div className="text-[10px] sm:text-xs tracking-[0.3em] text-muted-foreground mb-1 sm:mb-3">CONTROL CENTER</div>
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-light tracking-tight text-foreground">Dashboard</h1>
+            <p className="text-muted-foreground mt-2 sm:mt-4 text-sm sm:text-base lg:text-lg">Manage your AI agents and monitor performance</p>
           </div>
-          <Button onClick={() => window.location.href = '/'} className="px-6 py-3 bg-foreground text-background rounded-full text-sm font-medium hover:bg-green-400 transition-all">
-            <Plus className="h-4 w-4 mr-2" />
+          <Button onClick={() => window.location.href = '/'} className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-foreground text-background rounded-full text-xs sm:text-sm font-medium hover:bg-green-400 transition-all whitespace-nowrap">
+            <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
             DEPLOY NEW AGENT
           </Button>
         </div>
 
         {/* Stats Overview - Minimalist */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
-          <div className="border-l-2 border-green-400 pl-6 py-4">
-            <div className="text-xs tracking-wider text-muted-foreground mb-2">ACTIVE AGENTS</div>
-            <div className="text-4xl font-light mb-2">{activeAgents}</div>
-            <p className="text-xs text-muted-foreground">{runningBots} running • {pausedBots} paused</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 lg:gap-8 mb-6 sm:mb-12 lg:mb-16">
+          <div className="border-l-2 border-green-400 pl-3 sm:pl-4 lg:pl-6 py-2 sm:py-3 lg:py-4">
+            <div className="text-[10px] sm:text-xs tracking-wider text-muted-foreground mb-1 sm:mb-2">ACTIVE AGENTS</div>
+            <div className="text-2xl sm:text-3xl lg:text-4xl font-light mb-1 sm:mb-2">{activeAgents}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">{runningBots} running • {pausedBots} paused</p>
           </div>
           
-          <div className="border-l-2 border-green-400 pl-6 py-4">
-            <div className="text-xs tracking-wider text-muted-foreground mb-2">TOTAL MESSAGES</div>
-            <div className="text-4xl font-light mb-2">{totalMessages.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">Across all agents</p>
+          <div className="border-l-2 border-green-400 pl-3 sm:pl-4 lg:pl-6 py-2 sm:py-3 lg:py-4">
+            <div className="text-[10px] sm:text-xs tracking-wider text-muted-foreground mb-1 sm:mb-2">TOTAL MESSAGES</div>
+            <div className="text-2xl sm:text-3xl lg:text-4xl font-light mb-1 sm:mb-2">{totalMessages.toLocaleString()}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Across all agents</p>
           </div>
           
-          <div className="border-l-2 border-green-400 pl-6 py-4">
-            <div className="text-xs tracking-wider text-muted-foreground mb-2">ACTIVE USERS</div>
-            <div className="text-4xl font-light mb-2">{totalUsers}</div>
-            <p className="text-xs text-muted-foreground">Total users served</p>
+          <div className="border-l-2 border-green-400 pl-3 sm:pl-4 lg:pl-6 py-2 sm:py-3 lg:py-4">
+            <div className="text-[10px] sm:text-xs tracking-wider text-muted-foreground mb-1 sm:mb-2">ACTIVE USERS</div>
+            <div className="text-2xl sm:text-3xl lg:text-4xl font-light mb-1 sm:mb-2">{totalUsers}</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Total users served</p>
           </div>
           
-          <div className="border-l-2 border-green-400 pl-6 py-4">
-            <div className="text-xs tracking-wider text-muted-foreground mb-2">MONTHLY COST</div>
-            <div className="text-4xl font-light mb-2">$57.70</div>
-            <p className="text-xs text-muted-foreground">Within budget</p>
+          <div className="border-l-2 border-green-400 pl-3 sm:pl-4 lg:pl-6 py-2 sm:py-3 lg:py-4">
+            <div className="text-[10px] sm:text-xs tracking-wider text-muted-foreground mb-1 sm:mb-2">MONTHLY COST</div>
+            <div className="text-2xl sm:text-3xl lg:text-4xl font-light mb-1 sm:mb-2">$57.70</div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Within budget</p>
           </div>
         </div>
 
         {/* Agents List */}
-        <div className="space-y-8">
-          <div className="flex items-center justify-between border-b border-border pb-4">
+        <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-border pb-3 sm:pb-4 gap-3">
             <div>
-              <div className="text-xs tracking-[0.3em] text-muted-foreground mb-2">DEPLOYED UNITS</div>
-              <h2 className="text-3xl font-light text-foreground">Your AI Agents</h2>
+              <div className="text-[10px] sm:text-xs tracking-[0.3em] text-muted-foreground mb-1 sm:mb-2">DEPLOYED UNITS</div>
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-light text-foreground">Your AI Agents</h2>
             </div>
-            <div className="flex space-x-2">
-              <Button variant="outline" size="sm">All</Button>
-              <Button variant="outline" size="sm">Running</Button>
-              <Button variant="outline" size="sm">Paused</Button>
-              <Button variant="outline" size="sm">Error</Button>
+            <div className="flex space-x-1 sm:space-x-2 overflow-x-auto w-full sm:w-auto">
+              <Button variant="outline" size="sm" className="text-xs px-2 sm:px-3">All</Button>
+              <Button variant="outline" size="sm" className="text-xs px-2 sm:px-3">Running</Button>
+              <Button variant="outline" size="sm" className="text-xs px-2 sm:px-3">Paused</Button>
+              <Button variant="outline" size="sm" className="text-xs px-2 sm:px-3">Error</Button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
             {bots.map((agent) => {
               const StatusIcon = getStatusIcon(agent.status);
               return (
-                <div key={agent.id} className="glass-agent-card rounded-xl p-5 flex flex-col">
+                <div key={agent.id} className="glass-agent-card rounded-xl p-3 sm:p-4 lg:p-5 flex flex-col">
                   {/* Compact Header */}
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-3 sm:mb-4">
                     <div className="flex items-center space-x-3">
                       <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg">
                         <Bot className="h-5 w-5 text-primary" />
@@ -375,7 +375,7 @@ export default function Dashboard() {
                   </div>
 
                   {/* Stats Grid */}
-                  <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
                     <div className="glass-stat-card rounded-lg p-2">
                       <p className="text-xs text-muted-foreground">Uptime</p>
                       <p className="text-sm font-bold text-foreground">{agent.uptime}</p>
@@ -427,44 +427,44 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions - Minimalist */}
-        <div className="mt-16">
-          <div className="text-xs tracking-[0.3em] text-muted-foreground mb-6">QUICK ACTIONS</div>
-          <div className="grid md:grid-cols-3 gap-6">
+        <div className="mt-8 sm:mt-12 lg:mt-16">
+          <div className="text-[10px] sm:text-xs tracking-[0.3em] text-muted-foreground mb-4 sm:mb-6">QUICK ACTIONS</div>
+          <div className="grid md:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
             {/* Deploy New Agent */}
-            <div className="group border border-border hover:border-green-400 rounded-lg p-8 transition-all cursor-pointer">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-green-400/10 flex items-center justify-center">
-                  <Plus className="h-5 w-5 text-green-400" />
+            <div className="group border border-border hover:border-green-400 rounded-lg p-4 sm:p-6 lg:p-8 transition-all cursor-pointer">
+              <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-400/10 flex items-center justify-center">
+                  <Plus className="h-4 w-4 sm:h-5 sm:w-5 text-green-400" />
                 </div>
-                <h3 className="text-lg font-medium text-foreground">Deploy New Agent</h3>
+                <h3 className="text-sm sm:text-base lg:text-lg font-medium text-foreground">Deploy New Agent</h3>
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 Choose from our template gallery or build custom
               </p>
             </div>
             
             {/* Manage Integrations */}
-            <div className="group border border-border hover:border-green-400 rounded-lg p-8 transition-all cursor-pointer">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-green-400/10 flex items-center justify-center">
-                  <Settings className="h-5 w-5 text-green-400" />
+            <div className="group border border-border hover:border-green-400 rounded-lg p-4 sm:p-6 lg:p-8 transition-all cursor-pointer">
+              <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-400/10 flex items-center justify-center">
+                  <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-green-400" />
                 </div>
-                <h3 className="text-lg font-medium text-foreground">Manage Integrations</h3>
+                <h3 className="text-sm sm:text-base lg:text-lg font-medium text-foreground">Manage Integrations</h3>
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 Connect new channels and services
               </p>
             </div>
             
             {/* View Analytics */}
-            <div className="group border border-border hover:border-green-400 rounded-lg p-8 transition-all cursor-pointer">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-green-400/10 flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-green-400" />
+            <div className="group border border-border hover:border-green-400 rounded-lg p-4 sm:p-6 lg:p-8 transition-all cursor-pointer">
+              <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-400/10 flex items-center justify-center">
+                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-green-400" />
                 </div>
-                <h3 className="text-lg font-medium text-foreground">View Analytics</h3>
+                <h3 className="text-sm sm:text-base lg:text-lg font-medium text-foreground">View Analytics</h3>
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 Detailed performance metrics and insights
               </p>
             </div>
