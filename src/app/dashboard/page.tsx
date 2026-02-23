@@ -28,6 +28,7 @@ import {
   ExternalLink,
   Key,
   Sun,
+  Mail,
   Moon,
   LogOut,
   User as UserIcon
@@ -86,22 +87,41 @@ export default function Dashboard() {
           console.log('✅ Found', botsData.bots.length, 'bots in database');
           
           if (botsData.bots.length > 0) {
-            const mappedBots = botsData.bots.map((bot: any) => ({
-              id: bot.id,
-              name: bot.name || bot.telegramBotUsername,
-              type: 'AI Agent',
-              status: bot.status === 'configured' ? 'paused' : bot.status,
-              uptime: '99.9%',
-              messages: 0,
-              users: 0,
-              cost: '$0.00/mo',
-              channels: ['Telegram'],
-              lastActive: new Date(bot.deployedAt || bot.createdAt).toLocaleString(),
-              model: bot.selectedModel
-            }));
+            // Fetch stats for each bot
+            const botsWithStats = await Promise.all(
+              botsData.bots.map(async (bot: any) => {
+                let messages = 0;
+                let users = 0;
+                
+                try {
+                  const statsResponse = await fetch(`/api/bots/${bot.id}/stats`);
+                  if (statsResponse.ok) {
+                    const statsData = await statsResponse.json();
+                    messages = statsData.stats.messages || 0;
+                    users = statsData.stats.users || 0;
+                  }
+                } catch (error) {
+                  console.error('Failed to fetch stats for bot:', bot.id);
+                }
+                
+                return {
+                  id: bot.id,
+                  name: bot.name || bot.telegramBotUsername,
+                  type: 'AI Agent',
+                  status: bot.status === 'configured' ? 'paused' : bot.status,
+                  uptime: '99.9%',
+                  messages,
+                  users,
+                  cost: `$${userPackage === 'starter' ? '20.00' : userPackage === 'professional' ? '50.00' : userPackage === 'enterprise' ? '100.00' : '20.00'}/mo`,
+                  channels: ['Telegram'],
+                  lastActive: new Date(bot.deployedAt || bot.createdAt).toLocaleString(),
+                  model: bot.selectedModel
+                };
+              })
+            );
             
-            console.log('🤖 Mapped bots:', mappedBots);
-            setBots(mappedBots);
+            console.log('🤖 Mapped bots with stats:', botsWithStats);
+            setBots(botsWithStats);
           } else {
             console.log('📭 No bots found - showing empty state');
             setBots([]);
@@ -294,6 +314,16 @@ export default function Dashboard() {
                       >
                         <UserIcon className="h-4 w-4 mr-2" />
                         Profile Settings
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          window.location.href = 'mailto:support@clawdwako.com';
+                        }}
+                        className="w-full flex items-center px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md transition-colors"
+                      >
+                        <Mail className="h-4 w-4 mr-2" />
+                        Contact Support
                       </button>
                       <button
                         onClick={() => {
