@@ -7,6 +7,7 @@ import { TelegramBotModal } from "@/components/TelegramBotModal";
 import { DeploymentSuccessModal } from "@/components/DeploymentSuccessModal";
 import { PaymentPackageModal } from "@/components/PaymentPackageModal";
 import { CustomSelect } from "@/components/CustomSelect";
+import { MobileConfigSection } from "@/components/MobileConfigSection";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
@@ -341,7 +342,24 @@ export default function Home() {
               </div>
 
               {/* Configuration Section - Mobile Only */}
-              <div className="lg:hidden space-y-4 rounded-2xl border border-border p-4 bg-gradient-to-br from-background via-background to-green-500/5 backdrop-blur-sm shadow-lg">
+              <MobileConfigSection
+                selectedModel={selectedModel}
+                setSelectedModel={setSelectedModel}
+                showApiKeyInput={showApiKeyInput}
+                setShowApiKeyInput={setShowApiKeyInput}
+                userApiKey={userApiKey}
+                setUserApiKey={setUserApiKey}
+                setShowTelegramModal={setShowTelegramModal}
+                session={session}
+                handleGoogleSignIn={handleGoogleSignIn}
+                handleInitiateDeploy={handleInitiateDeploy}
+                telegramBotInfo={telegramBotInfo}
+                deploying={deploying}
+                signOut={signOut}
+              />
+
+              {/* Old mobile section - hidden */}
+              <div className="hidden lg:hidden space-y-4 rounded-2xl border border-border p-4 bg-gradient-to-br from-background via-background to-green-500/5 backdrop-blur-sm shadow-lg">
                 {/* Choose AI Model */}
                 <div>
                   <div className="flex items-center gap-2 mb-3">
