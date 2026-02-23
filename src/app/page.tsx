@@ -169,7 +169,7 @@ export default function Home() {
             </div>
             
             {/* Mobile Navigation */}
-            <div className="flex md:hidden items-center space-x-2">
+            <div className="flex md:hidden items-center space-x-2 relative z-50">
               <Button
                 variant="ghost"
                 size="sm"
@@ -182,20 +182,56 @@ export default function Home() {
               {!session && (
                 <button
                   onClick={() => signIn('google', { callbackUrl: '/' })}
-                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-semibold text-sm transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-semibold text-sm transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 relative z-50"
                 >
                   Sign In
                 </button>
               )}
               {session && (
-                <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="h-10 w-10 sm:h-8 sm:w-8 bg-primary rounded-full flex items-center justify-center hover:opacity-80 transition-opacity"
-                >
-                  <span className="text-primary-foreground text-sm font-medium">
-                    {session?.user?.name?.charAt(0).toUpperCase() || session?.user?.email?.charAt(0).toUpperCase() || 'U'}
-                  </span>
-                </button>
+                <div className="relative">
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="h-10 w-10 sm:h-8 sm:w-8 bg-primary rounded-full flex items-center justify-center hover:opacity-80 transition-opacity relative z-50 touch-manipulation"
+                  >
+                    <span className="text-primary-foreground text-sm font-medium pointer-events-none">
+                      {session?.user?.name?.charAt(0).toUpperCase() || session?.user?.email?.charAt(0).toUpperCase() || 'U'}
+                    </span>
+                  </button>
+                  
+                  {showUserMenu && (
+                    <div className="absolute right-0 mt-2 w-64 bg-background border border-border rounded-lg shadow-lg z-[100]">
+                      <div className="p-4 border-b border-border">
+                        <p className="text-sm font-medium text-foreground">
+                          {session?.user?.name || 'User'}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {session?.user?.email || 'Not signed in'}
+                        </p>
+                      </div>
+                      <div className="p-2">
+                        <button
+                          onClick={() => {
+                            setShowUserMenu(false);
+                            router.push('/dashboard');
+                          }}
+                          className="w-full flex items-center px-3 py-2 text-sm text-foreground hover:bg-accent rounded-md transition-colors"
+                        >
+                          Dashboard
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowUserMenu(false);
+                            signOut({ callbackUrl: '/' });
+                          }}
+                          className="w-full flex items-center px-3 py-2 text-sm text-destructive hover:bg-accent rounded-md transition-colors"
+                        >
+                          <LogOut className="h-4 w-4 mr-2" />
+                          Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
             
