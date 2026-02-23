@@ -209,10 +209,10 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/30 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[95vh] overflow-y-auto shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/30 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[96vh] overflow-y-auto shadow-2xl">
         {/* Logo Header */}
-        <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-4 sm:p-5 rounded-t-2xl sm:rounded-t-3xl">
+        <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-3 sm:p-4 rounded-t-2xl sm:rounded-t-3xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {(paymentMethod || paymentComplete) && (
@@ -227,7 +227,7 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
                 </Button>
               )}
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg overflow-hidden bg-white p-1">
+                <div className="h-8 w-8 rounded-lg overflow-hidden bg-white p-0.5">
                   <img 
                     src="/claw.jpg" 
                     alt="Clawdwako" 
@@ -238,10 +238,10 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
                   />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-white">
+                  <h2 className="text-base font-bold text-white">
                     {paymentComplete ? 'Payment Successful!' : 'Complete Payment'}
                   </h2>
-                  <p className="text-sm text-white/90">
+                  <p className="text-xs text-white/90">
                     {packageInfo.name} - <span className="font-bold">${packageInfo.price}</span>
                   </p>
                 </div>
@@ -260,22 +260,22 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
         </div>
 
         {/* Content */}
-        <div className="p-4 sm:p-6">
+        <div className="p-3 sm:p-4">
 
           {/* Payment Complete */}
           {paymentComplete && (
-            <div className="text-center py-12">
-              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full mb-6 shadow-lg">
+            <div className="text-center py-6">
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full mb-3 shadow-lg">
                 {paymentMethod === 'card' ? (
-                  <CreditCard className="w-12 h-12 text-white animate-pulse" />
+                  <CreditCard className="w-7 h-7 text-white animate-pulse" />
                 ) : (
-                  <Smartphone className="w-12 h-12 text-white animate-pulse" />
+                  <Smartphone className="w-7 h-7 text-white animate-pulse" />
                 )}
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-3">
+              <h3 className="text-lg font-bold text-gray-900 mb-1.5">
                 {paymentMethod === 'card' ? 'Complete Payment' : 'Check Your Phone'}
               </h3>
-              <p className="text-gray-600 mb-6 text-lg">
+              <p className="text-gray-600 mb-3 text-sm">
                 {paymentMethod === 'card' 
                   ? 'Please complete the payment in the popup window to continue.'
                   : 'A USSD prompt has been sent to your phone. Please complete the payment to continue.'}
@@ -289,29 +289,42 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
 
           {/* Payment Method Selection */}
           {!paymentMethod && !paymentComplete && (
-            <div className="space-y-4">
-              <p className="text-gray-600 mb-6 text-base font-medium">
-                Choose your preferred payment method
-              </p>
+            <div className="space-y-2.5">
+              <div className="relative overflow-hidden rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50/70 via-white to-white p-2.5">
+                <div className="absolute -right-8 -top-8 h-16 w-16 rounded-full bg-emerald-200/30 blur-xl" />
+                <p className="relative text-gray-900 text-sm font-semibold tracking-tight">Choose your payment rail</p>
+                <p className="relative text-[10px] text-gray-500 mt-0.5">Secure checkout • encrypted end-to-end</p>
+              </div>
 
               {/* Card Payment */}
               <button
                 onClick={() => setPaymentMethod('card')}
-                className="group w-full bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl p-4 sm:p-5 hover:border-green-400 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer"
+                className="group relative w-full rounded-xl p-[1.5px] bg-gradient-to-r from-emerald-400 via-green-300 to-teal-400 shadow-[0_8px_20px_-12px_rgba(16,185,129,0.9)] transition-all duration-300 hover:-translate-y-0.5"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                      <CreditCard className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                <div className="relative overflow-hidden rounded-[11px] bg-gradient-to-br from-white via-emerald-50/40 to-emerald-100/55 px-3 py-2.5">
+                  <div className="absolute -right-4 -top-4 h-12 w-12 rounded-full bg-emerald-300/30 blur-lg" />
+                  <div className="relative flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-green-600 rounded-lg flex items-center justify-center shadow-md group-hover:scale-105 transition-transform shrink-0">
+                        <CreditCard className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="text-left min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-sm text-gray-900 font-bold leading-tight">Card Payment</p>
+                          <span className="text-[9px] font-semibold text-emerald-800 bg-emerald-100 border border-emerald-200 px-1.5 py-0.5 rounded-full">Recommended</span>
+                        </div>
+                        <p className="text-[10px] text-gray-500 mt-0.5">Visa, Mastercard & more</p>
+                      </div>
                     </div>
-                    <div className="text-left flex-1">
-                      <p className="text-base sm:text-lg text-gray-900 font-bold mb-0.5">Card Payment</p>
-                      <p className="text-xs text-gray-500">Visa, Mastercard & more</p>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span className="inline-flex h-5 items-center rounded bg-white border border-gray-200 px-1 shadow-sm">
+                        <img src="/visa.png" alt="Visa" className="h-3 w-auto object-contain" />
+                      </span>
+                      <span className="inline-flex h-5 items-center rounded bg-white border border-gray-200 px-1 shadow-sm">
+                        <img src="/mastercard.png" alt="Mastercard" className="h-3 w-auto object-contain" />
+                      </span>
+                      <span className="text-emerald-600 text-sm font-semibold">›</span>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <img src="/visa.png" alt="Visa" className="h-6 sm:h-7 w-auto object-contain" />
-                    <img src="/mastercard.png" alt="Mastercard" className="h-6 sm:h-7 w-auto object-contain" />
                   </div>
                 </div>
               </button>
@@ -319,22 +332,35 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
               {/* Mobile Money */}
               <button
                 onClick={() => setPaymentMethod('mobile')}
-                className="group w-full bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl p-4 sm:p-5 hover:border-green-400 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer"
+                className="group relative w-full rounded-xl p-[1.5px] bg-gradient-to-r from-indigo-400 via-blue-400 to-cyan-400 shadow-[0_8px_20px_-12px_rgba(37,99,235,0.85)] transition-all duration-300 hover:-translate-y-0.5"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                      <Smartphone className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                <div className="relative overflow-hidden rounded-[11px] bg-gradient-to-br from-white via-blue-50/40 to-indigo-100/50 px-3 py-2.5">
+                  <div className="absolute -right-4 -top-4 h-12 w-12 rounded-full bg-blue-300/30 blur-lg" />
+                  <div className="relative flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-md group-hover:scale-105 transition-transform shrink-0">
+                        <Smartphone className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="text-left min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-sm text-gray-900 font-bold leading-tight">Mobile Money</p>
+                          <span className="text-[9px] font-semibold text-blue-800 bg-blue-100 border border-blue-200 px-1.5 py-0.5 rounded-full">East Africa</span>
+                        </div>
+                        <p className="text-[10px] text-gray-500 mt-0.5">M-Pesa, Airtel, Yas & more</p>
+                      </div>
                     </div>
-                    <div className="text-left flex-1">
-                      <p className="text-base sm:text-lg text-gray-900 font-bold mb-0.5">Mobile Money</p>
-                      <p className="text-xs text-gray-500">M-Pesa, Airtel, Yas & more</p>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span className="inline-flex h-5 items-center rounded bg-white border border-gray-200 px-1 shadow-sm">
+                        <img src="/M-pesa-logo.png" alt="M-Pesa" className="h-3 w-auto object-contain" />
+                      </span>
+                      <span className="inline-flex h-5 items-center rounded bg-white border border-gray-200 px-1 shadow-sm">
+                        <img src="/Airtel_Tanzania-Logo.wine.png" alt="Airtel" className="h-3 w-auto object-contain" />
+                      </span>
+                      <span className="inline-flex h-5 items-center rounded bg-white border border-gray-200 px-1 shadow-sm">
+                        <img src="/yas.jpg" alt="Yas" className="h-3 w-auto object-contain rounded" />
+                      </span>
+                      <span className="text-blue-600 text-sm font-semibold">›</span>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <img src="/M-pesa-logo.png" alt="M-Pesa" className="h-6 sm:h-7 w-auto object-contain" />
-                    <img src="/Airtel_Tanzania-Logo.wine.png" alt="Airtel" className="h-6 sm:h-7 w-auto object-contain" />
-                    <img src="/yas.jpg" alt="Yas" className="h-6 sm:h-7 w-auto object-contain rounded" />
                   </div>
                 </div>
               </button>
@@ -343,13 +369,10 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
 
         {/* Card Payment Form */}
         {paymentMethod === 'card' && !paymentComplete && (
-          <div className="space-y-3">
-            <p className="text-sm font-semibold text-gray-900 mb-3">Enter Payment Details</p>
-            
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-gray-700">Enter Payment Details</p>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                Card information *
-              </label>
+              <label className="block text-[10px] font-medium text-gray-500 mb-1">Card information *</label>
               <div className="relative">
                 <input
                   type="text"
@@ -357,118 +380,73 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
                   maxLength={19}
                   value={cardDetails.number}
                   onChange={(e) => setCardDetails({ ...cardDetails, number: formatCardNumber(e.target.value) })}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-t-lg text-gray-900 text-sm focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
+                  className="w-full px-2.5 py-2 bg-gray-50 border border-gray-300 rounded-t-lg text-gray-900 text-xs focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
                 />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-                  <img src="/visa.png" alt="Visa" className="h-5 w-auto object-contain opacity-60" />
-                  <img src="/mastercard.png" alt="Mastercard" className="h-5 w-auto object-contain opacity-60" />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                  <img src="/visa.png" alt="Visa" className="h-4 w-auto object-contain opacity-60" />
+                  <img src="/mastercard.png" alt="Mastercard" className="h-4 w-auto object-contain opacity-60" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-0">
-                <input
-                  type="text"
-                  placeholder="09/28"
-                  maxLength={5}
-                  value={cardDetails.expiry}
+                <input type="text" placeholder="MM/YY" maxLength={5} value={cardDetails.expiry}
                   onChange={(e) => setCardDetails({ ...cardDetails, expiry: formatExpiry(e.target.value) })}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 border-t-0 rounded-bl-lg text-gray-900 text-sm focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
-                />
-                <input
-                  type="text"
-                  placeholder="123"
-                  maxLength={4}
-                  value={cardDetails.cvv}
+                  className="w-full px-2.5 py-2 bg-gray-50 border border-gray-300 border-t-0 rounded-bl-lg text-gray-900 text-xs focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none" />
+                <input type="text" placeholder="CVV" maxLength={4} value={cardDetails.cvv}
                   onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value.replace(/[^0-9]/g, '') })}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 border-t-0 border-l-0 rounded-br-lg text-gray-900 text-sm focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
-                />
+                  className="w-full px-2.5 py-2 bg-gray-50 border border-gray-300 border-t-0 border-l-0 rounded-br-lg text-gray-900 text-xs focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none" />
               </div>
             </div>
-
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                Cardholder Name *
-              </label>
-              <input
-                type="text"
-                placeholder="Duran Clayton"
-                value={cardDetails.name}
+              <label className="block text-[10px] font-medium text-gray-500 mb-1">Cardholder Name *</label>
+              <input type="text" placeholder="Full name on card" value={cardDetails.name}
                 onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
-              />
+                className="w-full px-2.5 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-xs focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none" />
             </div>
-
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                Country *
-              </label>
-              <div className="mb-2">
-                <CountrySelector
-                  value={cardDetails.country}
-                  onChange={(country) => setCardDetails({ ...cardDetails, country })}
-                />
+              <label className="block text-[10px] font-medium text-gray-500 mb-1">Country *</label>
+              <div className="mb-1.5">
+                <CountrySelector value={cardDetails.country} onChange={(country) => setCardDetails({ ...cardDetails, country })} />
               </div>
-              <input
-                type="text"
-                placeholder="Address"
-                value={cardDetails.addressLine1}
+              <input type="text" placeholder="Address" value={cardDetails.addressLine1}
                 onChange={(e) => setCardDetails({ ...cardDetails, addressLine1: e.target.value })}
-                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none mb-2"
-              />
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="text"
-                  placeholder="Postal code"
-                  value={cardDetails.postalCode}
+                className="w-full px-2.5 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-xs focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none mb-1.5" />
+              <div className="grid grid-cols-2 gap-1.5">
+                <input type="text" placeholder="Postal code" value={cardDetails.postalCode}
                   onChange={(e) => setCardDetails({ ...cardDetails, postalCode: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
-                />
-                <input
-                  type="text"
-                  placeholder="City"
-                  value={cardDetails.city}
+                  className="w-full px-2.5 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-xs focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none" />
+                <input type="text" placeholder="City" value={cardDetails.city}
                   onChange={(e) => setCardDetails({ ...cardDetails, city: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
-                />
+                  className="w-full px-2.5 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-xs focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none" />
               </div>
             </div>
-
             <Button
               onClick={handlePayment}
               disabled={processing || !cardDetails.number || !cardDetails.expiry || !cardDetails.cvv || !cardDetails.name || !cardDetails.addressLine1 || !cardDetails.city}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white h-12 text-sm font-bold rounded-lg transition-all shadow-lg hover:shadow-xl mt-4"
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white h-10 text-sm font-bold rounded-xl transition-all shadow-md hover:shadow-lg mt-1"
             >
-              {processing ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                `Pay now`
-              )}
+              {processing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Processing...</> : 'Pay now'}
             </Button>
           </div>
         )}
 
         {/* Mobile Money Provider Selection */}
         {paymentMethod === 'mobile' && !selectedProvider && !paymentComplete && (
-          <div className="space-y-3">
-            <p className="text-gray-500 mb-3 text-sm">
-              Select your mobile money provider
-            </p>
-            <div className="grid grid-cols-2 gap-3">
+          <div>
+            <p className="text-[10px] font-medium text-gray-500 mb-2">Select your mobile money provider</p>
+            <div className="grid grid-cols-3 gap-2">
               {MOBILE_MONEY_PROVIDERS.map((provider) => (
                 <button
-                key={provider.id}
-                onClick={() => setSelectedProvider(provider.id)}
-                className="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:border-green-500 hover:bg-gray-100 transition-all cursor-pointer"
-              >
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center p-2 shadow-sm">
-                    <img src={provider.logo} alt={provider.name} className="w-full h-full object-contain" onError={(e) => { e.currentTarget.src = '/M-pesa-logo.png'; }} />
+                  key={provider.id}
+                  onClick={() => setSelectedProvider(provider.id)}
+                  className="bg-gray-50 border border-gray-200 rounded-xl p-2.5 hover:border-green-500 hover:bg-green-50 hover:shadow-sm transition-all cursor-pointer"
+                >
+                  <div className="flex flex-col items-center gap-1.5">
+                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center p-1.5 shadow-sm">
+                      <img src={provider.logo} alt={provider.name} className="w-full h-full object-contain" onError={(e) => { e.currentTarget.src = '/M-pesa-logo.png'; }} />
+                    </div>
+                    <span className="text-[10px] font-medium text-gray-800 text-center leading-tight">{provider.name}</span>
                   </div>
-                  <span className="text-xs font-medium text-gray-900 text-center">{provider.name}</span>
-                </div>
-              </button>
+                </button>
               ))}
             </div>
           </div>
@@ -476,52 +454,39 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
 
         {/* Mobile Money Payment Form */}
         {paymentMethod === 'mobile' && selectedProvider && !paymentComplete && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center p-2">
-                <img 
-                  src={MOBILE_MONEY_PROVIDERS.find(p => p.id === selectedProvider)?.logo} 
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-2.5 p-2.5 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center p-1.5 shadow-sm shrink-0">
+                <img
+                  src={MOBILE_MONEY_PROVIDERS.find(p => p.id === selectedProvider)?.logo}
                   alt={MOBILE_MONEY_PROVIDERS.find(p => p.id === selectedProvider)?.name}
                   className="w-full h-full object-contain"
                 />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-gray-900">
+                <p className="text-sm font-bold text-gray-900 leading-tight">
                   {MOBILE_MONEY_PROVIDERS.find(p => p.id === selectedProvider)?.name}
-                </h3>
-                <p className="text-xs text-gray-500">Enter your phone number</p>
+                </p>
+                <p className="text-[10px] text-gray-500">Enter your phone number to pay</p>
               </div>
             </div>
-
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-2">
-                Phone Number
-              </label>
+              <label className="block text-[10px] font-medium text-gray-500 mb-1">Phone Number</label>
               <input
                 type="tel"
                 placeholder="+255 XXX XXX XXX"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
-                className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-1 focus:ring-green-400 outline-none"
+                className="w-full px-2.5 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-xs focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
               />
-              <p className="text-xs text-gray-500 mt-2">
-                You will receive a prompt on your phone to complete the payment
-              </p>
+              <p className="text-[10px] text-gray-400 mt-1">You will receive a USSD prompt to complete payment</p>
             </div>
-
             <Button
               onClick={handlePayment}
               disabled={processing || !phoneNumber}
-              className="w-full bg-green-500 hover:bg-green-600 text-white h-11 text-sm font-semibold rounded-lg transition-all"
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white h-10 text-sm font-bold rounded-xl transition-all shadow-md"
             >
-              {processing ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Sending prompt...
-                </>
-              ) : (
-                `Pay`
-              )}
+              {processing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Sending prompt...</> : 'Pay now'}
             </Button>
           </div>
         )}
