@@ -89,30 +89,31 @@ export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: Paym
   const selectedPackageInfo = selectedPackage ? PACKAGES.find(p => p.id === selectedPackage) : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="glass-card rounded-2xl p-6 w-full max-w-4xl max-h-[85vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm">
+      <div className="glass-card rounded-2xl p-3 sm:p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-3 sm:mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Choose Your Package</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Select the perfect plan for your AI bot deployment</p>
+            <h2 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white mb-1">Choose Your Package</h2>
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Select the perfect plan for your AI bot deployment</p>
           </div>
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={onClose}
+            className="h-8 w-8 p-0"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
         </div>
 
         {/* Packages Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="flex md:grid md:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6 overflow-x-auto pb-2 snap-x snap-mandatory md:overflow-visible">
           {PACKAGES.map((pkg) => (
             <div
               key={pkg.id}
               onClick={() => handlePackageClick(pkg.id)}
-              className={`relative glass-stat-card rounded-xl p-4 transition-all duration-300 cursor-pointer ${
+              className={`relative glass-stat-card rounded-xl p-3 sm:p-4 transition-all duration-300 cursor-pointer flex-shrink-0 w-[85vw] sm:w-auto snap-center md:snap-align-none ${
                 pkg.popular
                   ? 'ring-2 ring-green-400 scale-105'
                   : ''
@@ -123,29 +124,29 @@ export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: Paym
               }`}
             >
               {pkg.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                  <span className="bg-green-400 text-white text-xs font-bold px-3 py-1 rounded-full">
+                <div className="absolute -top-2 sm:-top-3 left-1/2 -translate-x-1/2 z-10">
+                  <span className="bg-green-400 text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
                     MOST POPULAR
                   </span>
                 </div>
               )}
 
-              <div className="text-center mb-4">
-                <div className="inline-flex items-center justify-center w-10 h-10 bg-green-400/10 rounded-lg mb-2">
-                  <pkg.icon className="w-5 h-5 text-green-400" />
+              <div className="text-center mb-3 sm:mb-4">
+                <div className="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-green-400/10 rounded-lg mb-1 sm:mb-2">
+                  <pkg.icon className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{pkg.name}</h3>
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">{pkg.name}</h3>
                 <div className="flex items-baseline justify-center gap-1 mb-1">
-                  <span className="text-3xl font-bold text-gray-900 dark:text-white">${pkg.price}</span>
+                  <span className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">${pkg.price}</span>
                 </div>
-                <span className="text-xs text-gray-600 dark:text-gray-400">one-time payment</span>
+                <span className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">one-time payment</span>
               </div>
 
-              <ul className="space-y-2 mb-4 min-h-[180px]">
+              <ul className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4 min-h-[140px] sm:min-h-[180px]">
                 {pkg.features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <Check className="h-3.5 w-3.5 text-green-500 dark:text-green-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-xs text-gray-700 dark:text-gray-300">{feature}</span>
+                  <li key={index} className="flex items-start gap-1.5 sm:gap-2">
+                    <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-green-500 dark:text-green-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-[11px] sm:text-xs text-gray-700 dark:text-gray-300">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -156,7 +157,7 @@ export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: Paym
                   handleSelectPackage(pkg.id);
                 }}
                 disabled={!selectedPackage}
-                className={`w-full ${
+                className={`w-full text-xs sm:text-sm py-2 sm:py-2.5 ${
                   selectedPackage === pkg.id
                     ? 'bg-green-500 hover:bg-green-600 text-white'
                     : 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 opacity-50'
@@ -168,12 +169,12 @@ export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: Paym
           ))}
         </div>
 
-        <div className="mt-4">
-          <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <p className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">
+        <div className="mt-3 sm:mt-4">
+          <div className="text-center p-2 sm:p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <p className="text-xs sm:text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">
               💡 Have your own API key?
             </p>
-            <p className="text-xs text-blue-700 dark:text-blue-400">
+            <p className="text-[10px] sm:text-xs text-blue-700 dark:text-blue-400">
               You can skip payment and deploy directly using your own API credits. Just add your API key on the homepage or in the Telegram connection modal.
             </p>
           </div>
