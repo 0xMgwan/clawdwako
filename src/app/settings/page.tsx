@@ -30,31 +30,35 @@ export default function SettingsPage() {
       <nav className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/dashboard')}
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
-              </Button>
-              <div className="flex items-center space-x-2">
-                <Bot className="h-8 w-8 text-primary" />
-                <span className="text-xl font-bold text-foreground">Clawdwako.ai Settings</span>
+            <button onClick={() => router.push('/dashboard')} className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+              <div className="h-8 w-8 rounded-lg overflow-hidden">
+                <img 
+                  src="/claw.jpg" 
+                  alt="Clawdwako" 
+                  className="h-full w-full object-cover"
+                  style={{
+                    filter: 'hue-rotate(100deg) saturate(1.2) brightness(1.1)'
+                  }}
+                />
               </div>
-            </div>
-            <div className="flex items-center space-x-4">
+              <span className="text-lg font-bold">Clawdwako<span className="text-muted-foreground">.ai</span></span>
+            </button>
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="relative"
               >
                 {theme === "dark" ? (
                   <Sun className="h-5 w-5" />
                 ) : (
                   <Moon className="h-5 w-5" />
                 )}
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => router.push('/dashboard')} className="hidden sm:flex">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Dashboard
               </Button>
             </div>
           </div>
@@ -202,68 +206,97 @@ export default function SettingsPage() {
             )}
 
             {activeTab === "billing" && (
-              <div className="space-y-6">
-                <Card>
+              <div className="space-y-4 sm:space-y-6">
+                <Card className="bg-gradient-to-br from-background via-background to-green-500/5">
                   <CardHeader>
-                    <CardTitle>Current Plan</CardTitle>
-                    <CardDescription>Manage your subscription and billing</CardDescription>
+                    <CardTitle className="text-lg sm:text-xl">Current Plan</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">Manage your subscription and billing</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="flex items-center justify-between p-4 border border-border rounded-lg">
+                  <CardContent className="space-y-4 sm:space-y-6">
+                    <div className="flex items-center justify-between p-3 sm:p-4 border border-border rounded-lg bg-gradient-to-r from-muted/50 to-green-500/5">
                       <div>
-                        <h3 className="font-semibold text-lg">Free Plan</h3>
-                        <p className="text-sm text-muted-foreground">1 AI Agent • 1,000 messages/month</p>
+                        <h3 className="font-semibold text-base sm:text-lg">Pay-as-you-go</h3>
+                        <p className="text-xs sm:text-sm text-muted-foreground">One-time payment per deployment</p>
                       </div>
-                      <Badge variant="secondary">Current Plan</Badge>
+                      <Badge variant="secondary" className="text-xs">Active</Badge>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg">Pro Plan</CardTitle>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                      <Card className="bg-gradient-to-br from-background to-green-500/5">
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-base sm:text-lg">Starter</CardTitle>
                           <CardDescription>
-                            <span className="text-2xl font-bold text-foreground">$30</span>
-                            <span className="text-muted-foreground">/month</span>
+                            <span className="text-xl sm:text-2xl font-bold text-foreground">$20</span>
+                            <span className="text-xs sm:text-sm text-muted-foreground">/one-time</span>
                           </CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-2">
-                          <div className="flex items-center space-x-2 text-sm">
-                            <Check className="h-4 w-4 text-green-500" />
-                            <span>5 AI Agents</span>
+                        <CardContent className="space-y-1.5 sm:space-y-2">
+                          <div className="flex items-center space-x-2 text-xs sm:text-sm">
+                            <Check className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
+                            <span>1 AI Bot</span>
                           </div>
-                          <div className="flex items-center space-x-2 text-sm">
-                            <Check className="h-4 w-4 text-green-500" />
-                            <span>50,000 messages/month</span>
+                          <div className="flex items-center space-x-2 text-xs sm:text-sm">
+                            <Check className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
+                            <span>~1,000 messages</span>
                           </div>
-                          <div className="flex items-center space-x-2 text-sm">
-                            <Check className="h-4 w-4 text-green-500" />
-                            <span>Priority support</span>
+                          <div className="flex items-center space-x-2 text-xs sm:text-sm">
+                            <Check className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
+                            <span>30 days active</span>
                           </div>
-                          <Button className="w-full mt-4">Upgrade to Pro</Button>
+                          <Button className="w-full mt-3 sm:mt-4 text-xs sm:text-sm bg-green-500 hover:bg-green-600">Deploy Now</Button>
                         </CardContent>
                       </Card>
 
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg">Enterprise</CardTitle>
+                      <Card className="bg-gradient-to-br from-background to-green-500/5 ring-2 ring-green-400">
+                        <CardHeader className="pb-3">
+                          <div className="flex items-center justify-between">
+                            <CardTitle className="text-base sm:text-lg">Professional</CardTitle>
+                            <Badge className="bg-green-400 text-white text-[10px]">POPULAR</Badge>
+                          </div>
                           <CardDescription>
-                            <span className="text-2xl font-bold text-foreground">Custom</span>
+                            <span className="text-xl sm:text-2xl font-bold text-foreground">$50</span>
+                            <span className="text-xs sm:text-sm text-muted-foreground">/one-time</span>
                           </CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-2">
-                          <div className="flex items-center space-x-2 text-sm">
-                            <Check className="h-4 w-4 text-green-500" />
-                            <span>Unlimited agents</span>
+                        <CardContent className="space-y-1.5 sm:space-y-2">
+                          <div className="flex items-center space-x-2 text-xs sm:text-sm">
+                            <Check className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
+                            <span>3 AI Bots</span>
                           </div>
-                          <div className="flex items-center space-x-2 text-sm">
-                            <Check className="h-4 w-4 text-green-500" />
-                            <span>Unlimited messages</span>
+                          <div className="flex items-center space-x-2 text-xs sm:text-sm">
+                            <Check className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
+                            <span>~3,000 messages</span>
                           </div>
-                          <div className="flex items-center space-x-2 text-sm">
-                            <Check className="h-4 w-4 text-green-500" />
-                            <span>Dedicated support</span>
+                          <div className="flex items-center space-x-2 text-xs sm:text-sm">
+                            <Check className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
+                            <span>90 days active</span>
                           </div>
-                          <Button variant="outline" className="w-full mt-4">Contact Sales</Button>
+                          <Button className="w-full mt-3 sm:mt-4 text-xs sm:text-sm bg-green-500 hover:bg-green-600">Deploy Now</Button>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-gradient-to-br from-background to-green-500/5">
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-base sm:text-lg">Enterprise</CardTitle>
+                          <CardDescription>
+                            <span className="text-xl sm:text-2xl font-bold text-foreground">$100</span>
+                            <span className="text-xs sm:text-sm text-muted-foreground">/one-time</span>
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-1.5 sm:space-y-2">
+                          <div className="flex items-center space-x-2 text-xs sm:text-sm">
+                            <Check className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
+                            <span>Unlimited bots</span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-xs sm:text-sm">
+                            <Check className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
+                            <span>~7,000 messages</span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-xs sm:text-sm">
+                            <Check className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
+                            <span>365 days active</span>
+                          </div>
+                          <Button variant="outline" className="w-full mt-3 sm:mt-4 text-xs sm:text-sm">Deploy Now</Button>
                         </CardContent>
                       </Card>
                     </div>
