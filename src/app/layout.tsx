@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/components/session-provider";
 import "./globals.css";
+import "flag-icons/css/flag-icons.min.css";
 
 const inter = Inter({
   variable: "--font-inter",

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { X, CreditCard, Smartphone, ArrowLeft, Loader2, Check } from "lucide-react";
+import { CountrySelector } from "@/components/CountrySelector";
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -208,10 +209,10 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm">
-      <div className="bg-white rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/30 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[95vh] overflow-y-auto shadow-2xl">
         {/* Logo Header */}
-        <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-5 rounded-t-3xl">
+        <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-4 sm:p-5 rounded-t-2xl sm:rounded-t-3xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {(paymentMethod || paymentComplete) && (
@@ -241,7 +242,7 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
                     {paymentComplete ? 'Payment Successful!' : 'Complete Payment'}
                   </h2>
                   <p className="text-sm text-white/90">
-                    {packageInfo.name} - TZS {(packageInfo.price * 2500).toLocaleString()} (${packageInfo.price})
+                    {packageInfo.name} - <span className="font-bold">${packageInfo.price}</span>
                   </p>
                 </div>
               </div>
@@ -259,7 +260,7 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
         </div>
 
         {/* Content */}
-        <div className="p-8">
+        <div className="p-4 sm:p-6">
 
           {/* Payment Complete */}
           {paymentComplete && (
@@ -288,22 +289,29 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
 
           {/* Payment Method Selection */}
           {!paymentMethod && !paymentComplete && (
-            <div className="space-y-3">
-              <p className="text-gray-500 mb-4 text-sm font-medium">
+            <div className="space-y-4">
+              <p className="text-gray-600 mb-6 text-base font-medium">
                 Choose your preferred payment method
               </p>
 
               {/* Card Payment */}
               <button
                 onClick={() => setPaymentMethod('card')}
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 hover:border-green-500 hover:bg-gray-100 transition-all cursor-pointer"
+                className="group w-full bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl p-4 sm:p-5 hover:border-green-400 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 bg-green-500 rounded-lg flex items-center justify-center shadow-sm">
-                    <CreditCard className="w-5 h-5 text-white" />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                      <CreditCard className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <p className="text-base sm:text-lg text-gray-900 font-bold mb-0.5">Card Payment</p>
+                      <p className="text-xs text-gray-500">Visa, Mastercard & more</p>
+                    </div>
                   </div>
-                  <div className="text-left flex-1">
-                    <p className="text-sm text-gray-900 font-medium">Card</p>
+                  <div className="flex items-center gap-1.5">
+                    <img src="/visa.png" alt="Visa" className="h-6 sm:h-7 w-auto object-contain" />
+                    <img src="/mastercard.png" alt="Mastercard" className="h-6 sm:h-7 w-auto object-contain" />
                   </div>
                 </div>
               </button>
@@ -311,14 +319,22 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
               {/* Mobile Money */}
               <button
                 onClick={() => setPaymentMethod('mobile')}
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 hover:border-green-500 hover:bg-gray-100 transition-all cursor-pointer"
+                className="group w-full bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl p-4 sm:p-5 hover:border-green-400 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 bg-green-500 rounded-lg flex items-center justify-center shadow-sm">
-                    <Smartphone className="w-5 h-5 text-white" />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                      <Smartphone className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <p className="text-base sm:text-lg text-gray-900 font-bold mb-0.5">Mobile Money</p>
+                      <p className="text-xs text-gray-500">M-Pesa, Airtel, Yas & more</p>
+                    </div>
                   </div>
-                  <div className="text-left flex-1">
-                    <p className="text-sm text-gray-900 font-medium">Mobile Money</p>
+                  <div className="flex items-center gap-1.5">
+                    <img src="/M-pesa-logo.png" alt="M-Pesa" className="h-6 sm:h-7 w-auto object-contain" />
+                    <img src="/Airtel_Tanzania-Logo.wine.png" alt="Airtel" className="h-6 sm:h-7 w-auto object-contain" />
+                    <img src="/yas.jpg" alt="Yas" className="h-6 sm:h-7 w-auto object-contain rounded" />
                   </div>
                 </div>
               </button>
@@ -327,82 +343,76 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
 
         {/* Card Payment Form */}
         {paymentMethod === 'card' && !paymentComplete && (
-          <div className="space-y-4">
+          <div className="space-y-3">
+            <p className="text-sm font-semibold text-gray-900 mb-3">Enter Payment Details</p>
+            
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-2">
-                Card information
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                Card information *
               </label>
-              <input
-                type="text"
-                placeholder="1234 1234 1234 1234"
-                maxLength={19}
-                value={cardDetails.number}
-                onChange={(e) => setCardDetails({ ...cardDetails, number: formatCardNumber(e.target.value) })}
-                className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-t-lg text-gray-900 text-sm focus:ring-1 focus:ring-green-400 outline-none"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="**** **** 1234 1234"
+                  maxLength={19}
+                  value={cardDetails.number}
+                  onChange={(e) => setCardDetails({ ...cardDetails, number: formatCardNumber(e.target.value) })}
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-t-lg text-gray-900 text-sm focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                  <img src="/visa.png" alt="Visa" className="h-5 w-auto object-contain opacity-60" />
+                  <img src="/mastercard.png" alt="Mastercard" className="h-5 w-auto object-contain opacity-60" />
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-0">
                 <input
                   type="text"
-                  placeholder="MM / YY"
+                  placeholder="09/28"
                   maxLength={5}
                   value={cardDetails.expiry}
                   onChange={(e) => setCardDetails({ ...cardDetails, expiry: formatExpiry(e.target.value) })}
-                  className="w-full px-3 py-2.5 bg-white border border-gray-300 border-t-0 rounded-bl-lg text-gray-900 text-sm focus:ring-1 focus:ring-green-400 outline-none"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 border-t-0 rounded-bl-lg text-gray-900 text-sm focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
                 />
                 <input
                   type="text"
-                  placeholder="CVC"
+                  placeholder="123"
                   maxLength={4}
                   value={cardDetails.cvv}
                   onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value.replace(/[^0-9]/g, '') })}
-                  className="w-full px-3 py-2.5 bg-white border border-gray-300 border-t-0 border-l-0 rounded-br-lg text-gray-900 text-sm focus:ring-1 focus:ring-green-400 outline-none"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 border-t-0 border-l-0 rounded-br-lg text-gray-900 text-sm focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-2">
-                Cardholder name
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                Cardholder Name *
               </label>
               <input
                 type="text"
-                placeholder="Full name on card"
+                placeholder="Duran Clayton"
                 value={cardDetails.name}
                 onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
-                className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-1 focus:ring-green-400 outline-none"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-2">
-                Billing address
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                Country *
               </label>
-              <select
-                value={cardDetails.country}
-                onChange={(e) => setCardDetails({ ...cardDetails, country: e.target.value })}
-                className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-1 focus:ring-green-400 outline-none mb-2"
-              >
-                <option value="Tanzania">Tanzania</option>
-                <option value="Kenya">Kenya</option>
-                <option value="Uganda">Uganda</option>
-                <option value="Rwanda">Rwanda</option>
-                <option value="Ethiopia">Ethiopia</option>
-                <option value="Zimbabwe">Zimbabwe</option>
-                <option value="Other">Other</option>
-              </select>
+              <div className="mb-2">
+                <CountrySelector
+                  value={cardDetails.country}
+                  onChange={(country) => setCardDetails({ ...cardDetails, country })}
+                />
+              </div>
               <input
                 type="text"
-                placeholder="Address line 1"
+                placeholder="Address"
                 value={cardDetails.addressLine1}
                 onChange={(e) => setCardDetails({ ...cardDetails, addressLine1: e.target.value })}
-                className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-1 focus:ring-green-400 outline-none mb-2"
-              />
-              <input
-                type="text"
-                placeholder="Address line 2"
-                value={cardDetails.addressLine2}
-                onChange={(e) => setCardDetails({ ...cardDetails, addressLine2: e.target.value })}
-                className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-1 focus:ring-green-400 outline-none mb-2"
+                className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none mb-2"
               />
               <div className="grid grid-cols-2 gap-2">
                 <input
@@ -410,14 +420,14 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
                   placeholder="Postal code"
                   value={cardDetails.postalCode}
                   onChange={(e) => setCardDetails({ ...cardDetails, postalCode: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-1 focus:ring-green-400 outline-none"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
                 />
                 <input
                   type="text"
                   placeholder="City"
                   value={cardDetails.city}
                   onChange={(e) => setCardDetails({ ...cardDetails, city: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-1 focus:ring-green-400 outline-none"
+                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
                 />
               </div>
             </div>
@@ -425,7 +435,7 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
             <Button
               onClick={handlePayment}
               disabled={processing || !cardDetails.number || !cardDetails.expiry || !cardDetails.cvv || !cardDetails.name || !cardDetails.addressLine1 || !cardDetails.city}
-              className="w-full bg-green-500 hover:bg-green-600 text-white h-11 text-sm font-semibold rounded-lg transition-all"
+              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white h-12 text-sm font-bold rounded-lg transition-all shadow-lg hover:shadow-xl mt-4"
             >
               {processing ? (
                 <>
@@ -433,7 +443,7 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
                   Processing...
                 </>
               ) : (
-                `Pay`
+                `Pay now`
               )}
             </Button>
           </div>
