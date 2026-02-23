@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { X, Check, Loader2, Rocket, Zap, Crown } from "lucide-react";
+import { X, Check, Loader2, Rocket, Zap, Crown, Bot } from "lucide-react";
 import { CheckoutModal } from "./CheckoutModal";
 
 interface PaymentPackageModalProps {
@@ -93,27 +93,32 @@ export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: Paym
       <div className="glass-card rounded-2xl p-3 sm:p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-3 sm:mb-6">
-          <div>
-            <h2 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white mb-1">Choose Your Package</h2>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Select the perfect plan for your AI bot deployment</p>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-lg flex items-center justify-center">
+              <Bot className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white mb-0.5 sm:mb-1">Choose Your Package</h2>
+              <p className="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400">Select the perfect plan for your AI bot deployment</p>
+            </div>
           </div>
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={onClose}
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 flex-shrink-0"
           >
             <X className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
         </div>
 
         {/* Packages Grid */}
-        <div className="flex md:grid md:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6 overflow-x-auto pb-2 snap-x snap-mandatory md:overflow-visible">
+        <div className="flex md:grid md:grid-cols-3 gap-2 sm:gap-4 mb-3 sm:mb-6 overflow-x-auto pb-2 snap-x snap-mandatory md:overflow-visible -mx-1 px-1">
           {PACKAGES.map((pkg) => (
             <div
               key={pkg.id}
               onClick={() => handlePackageClick(pkg.id)}
-              className={`relative glass-stat-card rounded-xl p-3 sm:p-4 transition-all duration-300 cursor-pointer flex-shrink-0 w-[85vw] sm:w-auto snap-center md:snap-align-none ${
+              className={`relative glass-stat-card rounded-xl p-2.5 sm:p-4 transition-all duration-300 cursor-pointer flex-shrink-0 w-[82vw] sm:w-auto snap-center md:snap-align-none ${
                 pkg.popular
                   ? 'ring-2 ring-green-400 scale-105'
                   : ''
@@ -131,22 +136,22 @@ export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: Paym
                 </div>
               )}
 
-              <div className="text-center mb-3 sm:mb-4">
-                <div className="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-green-400/10 rounded-lg mb-1 sm:mb-2">
-                  <pkg.icon className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
+              <div className="text-center mb-2 sm:mb-4">
+                <div className="inline-flex items-center justify-center w-7 h-7 sm:w-10 sm:h-10 bg-green-400/10 rounded-lg mb-1 sm:mb-2">
+                  <pkg.icon className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-green-400" />
                 </div>
-                <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">{pkg.name}</h3>
-                <div className="flex items-baseline justify-center gap-1 mb-1">
-                  <span className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">${pkg.price}</span>
+                <h3 className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white mb-0.5 sm:mb-2">{pkg.name}</h3>
+                <div className="flex items-baseline justify-center gap-1 mb-0.5">
+                  <span className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">${pkg.price}</span>
                 </div>
-                <span className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">one-time payment</span>
+                <span className="text-[9px] sm:text-xs text-gray-600 dark:text-gray-400">one-time payment</span>
               </div>
 
-              <ul className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4 min-h-[140px] sm:min-h-[180px]">
+              <ul className="space-y-1 sm:space-y-2 mb-2 sm:mb-4 min-h-[120px] sm:min-h-[180px]">
                 {pkg.features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-1.5 sm:gap-2">
-                    <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-green-500 dark:text-green-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-[11px] sm:text-xs text-gray-700 dark:text-gray-300">{feature}</span>
+                  <li key={index} className="flex items-start gap-1 sm:gap-2">
+                    <Check className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 text-green-500 dark:text-green-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300 leading-tight">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -157,7 +162,7 @@ export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: Paym
                   handleSelectPackage(pkg.id);
                 }}
                 disabled={!selectedPackage}
-                className={`w-full text-xs sm:text-sm py-2 sm:py-2.5 ${
+                className={`w-full text-[10px] sm:text-sm py-1.5 sm:py-2.5 ${
                   selectedPackage === pkg.id
                     ? 'bg-green-500 hover:bg-green-600 text-white'
                     : 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 opacity-50'
