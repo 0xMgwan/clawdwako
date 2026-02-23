@@ -275,7 +275,7 @@ export class RailwayClient {
     return data.service;
   }
 
-  async deployOpenClaw(options: RailwayDeploymentOptions) {
+  async deployOpenClaw(options: RailwayDeploymentOptions & { botId?: string }) {
     const {
       projectName,
       telegramBotToken,
@@ -283,6 +283,7 @@ export class RailwayClient {
       anthropicApiKey,
       openaiApiKey,
       googleAiApiKey,
+      botId,
     } = options;
 
     console.log('Step 1: Creating Railway project...');
@@ -301,31 +302,22 @@ export class RailwayClient {
       anthropic: anthropicApiKey ? `${anthropicApiKey.substring(0, 10)}...` : 'NOT PROVIDED',
       openai: openaiApiKey ? `${openaiApiKey.substring(0, 10)}...` : 'NOT PROVIDED',
       google: googleAiApiKey ? `${googleAiApiKey.substring(0, 10)}...` : 'NOT PROVIDED',
-      selectedModel
+      selectedModel,
+      botId: botId || 'NOT PROVIDED YET'
     });
     
-    // Determine which API key to use based on selected model
-    let apiKeyToUse = '';
-    let apiKeyName = '';
-    
-    if (selectedModel.includes('claude')) {
-      apiKeyToUse = anthropicApiKey || process.env.ANTHROPIC_API_KEY || '';
-      apiKeyName = 'ANTHROPIC_API_KEY';
-    } else if (selectedModel.includes('gpt')) {
-      apiKeyToUse = openaiApiKey || process.env.OPENAI_API_KEY || '';
-      apiKeyName = 'OPENAI_API_KEY';
-    } else if (selectedModel.includes('gemini')) {
-      apiKeyToUse = googleAiApiKey || process.env.GOOGLE_AI_API_KEY || '';
-      apiKeyName = 'GOOGLE_AI_API_KEY';
-    }
-    
-    console.log(`🎯 Selected API key: ${apiKeyName} = ${apiKeyToUse ? `${apiKeyToUse.substring(0, 10)}...` : 'EMPTY'}`);
-    
-    // Only set BOT_ID and PLATFORM_URL - bot will fetch API keys from database
+    // Set environment variables - BOT_ID will be updated after bot creation if not provided
     const envVars: Record<string, string> = {
-      BOT_ID: '', // Will be set after bot is created in database
       PLATFORM_URL: process.env.NEXT_PUBLIC_URL || 'https://clawdwako.vercel.app',
     };
+    
+    // Add BOT_ID if provided (for redeployments)
+    if (botId) {
+      envVars.BOT_ID = botId;
+      console.log('✅ BOT_ID provided, setting in initial deployment');
+    } else {
+      console.log('⚠️ BOT_ID not provided yet, will be set after bot creation');
+    }
     
     console.log('📝 API keys will be fetched from database by bot-runner using BOT_ID');
 

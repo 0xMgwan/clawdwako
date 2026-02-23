@@ -174,18 +174,21 @@ export async function POST(request: NextRequest) {
     
     console.log('🎯 FINAL userId for bot:', userId);
 
+    // Check if bot already exists to get botId for Railway
+    let existingBot = await prisma.bot.findFirst({
+      where: { telegramBotToken: deployment.botToken }
+    });
+    
+    const botIdForRailway = existingBot?.id;
+    console.log('🔍 Existing bot found:', !!existingBot, 'Bot ID:', botIdForRailway);
+
     // Deploy to Railway for 24/7 operation
     let railwayProjectId = null;
     let railwayServiceId = null;
 
     try {
       console.log('Deploying to Railway...');
-      console.log('🔑 User API Keys being sent to Railway:', {
-        anthropic: deployment.userApiKeys?.anthropic ? `${deployment.userApiKeys.anthropic.substring(0, 10)}...` : 'NOT PROVIDED',
-        openai: deployment.userApiKeys?.openai ? `${deployment.userApiKeys.openai.substring(0, 10)}...` : 'NOT PROVIDED',
-        google: deployment.userApiKeys?.google ? `${deployment.userApiKeys.google.substring(0, 10)}...` : 'NOT PROVIDED',
-        selectedModel: deployment.selectedModel
-      });
+      console.log('🔑 API keys stored in database, Railway bot will fetch them using BOT_ID');
       
       const railwayClient = getRailwayClient();
       
@@ -197,6 +200,7 @@ export async function POST(request: NextRequest) {
         anthropicApiKey: deployment.userApiKeys?.anthropic,
         openaiApiKey: deployment.userApiKeys?.openai,
         googleAiApiKey: deployment.userApiKeys?.google,
+        botId: botIdForRailway,
       });
 
       railwayProjectId = railwayDeployment.projectId;
@@ -214,15 +218,12 @@ export async function POST(request: NextRequest) {
       // Continue with webhook setup even if Railway fails
     }
 
-    // Check if bot already exists
-    let bot = await prisma.bot.findFirst({
-      where: { telegramBotToken: deployment.botToken }
-    });
-
-    if (bot) {
+    // Use existing bot or create new one
+    let bot;
+    if (existingBot) {
       // Update existing bot AND transfer ownership to correct user
       bot = await prisma.bot.update({
-        where: { id: bot.id },
+        where: { id: existingBot.id },
         data: {
           userId: userId,
           name: deployment.botUsername,
@@ -236,6 +237,7 @@ export async function POST(request: NextRequest) {
           googleApiKey: deployment.userApiKeys?.google || null,
         }
       });
+      console.log('✅ Updated existing bot:', bot.id);
     } else {
       // Create new bot
       bot = await prisma.bot.create({
@@ -254,12 +256,13 @@ export async function POST(request: NextRequest) {
           googleApiKey: deployment.userApiKeys?.google || null,
         },
       });
+      console.log('✅ Created new bot:', bot.id);
     }
 
-    // Update Railway environment variable with BOT_ID
-    if (railwayProjectId && railwayServiceId) {
+    // Update Railway environment variable with BOT_ID (only if it wasn't set during initial deployment)
+    if (railwayProjectId && railwayServiceId && !botIdForRailway) {
       try {
-        console.log('Updating Railway BOT_ID environment variable...');
+        console.log('🔄 Updating Railway BOT_ID environment variable (new bot)...');
         const railwayClient = getRailwayClient();
         
         // Get environment ID
@@ -286,10 +289,10 @@ export async function POST(request: NextRequest) {
             'BOT_ID',
             bot.id
           );
-          console.log('✅ BOT_ID updated in Railway');
+          console.log('✅ BOT_ID updated in Railway:', bot.id);
         }
       } catch (error: any) {
-        console.error('Failed to update BOT_ID in Railway:', error.message);
+        console.error('❌ Failed to update BOT_ID in Railway:', error.message);
         // Continue even if this fails
       }
     }

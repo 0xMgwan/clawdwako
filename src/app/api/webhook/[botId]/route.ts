@@ -15,11 +15,6 @@ export async function POST(
 
     console.log('🔔 Webhook received for bot:', botId);
     console.log('📨 Update:', JSON.stringify(update, null, 2));
-    console.log('🔑 Available API keys:', {
-      anthropic: !!process.env.ANTHROPIC_API_KEY,
-      openai: !!process.env.OPENAI_API_KEY,
-      google: !!process.env.GOOGLE_AI_API_KEY
-    });
 
     // Get bot from database
     const bot = await prisma.bot.findUnique({
@@ -27,8 +22,21 @@ export async function POST(
     });
 
     if (!bot) {
+      console.log('❌ Bot not found in database:', botId);
       return NextResponse.json({ error: 'Bot not found' }, { status: 404 });
     }
+
+    console.log('✅ Bot found in database:', {
+      id: bot.id,
+      name: bot.name,
+      model: bot.selectedModel,
+      hasAnthropicKey: !!bot.anthropicApiKey,
+      hasOpenAIKey: !!bot.openaiApiKey,
+      hasGoogleKey: !!bot.googleApiKey,
+      anthropicKeyPreview: bot.anthropicApiKey ? `${bot.anthropicApiKey.substring(0, 10)}...` : 'NONE',
+      openaiKeyPreview: bot.openaiApiKey ? `${bot.openaiApiKey.substring(0, 10)}...` : 'NONE',
+      googleKeyPreview: bot.googleApiKey ? `${bot.googleApiKey.substring(0, 10)}...` : 'NONE',
+    });
 
     // Only respond if bot is running
     if (bot.status !== 'running') {
@@ -54,6 +62,13 @@ export async function POST(
     const anthropicKey = bot.anthropicApiKey || process.env.ANTHROPIC_API_KEY;
     const openaiKey = bot.openaiApiKey || process.env.OPENAI_API_KEY;
     const googleKey = bot.googleApiKey || process.env.GOOGLE_AI_API_KEY;
+    
+    console.log('🔑 API Keys being used:', {
+      model: bot.selectedModel,
+      anthropicKey: anthropicKey ? `${anthropicKey.substring(0, 10)}...` : 'NONE',
+      openaiKey: openaiKey ? `${openaiKey.substring(0, 10)}...` : 'NONE',
+      googleKey: googleKey ? `${googleKey.substring(0, 10)}...` : 'NONE',
+    });
     
     // Test mode: If no API keys are configured, return a test response
     const hasApiKeys = anthropicKey || openaiKey || googleKey;
@@ -92,7 +107,8 @@ export async function POST(
 
         aiResponse = response.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
       } catch (error: any) {
-        console.error('OpenAI API error:', error.message);
+        console.error('❌ OpenAI API error:', error.message);
+        console.error('Full error:', JSON.stringify(error, null, 2));
         aiResponse = `I received your message: "${userMessage}"\n\nNote: The OpenAI API is currently unavailable. Please add API credits or use a different model.`;
       }
     } else if (bot.selectedModel.includes('gemini')) {
