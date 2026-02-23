@@ -3,6 +3,62 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<{ botId: string }> }
+) {
+  try {
+    const params = await context.params;
+    const botId = params.botId;
+
+    console.log('🔍 Fetching bot configuration for botId:', botId);
+
+    // Fetch bot from database
+    const bot = await prisma.bot.findUnique({
+      where: { id: botId },
+      select: {
+        id: true,
+        telegramBotToken: true,
+        selectedModel: true,
+        anthropicApiKey: true,
+        openaiApiKey: true,
+        googleApiKey: true,
+        status: true,
+        name: true,
+      }
+    });
+
+    if (!bot) {
+      console.log('❌ Bot not found:', botId);
+      return NextResponse.json(
+        { error: 'Bot not found' },
+        { status: 404 }
+      );
+    }
+
+    console.log('✅ Bot configuration found:', {
+      id: bot.id,
+      name: bot.name,
+      model: bot.selectedModel,
+      hasToken: !!bot.telegramBotToken,
+      hasAnthropicKey: !!bot.anthropicApiKey,
+      hasOpenAIKey: !!bot.openaiApiKey,
+      hasGoogleKey: !!bot.googleApiKey
+    });
+
+    return NextResponse.json({
+      success: true,
+      bot
+    });
+  } catch (error: any) {
+    console.error('❌ Error fetching bot:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch bot', details: error.message },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ botId: string }> }

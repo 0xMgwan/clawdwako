@@ -22,13 +22,15 @@ const axios = require('axios');
 const http = require('http');
 
 // Get environment variables
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const SELECTED_MODEL = process.env.SELECTED_MODEL;
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
 const BOT_ID = process.env.BOT_ID;
 const PLATFORM_URL = process.env.PLATFORM_URL || 'https://clawdwako.vercel.app';
+
+// These will be fetched from database
+let TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+let SELECTED_MODEL = process.env.SELECTED_MODEL;
+let ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+let OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+let GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
 
 // Pricing per 1M tokens (approximate)
 const PRICING = {
@@ -36,6 +38,48 @@ const PRICING = {
   'gpt-5': { input: 5.00, output: 15.00 },
   'gemini-2.0-flash-exp': { input: 0.00, output: 0.00 }, // Free during preview
 };
+
+// Fetch bot configuration from database
+async function fetchBotConfig() {
+  if (!BOT_ID) {
+    console.log('⚠️  No BOT_ID provided, using environment variables only');
+    return false;
+  }
+
+  try {
+    console.log(`🔍 Fetching bot configuration from database for BOT_ID: ${BOT_ID}`);
+    const response = await axios.get(`${PLATFORM_URL}/api/bots/${BOT_ID}`);
+    
+    if (response.data && response.data.bot) {
+      const bot = response.data.bot;
+      console.log('✅ Bot configuration fetched from database');
+      
+      // Update variables with database values (fallback to env vars if not in DB)
+      TELEGRAM_BOT_TOKEN = bot.telegramBotToken || TELEGRAM_BOT_TOKEN;
+      SELECTED_MODEL = bot.selectedModel || SELECTED_MODEL;
+      ANTHROPIC_API_KEY = bot.anthropicApiKey || ANTHROPIC_API_KEY;
+      OPENAI_API_KEY = bot.openaiApiKey || OPENAI_API_KEY;
+      GOOGLE_AI_API_KEY = bot.googleApiKey || GOOGLE_AI_API_KEY;
+      
+      console.log('📋 Configuration loaded:', {
+        hasToken: !!TELEGRAM_BOT_TOKEN,
+        model: SELECTED_MODEL,
+        hasAnthropicKey: !!ANTHROPIC_API_KEY,
+        hasOpenAIKey: !!OPENAI_API_KEY,
+        hasGoogleKey: !!GOOGLE_AI_API_KEY
+      });
+      
+      return true;
+    } else {
+      console.log('⚠️  No bot found in database, using environment variables');
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ Failed to fetch bot config from database:', error.message);
+    console.log('⚠️  Falling back to environment variables');
+    return false;
+  }
+}
 
 // Track API usage
 async function trackUsage(model, provider, inputTokens, outputTokens, success, errorMessage = null) {
@@ -91,32 +135,45 @@ server.on('error', (err) => {
   console.error('HTTP server error:', err);
 });
 
-// Now initialize bot
-console.log('Starting Telegram bot...');
-console.log('Selected Model:', SELECTED_MODEL);
-console.log('Bot ID:', BOT_ID);
-console.log('Platform URL:', PLATFORM_URL);
-
-if (!TELEGRAM_BOT_TOKEN) {
-  console.error('TELEGRAM_BOT_TOKEN is required');
-  console.log('HTTP server will continue running for healthchecks');
-  // Don't exit - keep HTTP server running
-}
-
-// Create bot instance with polling (only if token exists)
+// Now initialize bot (async function to fetch config first)
 let bot;
-if (TELEGRAM_BOT_TOKEN && TELEGRAM_BOT_TOKEN !== 'test-bot-token') {
+
+(async () => {
   try {
-    bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true });
-    console.log('✅ Telegram bot polling started successfully');
+    // Fetch bot configuration from database
+    await fetchBotConfig();
+    
+    console.log('Starting Telegram bot...');
+    console.log('Selected Model:', SELECTED_MODEL);
+    console.log('Bot ID:', BOT_ID);
+    console.log('Platform URL:', PLATFORM_URL);
+
+    if (!TELEGRAM_BOT_TOKEN) {
+      console.error('TELEGRAM_BOT_TOKEN is required');
+      console.log('HTTP server will continue running for healthchecks');
+      return;
+    }
+
+    // Create bot instance with polling (only if token exists)
+    if (TELEGRAM_BOT_TOKEN && TELEGRAM_BOT_TOKEN !== 'test-bot-token') {
+      try {
+        bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true });
+        console.log('✅ Telegram bot polling started successfully');
+        
+        // Set up message handler
+        setupMessageHandler();
+      } catch (error) {
+        console.error('❌ Failed to start Telegram polling:', error.message);
+        console.log('HTTP server will continue running for healthchecks');
+      }
+    } else {
+      console.log('⚠️  No valid Telegram token - skipping bot initialization');
+      console.log('HTTP server will continue running for healthchecks');
+    }
   } catch (error) {
-    console.error('❌ Failed to start Telegram polling:', error.message);
-    console.log('HTTP server will continue running for healthchecks');
+    console.error('❌ Error during bot initialization:', error);
   }
-} else {
-  console.log('⚠️  No valid Telegram token - skipping bot initialization');
-  console.log('HTTP server will continue running for healthchecks');
-}
+})();
 
 // Keep process alive and log heartbeat
 setInterval(() => {
@@ -125,8 +182,13 @@ setInterval(() => {
 
 console.log('Bot is running and listening for messages...');
 
-// Handle incoming messages (only if bot initialized successfully)
-if (bot) {
+// Message handler function
+function setupMessageHandler() {
+  if (!bot) {
+    console.log('⚠️  Bot not initialized, cannot set up message handler');
+    return;
+  }
+  
   bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
   const userMessage = msg.text;
@@ -252,15 +314,13 @@ if (bot) {
   // Graceful shutdown
   process.on('SIGINT', () => {
     console.log('Shutting down bot...');
-    bot.stopPolling();
+    if (bot) bot.stopPolling();
     process.exit(0);
   });
 
   process.on('SIGTERM', () => {
     console.log('Shutting down bot...');
-    bot.stopPolling();
+    if (bot) bot.stopPolling();
     process.exit(0);
   });
-} else {
-  console.log('Bot not initialized - only HTTP server is running');
 }

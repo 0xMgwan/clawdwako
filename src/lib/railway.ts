@@ -321,20 +321,13 @@ export class RailwayClient {
     
     console.log(`🎯 Selected API key: ${apiKeyName} = ${apiKeyToUse ? `${apiKeyToUse.substring(0, 10)}...` : 'EMPTY'}`);
     
+    // Only set BOT_ID and PLATFORM_URL - bot will fetch API keys from database
     const envVars: Record<string, string> = {
-      TELEGRAM_BOT_TOKEN: telegramBotToken,
-      SELECTED_MODEL: selectedModel,
       BOT_ID: '', // Will be set after bot is created in database
       PLATFORM_URL: process.env.NEXT_PUBLIC_URL || 'https://clawdwako.vercel.app',
     };
     
-    // Only set the API key that matches the selected model
-    if (apiKeyToUse && apiKeyName) {
-      envVars[apiKeyName] = apiKeyToUse;
-      console.log(`✅ Setting ${apiKeyName} for model ${selectedModel}`);
-    } else {
-      console.warn(`⚠️ No API key found for model ${selectedModel}! Bot will not work.`);
-    }
+    console.log('📝 API keys will be fetched from database by bot-runner using BOT_ID');
 
     try {
       await this.setEnvironmentVariables(project.id, service.id, envVars);
