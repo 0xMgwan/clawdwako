@@ -90,13 +90,20 @@ export function AIBrainSelector({
       {activeTab === 'claude' && (
         <CustomSelect
           options={[
-            { value: 'claude-opus-4-20250514', label: 'Claude Opus 4 - Most capable' },
-            { value: 'claude-3-7-sonnet-20250219', label: 'Claude 3.7 Sonnet - Latest balanced' },
-            { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet - Balanced' },
-            { value: 'claude-3-5-haiku-20241022', label: 'Claude 3.5 Haiku - Fast' },
-            { value: 'claude-3-opus-20240229', label: 'Claude 3 Opus - Previous flagship' },
-            { value: 'claude-3-sonnet-20240229', label: 'Claude 3 Sonnet - Previous balanced' },
-            { value: 'claude-3-haiku-20240307', label: 'Claude 3 Haiku - Efficient' }
+            { value: 'claude-opus-4-6', label: 'Claude Opus 4.6 - Latest flagship (Feb 2026)' },
+            { value: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6 - Latest balanced (Feb 2026)' },
+            { value: 'claude-opus-4-5', label: 'Claude Opus 4.5 - Advanced intelligence' },
+            { value: 'claude-sonnet-4-5', label: 'Claude Sonnet 4.5 - Production agents' },
+            { value: 'claude-haiku-4-5', label: 'Claude Haiku 4.5 - Fast & efficient' },
+            { value: 'claude-opus-4-1', label: 'Claude Opus 4.1 - Agentic search' },
+            { value: 'claude-opus-4-20250514', label: 'Claude Opus 4 (May 2025)' },
+            { value: 'claude-sonnet-4', label: 'Claude Sonnet 4' },
+            { value: 'claude-3-7-sonnet-20250219', label: 'Claude 3.7 Sonnet' },
+            { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet' },
+            { value: 'claude-3-5-haiku-20241022', label: 'Claude 3.5 Haiku' },
+            { value: 'claude-3-opus-20240229', label: 'Claude 3 Opus' },
+            { value: 'claude-3-sonnet-20240229', label: 'Claude 3 Sonnet' },
+            { value: 'claude-3-haiku-20240307', label: 'Claude 3 Haiku' }
           ]}
           value={selectedModel}
           onChange={setSelectedModel}
@@ -107,28 +114,31 @@ export function AIBrainSelector({
       {activeTab === 'gpt' && (
         <CustomSelect
           options={[
-            { value: 'gpt-5', label: 'GPT-5 - Latest flagship (if available)' },
-            { value: 'o1', label: 'o1 - Advanced reasoning model' },
+            { value: 'o3-pro', label: 'o3-pro - Latest pro reasoning (Feb 2026)' },
+            { value: 'o3', label: 'o3 - Advanced reasoning (Feb 2026)' },
+            { value: 'o3-mini', label: 'o3-mini - Fast reasoning (Feb 2026)' },
+            { value: 'gpt-4.1', label: 'GPT-4.1 - Latest flagship (2026)' },
+            { value: 'computer-use-preview', label: 'Computer Use Preview - Specialized' },
+            { value: 'gpt-4o-search-preview', label: 'GPT-4o Search - Web search' },
+            { value: 'gpt-4o-mini-search-preview', label: 'GPT-4o Mini Search - Fast search' },
+            { value: 'o1-pro', label: 'o1-pro - Pro reasoning' },
+            { value: 'o1', label: 'o1 - Advanced reasoning' },
             { value: 'o1-mini', label: 'o1-mini - Fast reasoning' },
             { value: 'o1-preview', label: 'o1-preview - Reasoning preview' },
             { value: 'gpt-4o', label: 'GPT-4o - Multimodal optimized' },
             { value: 'gpt-4o-mini', label: 'GPT-4o Mini - Fast & affordable' },
-            { value: 'gpt-4o-2024-11-20', label: 'GPT-4o (Nov 2024) - Latest' },
+            { value: 'gpt-4o-2024-11-20', label: 'GPT-4o (Nov 2024)' },
             { value: 'gpt-4o-2024-08-06', label: 'GPT-4o (Aug 2024)' },
             { value: 'gpt-4o-2024-05-13', label: 'GPT-4o (May 2024)' },
             { value: 'chatgpt-4o-latest', label: 'ChatGPT-4o Latest - Dynamic' },
-            { value: 'gpt-4-turbo', label: 'GPT-4 Turbo - Advanced reasoning' },
+            { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
             { value: 'gpt-4-turbo-2024-04-09', label: 'GPT-4 Turbo (Apr 2024)' },
-            { value: 'gpt-4-turbo-preview', label: 'GPT-4 Turbo Preview' },
-            { value: 'gpt-4-0125-preview', label: 'GPT-4 0125 Preview' },
-            { value: 'gpt-4-1106-preview', label: 'GPT-4 1106 Preview' },
-            { value: 'gpt-4', label: 'GPT-4 - Powerful & reliable' },
+            { value: 'gpt-4', label: 'GPT-4' },
             { value: 'gpt-4-0613', label: 'GPT-4 (Jun 2023)' },
-            { value: 'gpt-4-32k', label: 'GPT-4 32K - Extended context' },
-            { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo - Fast & efficient' },
+            { value: 'gpt-4-32k', label: 'GPT-4 32K' },
+            { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
             { value: 'gpt-3.5-turbo-0125', label: 'GPT-3.5 Turbo (Jan 2024)' },
-            { value: 'gpt-3.5-turbo-1106', label: 'GPT-3.5 Turbo (Nov 2023)' },
-            { value: 'gpt-3.5-turbo-16k', label: 'GPT-3.5 Turbo 16K - Extended context' }
+            { value: 'gpt-3.5-turbo-16k', label: 'GPT-3.5 Turbo 16K' }
           ]}
           value={selectedModel}
           onChange={setSelectedModel}
