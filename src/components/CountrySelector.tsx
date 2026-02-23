@@ -229,7 +229,7 @@ export function CountrySelector({ value, onChange }: CountrySelectorProps) {
         className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none flex items-center justify-between hover:bg-gray-100 transition-colors"
       >
         <span className="flex items-center gap-2">
-          <span className={`fi fi-${selectedCountry.code.toLowerCase()} text-xl`}></span>
+          <span className={`fi fi-${selectedCountry.code.toLowerCase()} text-base`}></span>
           <span>{selectedCountry.name}</span>
         </span>
         <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -249,7 +249,7 @@ export function CountrySelector({ value, onChange }: CountrySelectorProps) {
                 selectedCountry.code === country.code ? 'bg-blue-500 text-white' : 'text-gray-900'
               }`}
             >
-              <span className={`fi fi-${country.code.toLowerCase()} text-xl`}></span>
+              <span className={`fi fi-${country.code.toLowerCase()} text-base`}></span>
               <span className="flex-1 text-sm">{country.name}</span>
               {selectedCountry.code === country.code && (
                 <Check className="h-4 w-4 text-white" />
