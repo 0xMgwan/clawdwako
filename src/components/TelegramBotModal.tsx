@@ -74,7 +74,7 @@ export function TelegramBotModal({ open, onOpenChange, onSuccess }: TelegramBotM
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] bg-background border-border">
+      <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto bg-background border-border">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">

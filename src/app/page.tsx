@@ -180,7 +180,7 @@ export default function Home() {
               </Button>
               {!session && (
                 <button
-                  onClick={() => signIn('google')}
+                  onClick={() => signIn('google', { callbackUrl: '/' })}
                   className="px-4 py-2 rounded-lg bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-semibold text-sm transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
                 >
                   Sign In
@@ -189,7 +189,7 @@ export default function Home() {
               {session && (
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="h-8 w-8 bg-primary rounded-full flex items-center justify-center hover:opacity-80 transition-opacity"
+                  className="h-10 w-10 sm:h-8 sm:w-8 bg-primary rounded-full flex items-center justify-center hover:opacity-80 transition-opacity"
                 >
                   <span className="text-primary-foreground text-sm font-medium">
                     {session?.user?.name?.charAt(0).toUpperCase() || session?.user?.email?.charAt(0).toUpperCase() || 'U'}
@@ -233,7 +233,7 @@ export default function Home() {
               {/* User Profile or Sign In */}
               {!session && (
                 <button
-                  onClick={() => signIn('google')}
+                  onClick={() => signIn('google', { callbackUrl: '/' })}
                   className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
                 >
                   Sign In
@@ -243,7 +243,7 @@ export default function Home() {
                 <div className="relative">
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="h-8 w-8 bg-primary rounded-full flex items-center justify-center hover:opacity-80 transition-opacity"
+                    className="h-10 w-10 sm:h-8 sm:w-8 bg-primary rounded-full flex items-center justify-center hover:opacity-80 transition-opacity"
                   >
                     <span className="text-primary-foreground text-sm font-medium">
                       {session?.user?.name?.charAt(0).toUpperCase() || session?.user?.email?.charAt(0).toUpperCase() || 'U'}
@@ -330,9 +330,9 @@ export default function Home() {
             {/* Left - Agent Showcase */}
             <div className="space-y-8 lg:space-y-12">
               <div>
-                <h2 className="text-4xl lg:text-6xl font-light mb-3 lg:mb-4">Clawdwako.</h2>
-                <div className="text-xs lg:text-sm tracking-[0.2em] text-muted-foreground mb-6 lg:mb-8">THE WORLD'S LEADING AI AGENT</div>
-                <div className="flex gap-2 mb-6 lg:mb-8">
+                <h2 className="text-3xl lg:text-6xl font-light mb-2 lg:mb-4">Clawdwako.</h2>
+                <div className="text-[10px] lg:text-sm tracking-[0.2em] text-muted-foreground mb-4 lg:mb-8">THE WORLD'S LEADING AI AGENT</div>
+                <div className="flex gap-2 mb-4 lg:mb-8">
                   <div className="w-2 h-2 rounded-full bg-green-400" />
                   <div className="w-2 h-2 rounded-full bg-green-400" />
                   <div className="w-8 h-2 rounded-full bg-green-400" />
@@ -341,7 +341,7 @@ export default function Home() {
               </div>
 
               {/* Configuration Section - Mobile Only */}
-              <div className="lg:hidden space-y-6 rounded-lg border border-border p-4 bg-background/50">
+              <div className="lg:hidden space-y-4 rounded-2xl border border-border p-4 bg-gradient-to-br from-background via-background to-green-500/5 backdrop-blur-sm shadow-lg">
                 {/* Choose AI Model */}
                 <div>
                   <div className="flex items-center gap-2 mb-3">
@@ -511,7 +511,7 @@ export default function Home() {
                 {session ? (
                   <>
                     {/* User Profile Card */}
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-muted/50 to-green-500/5 border border-border shadow-sm">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
                           {session.user?.name?.charAt(0).toUpperCase() || session.user?.email?.charAt(0).toUpperCase() || 'U'}
@@ -537,7 +537,7 @@ export default function Home() {
                     <button
                       onClick={handleInitiateDeploy}
                       disabled={!telegramBotInfo || deploying}
-                      className={`w-full py-3 rounded-lg font-semibold transition-all ${
+                      className={`w-full py-4 rounded-xl font-bold text-base transition-all shadow-lg hover:shadow-xl ${
                         !telegramBotInfo
                           ? 'bg-muted text-muted-foreground cursor-not-allowed'
                           : deploying
@@ -877,7 +877,7 @@ export default function Home() {
                           Connect Telegram first to proceed with deployment
                         </p>
                         <button
-                          onClick={() => signIn('google')}
+                          onClick={() => signIn('google', { callbackUrl: '/' })}
                           className="w-full py-3 rounded-lg border-2 border-border hover:border-green-400 transition-all flex items-center justify-center gap-2 bg-background"
                         >
                           <svg className="w-4 h-4" viewBox="0 0 24 24">
