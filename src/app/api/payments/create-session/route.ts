@@ -52,50 +52,61 @@ export async function POST(request: NextRequest) {
     });
 
     // Create Snippe payment session
+    const requestBody = {
+      amount: amountInCents,
+      currency: 'TZS', // Snippe uses TZS (Tanzanian Shilling)
+      allowed_methods: ['mobile_money', 'card', 'qr'],
+      customer: {
+        name: user.name || 'Customer',
+        email: user.email,
+      },
+      redirect_url: `${process.env.NEXT_PUBLIC_URL}/payment/success`,
+      webhook_url: `${process.env.NEXT_PUBLIC_URL}/api/webhooks/snippe`,
+      description: `${pkg.name} - Bot Deployment`,
+      metadata: {
+        userId: user.id,
+        package: packageType,
+        email: user.email
+      },
+      expires_in: 3600
+    };
+
+    console.log('Snippe API request:', {
+      url: `${SNIPPE_API_URL}/v1/sessions`,
+      body: requestBody
+    });
+
     const snippeResponse = await fetch(`${SNIPPE_API_URL}/v1/sessions`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${SNIPPE_API_KEY}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        amount: amountInCents,
-        currency: 'USD',
-        allowed_methods: ['mobile_money', 'card', 'qr'],
-        customer: {
-          name: user.name || 'Customer',
-          email: user.email,
-        },
-        redirect_url: `${process.env.NEXT_PUBLIC_URL}/payment/success`,
-        webhook_url: `${process.env.NEXT_PUBLIC_URL}/api/webhooks/snippe`,
-        description: `${pkg.name} - Bot Deployment`,
-        metadata: {
-          userId: user.id,
-          package: packageType,
-          email: user.email
-        },
-        expires_in: 3600 // 1 hour
-      })
+      body: JSON.stringify(requestBody)
     });
 
+    const responseText = await snippeResponse.text();
+    console.log('Snippe API response status:', snippeResponse.status);
+    console.log('Snippe API response:', responseText);
+
     if (!snippeResponse.ok) {
-      const error = await snippeResponse.text();
-      console.error('Snippe API error:', error);
+      console.error('Snippe API error:', responseText);
       return NextResponse.json(
-        { error: 'Failed to create payment session' },
+        { error: `Failed to create payment session: ${responseText}` },
         { status: 500 }
       );
     }
 
-    const snippeData = await snippeResponse.json();
+    const snippeData = JSON.parse(responseText);
 
     // Store payment in database
-    const payment = await prisma.payment.create({
+    await prisma.payment.create({
       data: {
         userId: user.id,
         sessionId: snippeData.data.id,
+        reference: snippeData.data.reference,
         amount: amountInCents,
-        currency: 'USD',
+        currency: 'TZS',
         package: packageType,
         status: 'pending',
         checkoutUrl: snippeData.data.checkout_url,
@@ -108,12 +119,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      payment: {
-        id: payment.id,
-        checkoutUrl: payment.checkoutUrl,
-        amount: pkg.amount,
-        package: packageType
-      }
+      checkoutUrl: snippeData.data.checkout_url,
+      sessionId: snippeData.data.id,
+      reference: snippeData.data.reference
     });
   } catch (error: any) {
     console.error('Error creating payment session:', error);

@@ -114,7 +114,7 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
         return;
       }
 
-      // Otherwise show success
+      // Otherwise show success (for testing/fallback)
       setProcessing(false);
       setPaymentComplete(true);
       
@@ -181,7 +181,7 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
                     {paymentComplete ? 'Payment Successful!' : 'Complete Payment'}
                   </h2>
                   <p className="text-sm text-white/90">
-                    {packageInfo.name} - ${packageInfo.price}
+                    {packageInfo.name} - TZS {(packageInfo.price * 2500).toLocaleString()} (${packageInfo.price})
                   </p>
                 </div>
               </div>

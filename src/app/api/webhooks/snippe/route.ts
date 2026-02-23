@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
           reference: reference,
           completedAt: new Date(),
           metadata: {
-            ...payment.metadata,
+            ...(payment.metadata as object || {}),
             ...event.data
           }
         }
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
           data: {
             status: 'failed',
             metadata: {
-              ...payment.metadata,
+              ...(payment.metadata as object || {}),
               failure_reason,
               ...event.data
             }
