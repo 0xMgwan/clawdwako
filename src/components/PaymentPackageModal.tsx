@@ -120,7 +120,7 @@ export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: Paym
         </div>
 
         {/* Packages Grid */}
-        <div className="flex md:grid md:grid-cols-3 gap-3 sm:gap-4 mb-3 sm:mb-6 overflow-x-auto pb-3 snap-x snap-mandatory md:overflow-visible -mx-1 px-1">
+        <div className="flex md:grid md:grid-cols-3 gap-3 sm:gap-4 mb-3 sm:mb-6 overflow-x-auto pb-3 pt-5 snap-x snap-mandatory md:overflow-visible -mx-1 px-1">
           {PACKAGES.map((pkg) => (
             <div
               key={pkg.id}
