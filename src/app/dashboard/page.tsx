@@ -410,8 +410,15 @@ export default function Dashboard() {
                   {/* Compact Header */}
                   <div className="flex items-center justify-between mb-3 sm:mb-4">
                     <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg">
-                        <Bot className="h-5 w-5 text-primary" />
+                      <div className="h-10 w-10 rounded-xl overflow-hidden shadow-lg shadow-green-500/20 group-hover:shadow-green-500/40 transition-all duration-300 group-hover:scale-110">
+                        <img 
+                          src="/claw.jpg" 
+                          alt="Clawdwako" 
+                          className="h-full w-full object-cover"
+                          style={{
+                            filter: 'hue-rotate(100deg) saturate(1.2) brightness(1.1)'
+                          }}
+                        />
                       </div>
                       <div>
                         <h3 className="text-base font-bold text-foreground">{agent.name}</h3>
