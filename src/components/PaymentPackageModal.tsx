@@ -136,8 +136,8 @@ export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: Paym
               }`}
             >
               {pkg.popular && (
-                <div className="absolute -top-2 sm:-top-3 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
-                  <span className="bg-green-400 text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-lg">
+                <div className="absolute -top-3 sm:-top-3 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
+                  <span className="bg-green-400 text-white text-[9px] sm:text-xs font-bold px-2.5 sm:px-3 py-1 sm:py-1 rounded-full shadow-lg">
                     MOST POPULAR
                   </span>
                 </div>
@@ -154,11 +154,13 @@ export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: Paym
                 <span className="text-[9px] sm:text-xs text-gray-600 dark:text-gray-400">one-time payment</span>
               </div>
 
-              <ul className="space-y-1 sm:space-y-2 mb-2 sm:mb-4 min-h-[120px] sm:min-h-[180px]">
+              <ul className="space-y-1.5 sm:space-y-2.5 mb-2 sm:mb-4 min-h-[120px] sm:min-h-[180px]">
                 {pkg.features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-1 sm:gap-2">
-                    <Check className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 text-green-500 dark:text-green-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300 leading-tight">{feature}</span>
+                  <li key={index} className="flex items-start gap-2 sm:gap-2.5">
+                    <div className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-green-500/20 dark:bg-green-500/30 flex items-center justify-center mt-0.5">
+                      <Check className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-green-500 dark:text-green-400 stroke-[3]" />
+                    </div>
+                    <span className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300 leading-relaxed">{feature}</span>
                   </li>
                 ))}
               </ul>
