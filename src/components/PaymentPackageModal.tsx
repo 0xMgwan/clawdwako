@@ -136,7 +136,7 @@ export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: Paym
               }`}
             >
               {pkg.popular && (
-                <div className="absolute -top-3 sm:-top-3 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
+                <div className="absolute -top-4 sm:-top-3 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
                   <span className="bg-green-400 text-white text-[9px] sm:text-xs font-bold px-2.5 sm:px-3 py-1 sm:py-1 rounded-full shadow-lg">
                     MOST POPULAR
                   </span>
