@@ -16,8 +16,8 @@ export const metadata: Metadata = {
   title: "Clawdwako.ai - Deploy AI Agents in Seconds",
   description: "Deploy powerful AI agents to Telegram in under 60 seconds. No coding required.",
   icons: {
-    icon: '/claw-logo.svg',
-    apple: '/claw-logo.svg',
+    icon: '/claw2.jpg',
+    apple: '/claw2.jpg',
   },
 };
 
