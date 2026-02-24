@@ -94,8 +94,15 @@ export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: Paym
         {/* Header */}
         <div className="flex items-center justify-between mb-3 sm:mb-6">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-lg flex items-center justify-center">
-              <Bot className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg overflow-hidden">
+              <img 
+                src="/claw.jpg" 
+                alt="Clawdwako" 
+                className="w-full h-full object-cover"
+                style={{
+                  filter: 'hue-rotate(100deg) saturate(1.2) brightness(1.1)'
+                }}
+              />
             </div>
             <div>
               <h2 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white mb-0.5 sm:mb-1">Choose Your Package</h2>
@@ -113,12 +120,12 @@ export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: Paym
         </div>
 
         {/* Packages Grid */}
-        <div className="flex md:grid md:grid-cols-3 gap-2 sm:gap-4 mb-3 sm:mb-6 overflow-x-auto pb-2 snap-x snap-mandatory md:overflow-visible -mx-1 px-1">
+        <div className="flex md:grid md:grid-cols-3 gap-3 sm:gap-4 mb-3 sm:mb-6 overflow-x-auto pb-3 snap-x snap-mandatory md:overflow-visible -mx-1 px-1">
           {PACKAGES.map((pkg) => (
             <div
               key={pkg.id}
               onClick={() => handlePackageClick(pkg.id)}
-              className={`relative glass-stat-card rounded-xl p-2.5 sm:p-4 transition-all duration-300 cursor-pointer flex-shrink-0 w-[82vw] sm:w-auto snap-center md:snap-align-none ${
+              className={`relative glass-stat-card rounded-xl p-3 sm:p-4 transition-all duration-300 cursor-pointer flex-shrink-0 w-[85vw] sm:w-auto snap-center md:snap-align-none ${
                 pkg.popular
                   ? 'ring-2 ring-green-400 scale-105'
                   : ''
@@ -129,8 +136,8 @@ export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: Paym
               }`}
             >
               {pkg.popular && (
-                <div className="absolute -top-2 sm:-top-3 left-1/2 -translate-x-1/2 z-10">
-                  <span className="bg-green-400 text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
+                <div className="absolute -top-2 sm:-top-3 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
+                  <span className="bg-green-400 text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-lg">
                     MOST POPULAR
                   </span>
                 </div>
