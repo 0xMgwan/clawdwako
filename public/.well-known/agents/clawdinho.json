@@ -1,0 +1,23 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "Clawdinho",
+  "description": "Personal assistant agent for Chuche (NEDApay). Smart, charming, execution-first.",
+  "image": "",
+  "services": [
+    {
+      "name": "telegram",
+      "endpoint": "https://t.me/necuva"
+    }
+  ],
+  "x402Support": false,
+  "active": true,
+  "registrations": [
+    {
+      "agentId": 1,
+      "agentRegistry": "eip155:8453:0x413E50dA66aD394893f1E3607fF2826CE5206600"
+    }
+  ],
+  "supportedTrust": [
+    "reputation"
+  ]
+}
