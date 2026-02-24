@@ -75,13 +75,17 @@ export function ConfigureModal({ bot, onClose, onSave }: ConfigureModalProps) {
                 onChange={(e) => setSelectedModel(e.target.value)}
                 className="w-full p-2 rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:border-green-400 focus:outline-none"
               >
-                <option value="claude-opus-4-20250514">Claude Opus 4 - Most capable</option>
-                <option value="claude-3-7-sonnet-20250219">Claude 3.7 Sonnet - Latest balanced</option>
-                <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet - Balanced</option>
-                <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku - Fast</option>
-                <option value="claude-3-opus-20240229">Claude 3 Opus - Previous flagship</option>
-                <option value="claude-3-sonnet-20240229">Claude 3 Sonnet - Previous balanced</option>
-                <option value="claude-3-haiku-20240307">Claude 3 Haiku - Efficient</option>
+                <option value="claude-opus-4-6">Opus 4.6 - Latest (Feb 2026)</option>
+                <option value="claude-sonnet-4-6">Sonnet 4.6 - Latest (Feb 2026)</option>
+                <option value="claude-opus-4-5">Opus 4.5 - Advanced</option>
+                <option value="claude-sonnet-4-5">Sonnet 4.5 - Production</option>
+                <option value="claude-haiku-4-5">Haiku 4.5 - Fast</option>
+                <option value="claude-opus-4-1">Opus 4.1 - Agentic</option>
+                <option value="claude-opus-4-20250514">Opus 4 (May 2025)</option>
+                <option value="claude-sonnet-4">Sonnet 4</option>
+                <option value="claude-3-7-sonnet-20250219">3.7 Sonnet</option>
+                <option value="claude-3-5-sonnet-20241022">3.5 Sonnet</option>
+                <option value="claude-3-5-haiku-20241022">3.5 Haiku</option>
               </select>
             </div>
 
@@ -92,17 +96,27 @@ export function ConfigureModal({ bot, onClose, onSave }: ConfigureModalProps) {
                 <span className="text-xs font-semibold text-gray-900 dark:text-white">GPT (OpenAI)</span>
               </div>
               <select
-                value={selectedModel?.includes('gpt') ? selectedModel : ''}
+                value={selectedModel?.includes('gpt') || selectedModel?.includes('o1') || selectedModel?.includes('o3') ? selectedModel : ''}
                 onChange={(e) => setSelectedModel(e.target.value)}
                 className="w-full p-2 rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:border-green-400 focus:outline-none"
               >
-                <option value="gpt-5">GPT-5 - Latest flagship (if available)</option>
-                <option value="gpt-4o">GPT-4o - Multimodal optimized</option>
-                <option value="gpt-4o-mini">GPT-4o Mini - Fast & affordable</option>
-                <option value="gpt-4-turbo">GPT-4 Turbo - Advanced reasoning</option>
-                <option value="gpt-4">GPT-4 - Powerful & reliable</option>
-                <option value="gpt-3.5-turbo">GPT-3.5 Turbo - Fast & efficient</option>
-                <option value="gpt-3.5-turbo-16k">GPT-3.5 Turbo 16K - Extended context</option>
+                <option value="gpt-5.3-codex-spark">GPT-5.3 Codex Spark (Feb 2026)</option>
+                <option value="gpt-5.2">GPT-5.2 - Smarter (2026)</option>
+                <option value="gpt-5.1-codex-max">GPT-5.1 Codex Max</option>
+                <option value="gpt-5.1-thinking">GPT-5.1 Thinking</option>
+                <option value="gpt-5.1-instant">GPT-5.1 Instant</option>
+                <option value="gpt-5.1">GPT-5.1 (Nov 2025)</option>
+                <option value="gpt-5">GPT-5</option>
+                <option value="o3-pro">o3-pro (Feb 2026)</option>
+                <option value="o3">o3 - Reasoning</option>
+                <option value="o3-mini">o3-mini - Fast</option>
+                <option value="gpt-4.1">GPT-4.1 (2026)</option>
+                <option value="o1-pro">o1-pro</option>
+                <option value="o1">o1</option>
+                <option value="gpt-4o">GPT-4o</option>
+                <option value="gpt-4o-mini">GPT-4o Mini</option>
+                <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                <option value="gpt-4">GPT-4</option>
               </select>
             </div>
 
@@ -117,13 +131,16 @@ export function ConfigureModal({ bot, onClose, onSave }: ConfigureModalProps) {
                 onChange={(e) => setSelectedModel(e.target.value)}
                 className="w-full p-2 rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:border-green-400 focus:outline-none"
               >
-                <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash - Experimental</option>
-                <option value="gemini-exp-1206">Gemini Exp 1206 - Experimental</option>
-                <option value="gemini-1.5-pro">Gemini 1.5 Pro - Most capable</option>
-                <option value="gemini-1.5-pro-exp-0827">Gemini 1.5 Pro Exp - Extended</option>
-                <option value="gemini-1.5-flash">Gemini 1.5 Flash - Fast</option>
-                <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B - Ultra fast</option>
-                <option value="gemini-1.0-pro">Gemini 1.0 Pro - Stable</option>
+                <option value="gemini-2.0-flash-exp">2.0 Flash Exp</option>
+                <option value="gemini-2.0-flash-thinking-exp-1219">2.0 Flash Thinking</option>
+                <option value="gemini-exp-1206">Exp 1206</option>
+                <option value="gemini-exp-1121">Exp 1121</option>
+                <option value="gemini-1.5-pro">1.5 Pro</option>
+                <option value="gemini-1.5-pro-002">1.5 Pro 002</option>
+                <option value="gemini-1.5-flash">1.5 Flash</option>
+                <option value="gemini-1.5-flash-002">1.5 Flash 002</option>
+                <option value="gemini-1.5-flash-8b">1.5 Flash 8B</option>
+                <option value="gemini-1.0-pro">1.0 Pro</option>
               </select>
             </div>
           </div>
