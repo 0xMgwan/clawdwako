@@ -98,10 +98,17 @@ export function MobileConfigSection({
         {activeTab === 'claude' && (
           <CustomSelect
             options={[
-              { value: 'claude-opus-4-20250514', label: 'Opus 4 - Most capable' },
-              { value: 'claude-3-7-sonnet-20250219', label: '3.7 Sonnet - Latest' },
+              { value: 'claude-opus-4-6', label: 'Opus 4.6 - Latest (Feb 2026)' },
+              { value: 'claude-sonnet-4-6', label: 'Sonnet 4.6 - Latest (Feb 2026)' },
+              { value: 'claude-opus-4-5', label: 'Opus 4.5 - Advanced' },
+              { value: 'claude-sonnet-4-5', label: 'Sonnet 4.5 - Production' },
+              { value: 'claude-haiku-4-5', label: 'Haiku 4.5 - Fast' },
+              { value: 'claude-opus-4-1', label: 'Opus 4.1 - Agentic' },
+              { value: 'claude-opus-4-20250514', label: 'Opus 4 (May 2025)' },
+              { value: 'claude-sonnet-4', label: 'Sonnet 4' },
+              { value: 'claude-3-7-sonnet-20250219', label: '3.7 Sonnet' },
               { value: 'claude-3-5-sonnet-20241022', label: '3.5 Sonnet' },
-              { value: 'claude-3-5-haiku-20241022', label: '3.5 Haiku - Fast' }
+              { value: 'claude-3-5-haiku-20241022', label: '3.5 Haiku' }
             ]}
             value={selectedModel}
             onChange={setSelectedModel}
@@ -112,8 +119,21 @@ export function MobileConfigSection({
         {activeTab === 'gpt' && (
           <CustomSelect
             options={[
-              { value: 'gpt-4o', label: 'GPT-4o - Multimodal' },
-              { value: 'gpt-4o-mini', label: 'GPT-4o Mini - Fast' },
+              { value: 'gpt-5.3-codex-spark', label: 'GPT-5.3 Codex Spark (Feb 2026)' },
+              { value: 'gpt-5.2', label: 'GPT-5.2 - Smarter (2026)' },
+              { value: 'gpt-5.1-codex-max', label: 'GPT-5.1 Codex Max' },
+              { value: 'gpt-5.1-thinking', label: 'GPT-5.1 Thinking' },
+              { value: 'gpt-5.1-instant', label: 'GPT-5.1 Instant' },
+              { value: 'gpt-5.1', label: 'GPT-5.1 (Nov 2025)' },
+              { value: 'gpt-5', label: 'GPT-5' },
+              { value: 'o3-pro', label: 'o3-pro (Feb 2026)' },
+              { value: 'o3', label: 'o3 - Reasoning' },
+              { value: 'o3-mini', label: 'o3-mini - Fast' },
+              { value: 'gpt-4.1', label: 'GPT-4.1 (2026)' },
+              { value: 'o1-pro', label: 'o1-pro' },
+              { value: 'o1', label: 'o1' },
+              { value: 'gpt-4o', label: 'GPT-4o' },
+              { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
               { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
               { value: 'gpt-4', label: 'GPT-4' }
             ]}
@@ -126,10 +146,16 @@ export function MobileConfigSection({
         {activeTab === 'gemini' && (
           <CustomSelect
             options={[
-              { value: 'gemini-2.0-flash-exp', label: '2.0 Flash - Experimental' },
-              { value: 'gemini-1.5-pro', label: '1.5 Pro - Most capable' },
-              { value: 'gemini-1.5-flash', label: '1.5 Flash - Fast' },
-              { value: 'gemini-1.0-pro', label: '1.0 Pro - Stable' }
+              { value: 'gemini-2.0-flash-exp', label: '2.0 Flash Exp' },
+              { value: 'gemini-2.0-flash-thinking-exp-1219', label: '2.0 Flash Thinking' },
+              { value: 'gemini-exp-1206', label: 'Exp 1206' },
+              { value: 'gemini-exp-1121', label: 'Exp 1121' },
+              { value: 'gemini-1.5-pro', label: '1.5 Pro' },
+              { value: 'gemini-1.5-pro-002', label: '1.5 Pro 002' },
+              { value: 'gemini-1.5-flash', label: '1.5 Flash' },
+              { value: 'gemini-1.5-flash-002', label: '1.5 Flash 002' },
+              { value: 'gemini-1.5-flash-8b', label: '1.5 Flash 8B' },
+              { value: 'gemini-1.0-pro', label: '1.0 Pro' }
             ]}
             value={selectedModel}
             onChange={setSelectedModel}
