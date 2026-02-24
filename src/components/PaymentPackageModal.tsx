@@ -105,8 +105,8 @@ export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: Paym
               />
             </div>
             <div>
-              <h2 className="text-base sm:text-2xl font-bold text-gray-900 dark:text-white mb-0.5 sm:mb-1">Choose Your Package</h2>
-              <p className="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400">Select the perfect plan for your AI bot deployment</p>
+              <h2 className="text-lg sm:text-2xl font-extrabold text-gray-900 dark:text-white mb-0.5 sm:mb-1">Choose Your Package</h2>
+              <p className="text-[10px] sm:text-sm font-medium text-gray-600 dark:text-gray-400">Select the perfect plan for your AI bot deployment</p>
             </div>
           </div>
           <Button 
@@ -147,20 +147,20 @@ export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: Paym
                 <div className="inline-flex items-center justify-center w-7 h-7 sm:w-10 sm:h-10 bg-green-400/10 rounded-lg mb-1 sm:mb-2">
                   <pkg.icon className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-green-400" />
                 </div>
-                <h3 className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white mb-0.5 sm:mb-2">{pkg.name}</h3>
+                <h3 className="text-base sm:text-xl font-extrabold text-gray-900 dark:text-white mb-0.5 sm:mb-2">{pkg.name}</h3>
                 <div className="flex items-baseline justify-center gap-1 mb-0.5">
-                  <span className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">${pkg.price}</span>
+                  <span className="text-2xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">${pkg.price}</span>
                 </div>
-                <span className="text-[9px] sm:text-xs text-gray-600 dark:text-gray-400">one-time payment</span>
+                <span className="text-[9px] sm:text-xs font-semibold text-gray-600 dark:text-gray-400">one-time payment</span>
               </div>
 
-              <ul className="space-y-1.5 sm:space-y-2.5 mb-2 sm:mb-4 min-h-[120px] sm:min-h-[180px]">
+              <ul className="space-y-2 sm:space-y-3 mb-2 sm:mb-4 min-h-[120px] sm:min-h-[180px]">
                 {pkg.features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-2 sm:gap-2.5">
-                    <div className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-green-500/20 dark:bg-green-500/30 flex items-center justify-center mt-0.5">
-                      <Check className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-green-500 dark:text-green-400 stroke-[3]" />
+                  <li key={index} className="flex items-start gap-2.5 sm:gap-3">
+                    <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mt-0.5 shadow-sm">
+                      <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white stroke-[3.5]" />
                     </div>
-                    <span className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300 leading-relaxed">{feature}</span>
+                    <span className="text-[10px] sm:text-sm font-semibold text-gray-700 dark:text-gray-300 leading-relaxed">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -171,9 +171,9 @@ export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: Paym
                   handleSelectPackage(pkg.id);
                 }}
                 disabled={!selectedPackage}
-                className={`w-full text-[10px] sm:text-sm py-1.5 sm:py-2.5 ${
+                className={`w-full text-xs sm:text-sm py-2 sm:py-3 font-bold rounded-xl transition-all duration-300 ${
                   selectedPackage === pkg.id
-                    ? 'bg-green-500 hover:bg-green-600 text-white'
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg shadow-green-500/30'
                     : 'bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 opacity-50'
                 }`}
               >
