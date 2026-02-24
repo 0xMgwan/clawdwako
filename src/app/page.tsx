@@ -970,8 +970,8 @@ export default function Home() {
       </section>
 
       {/* Use Cases Section */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="max-w-6xl mx-auto text-center mb-10">
+      <section className="py-8 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="max-w-6xl mx-auto text-center mb-6">
           <h2 className="text-3xl md:text-4xl font-bold mb-3">
             What can Clawdwako.ai do for you?
           </h2>
@@ -981,7 +981,7 @@ export default function Home() {
         </div>
         
         {/* Row 1 - Scroll Left */}
-        <div className="relative mb-4 overflow-hidden">
+        <div className="relative mb-3 overflow-hidden">
           <div className="flex animate-scroll-left">
             <div className="flex gap-4 pr-4">
               <Button variant="outline" className="h-auto p-4 text-left justify-start whitespace-nowrap flex-shrink-0">
@@ -1015,7 +1015,7 @@ export default function Home() {
         </div>
 
         {/* Row 2 - Scroll Right */}
-        <div className="relative mb-4 overflow-hidden">
+        <div className="relative mb-3 overflow-hidden">
           <div className="flex animate-scroll-right">
             <div className="flex gap-4 pr-4">
               <Button variant="outline" className="h-auto p-4 text-left justify-start whitespace-nowrap flex-shrink-0">
@@ -1049,7 +1049,7 @@ export default function Home() {
         </div>
 
         {/* Row 3 - Scroll Left */}
-        <div className="relative mb-4 overflow-hidden">
+        <div className="relative mb-3 overflow-hidden">
           <div className="flex animate-scroll-left">
             <div className="flex gap-4 pr-4">
               <Button variant="outline" className="h-auto p-4 text-left justify-start whitespace-nowrap flex-shrink-0">
@@ -1083,7 +1083,7 @@ export default function Home() {
         </div>
 
         {/* Row 4 - Scroll Right */}
-        <div className="relative mb-8 overflow-hidden">
+        <div className="relative mb-3 overflow-hidden">
           <div className="flex animate-scroll-right">
             <div className="flex gap-4 pr-4">
               <Button variant="outline" className="h-auto p-4 text-left justify-start whitespace-nowrap flex-shrink-0">
