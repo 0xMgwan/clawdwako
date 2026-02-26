@@ -389,7 +389,7 @@ export class RailwayClient {
       
       // Node environment
       NODE_ENV: 'production',
-      PORT: '3000',
+      // PORT is set by Railway automatically, don't override it
     };
 
     try {
