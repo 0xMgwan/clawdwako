@@ -7,8 +7,8 @@ import { X, RefreshCw, Download } from "lucide-react";
 
 interface LogEntry {
   id: string;
-  timestamp: Date;
-  type: 'message' | 'api_call' | 'error' | 'webhook';
+  timestamp: string;
+  type: 'message' | 'api_call' | 'error' | 'gateway' | 'config' | 'info';
   content: string;
   metadata?: any;
 }
@@ -21,6 +21,7 @@ interface ViewLogsModalProps {
 export function ViewLogsModal({ bot, onClose }: ViewLogsModalProps) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchLogs();
@@ -28,46 +29,22 @@ export function ViewLogsModal({ bot, onClose }: ViewLogsModalProps) {
 
   const fetchLogs = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const response = await fetch(`/api/bots/${bot.id}/logs`);
+      // Fetch real logs from Railway via OpenClaw instances API
+      const response = await fetch(`/api/openclaw/instances/${bot.id}/logs`);
       if (response.ok) {
         const data = await response.json();
         setLogs(data.logs || []);
       } else {
-        // Mock logs for now
-        setLogs([
-          {
-            id: '1',
-            timestamp: new Date(),
-            type: 'webhook',
-            content: 'Webhook received from Telegram',
-            metadata: { chatId: '123456' }
-          },
-          {
-            id: '2',
-            timestamp: new Date(Date.now() - 60000),
-            type: 'message',
-            content: 'User message: "Hello bot"',
-            metadata: { userId: '123456', messageId: '789' }
-          },
-          {
-            id: '3',
-            timestamp: new Date(Date.now() - 120000),
-            type: 'api_call',
-            content: 'Claude API call successful',
-            metadata: { model: 'claude-3-5-sonnet', tokens: 150 }
-          },
-          {
-            id: '4',
-            timestamp: new Date(Date.now() - 180000),
-            type: 'message',
-            content: 'Bot response: "Hello! How can I help you today?"',
-            metadata: { messageId: '790' }
-          },
-        ]);
+        const errData = await response.json();
+        setError(errData.message || 'Failed to fetch logs');
+        setLogs([]);
       }
-    } catch (error) {
-      console.error('Error fetching logs:', error);
+    } catch (err) {
+      console.error('Error fetching logs:', err);
+      setError('Failed to connect to logs service');
+      setLogs([]);
     } finally {
       setLoading(false);
     }
@@ -78,7 +55,8 @@ export function ViewLogsModal({ bot, onClose }: ViewLogsModalProps) {
       case 'message': return 'bg-blue-500/10 text-blue-500';
       case 'api_call': return 'bg-green-500/10 text-green-500';
       case 'error': return 'bg-red-500/10 text-red-500';
-      case 'webhook': return 'bg-purple-500/10 text-purple-500';
+      case 'gateway': return 'bg-purple-500/10 text-purple-500';
+      case 'config': return 'bg-yellow-500/10 text-yellow-500';
       default: return 'bg-gray-500/10 text-gray-500';
     }
   };
@@ -134,6 +112,15 @@ export function ViewLogsModal({ bot, onClose }: ViewLogsModalProps) {
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-red-500 font-medium">Failed to fetch logs</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{error}</p>
+              <Button variant="outline" size="sm" onClick={fetchLogs} className="mt-4">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Retry
+              </Button>
             </div>
           ) : logs.length === 0 ? (
             <div className="text-center py-12">

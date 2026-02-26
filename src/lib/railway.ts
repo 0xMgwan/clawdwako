@@ -310,13 +310,16 @@ export class RailwayClient {
   }
 
   async getLogs(projectId: string, serviceId: string, limit: number = 100) {
-    const query = `
-      query ServiceLogs($serviceId: String!, $limit: Int!) {
-        logs(serviceId: $serviceId, limit: $limit) {
-          edges {
-            node {
-              message
-              timestamp
+    // First get the environment ID and latest deployment ID
+    const envQuery = `
+      query Service($id: String!) {
+        service(id: $id) {
+          id
+          deployments(first: 1) {
+            edges {
+              node {
+                id
+              }
             }
           }
         }
@@ -324,8 +327,32 @@ export class RailwayClient {
     `;
 
     try {
-      const data = await this.query(query, { serviceId, limit });
-      return data.logs.edges.map((edge: any) => edge.node.message);
+      const serviceData = await this.query(envQuery, { id: serviceId });
+      const deploymentId = serviceData.service?.deployments?.edges?.[0]?.node?.id;
+      
+      if (!deploymentId) {
+        console.log('No deployment found for service');
+        return [];
+      }
+
+      const query = `
+        query DeploymentLogs($deploymentId: String!, $limit: Int!) {
+          deploymentLogs(deploymentId: $deploymentId, limit: $limit) {
+            message
+            timestamp
+            severity
+          }
+        }
+      `;
+
+      const data = await this.query(query, { deploymentId, limit });
+      const rawLogs = data.deploymentLogs || [];
+      
+      return rawLogs.map((log: any) => ({
+        message: log.message,
+        timestamp: log.timestamp,
+        severity: log.severity || 'info'
+      }));
     } catch (error) {
       console.error('Failed to fetch logs:', error);
       return [];
