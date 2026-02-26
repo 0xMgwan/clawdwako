@@ -25,4 +25,5 @@ EXPOSE 3000
 
 # Start OpenClaw Gateway
 # OpenClaw will initialize workspace on first run
-CMD ["openclaw", "gateway", "--allow-unconfigured", "--host", "0.0.0.0", "--port", "3000"]
+# --bind lan allows external connections, --allow-unconfigured skips config requirement
+CMD ["openclaw", "gateway", "--allow-unconfigured", "--bind", "lan", "--port", "3000"]
