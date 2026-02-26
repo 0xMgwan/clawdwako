@@ -71,12 +71,12 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    // Fetch user's bots and payment info from the database
+    // Fetch user's OpenClaw instances and payment info from the database
     const fetchData = async () => {
-      console.log('🔍 FETCHING BOTS FROM DATABASE...');
+      console.log('🔍 FETCHING OPENCLAW INSTANCES FROM DATABASE...');
       try {
-        // Fetch bots
-        const botsResponse = await fetch('/api/bots', {
+        // Fetch OpenClaw instances
+        const botsResponse = await fetch('/api/openclaw/instances', {
           cache: 'no-store',
           headers: { 'Cache-Control': 'no-cache' }
         });
@@ -84,41 +84,26 @@ export default function Dashboard() {
         console.log('📦 API Response:', botsData);
         
         if (botsData.success) {
-          console.log('✅ Found', botsData.bots.length, 'bots in database');
+          const instances = botsData.instances || [];
+          console.log('✅ Found', instances.length, 'OpenClaw instances in database');
           
-          if (botsData.bots.length > 0) {
-            // Fetch stats for each bot
-            const botsWithStats = await Promise.all(
-              botsData.bots.map(async (bot: any) => {
-                let messages = 0;
-                let users = 0;
-                
-                try {
-                  const statsResponse = await fetch(`/api/bots/${bot.id}/stats`);
-                  if (statsResponse.ok) {
-                    const statsData = await statsResponse.json();
-                    messages = statsData.stats.messages || 0;
-                    users = statsData.stats.users || 0;
-                  }
-                } catch (error) {
-                  console.error('Failed to fetch stats for bot:', bot.id);
-                }
-                
+          if (instances.length > 0) {
+            // Map OpenClaw instances to dashboard format
+            const botsWithStats = instances.map((instance: any) => {
                 return {
-                  id: bot.id,
-                  name: bot.name || bot.telegramBotUsername,
-                  type: 'AI Agent',
-                  status: bot.status === 'configured' ? 'paused' : bot.status,
-                  uptime: '99.9%',
-                  messages,
-                  users,
+                  id: instance.id,
+                  name: instance.name,
+                  type: 'OpenClaw Agent',
+                  status: instance.status === 'deploying' ? 'paused' : instance.status === 'active' ? 'running' : instance.status,
+                  uptime: instance.uptime || '99.9%',
+                  messages: instance.messageCount || 0,
+                  users: 1, // Will be tracked later
                   cost: `$${userPackage === 'starter' ? '20.00' : userPackage === 'professional' ? '50.00' : userPackage === 'enterprise' ? '100.00' : '20.00'}/mo`,
-                  channels: ['Telegram'],
-                  lastActive: new Date(bot.deployedAt || bot.createdAt).toLocaleString(),
-                  model: bot.selectedModel
+                  channels: [instance.channel === 'telegram' ? 'Telegram' : instance.channel === 'discord' ? 'Discord' : 'WhatsApp'],
+                  lastActive: instance.lastActive ? new Date(instance.lastActive).toLocaleString() : new Date(instance.createdAt).toLocaleString(),
+                  model: instance.model
                 };
-              })
-            );
+              });
             
             console.log('🤖 Mapped bots with stats:', botsWithStats);
             setBots(botsWithStats);

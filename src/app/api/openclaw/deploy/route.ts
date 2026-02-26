@@ -144,10 +144,12 @@ export async function POST(request: NextRequest) {
       instance: {
         id: dbInstance.id,
         name: dbInstance.name,
+        username: botUsername, // For success modal
         model: dbInstance.model,
         channel: dbInstance.channel,
         status: dbInstance.status,
         deploymentUrl: dbInstance.deploymentUrl,
+        railwayProjectId: dbInstance.railwayProjectId,
         createdAt: dbInstance.createdAt
       }
     });
