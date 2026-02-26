@@ -139,6 +139,14 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Instance saved to database:', dbInstance.id);
 
+    // Start automatic webhook configuration in the background
+    // This will poll Railway and configure the webhook when deployment is ready
+    const { setupWebhookWhenReady } = await import('@/lib/webhook-setup');
+    setupWebhookWhenReady(dbInstance.id).catch((error) => {
+      console.error('❌ Background webhook setup failed:', error);
+    });
+    console.log('🔄 Background webhook setup initiated');
+
     return NextResponse.json({
       success: true,
       instance: {

@@ -39,6 +39,7 @@ import {
 const getStatusColor = (status: string) => {
   switch (status) {
     case "running": return "text-green-400 bg-green-500/10 border border-green-500/20";
+    case "deploying": return "text-blue-400 bg-blue-500/10 border border-blue-500/20";
     case "paused": return "text-yellow-400 bg-yellow-500/10 border border-yellow-500/20";
     case "error": return "text-red-400 bg-red-500/10 border border-red-500/20";
     default: return "text-gray-400 bg-gray-500/10 border border-gray-500/20";
@@ -48,6 +49,7 @@ const getStatusColor = (status: string) => {
 const getStatusIcon = (status: string) => {
   switch (status) {
     case "running": return CheckCircle;
+    case "deploying": return RefreshCw;
     case "paused": return Clock;
     case "error": return AlertCircle;
     default: return Clock;
@@ -94,7 +96,7 @@ export default function Dashboard() {
                   id: instance.id,
                   name: instance.name,
                   type: 'OpenClaw Agent',
-                  status: instance.status === 'deploying' ? 'paused' : instance.status === 'active' ? 'running' : instance.status,
+                  status: instance.status === 'active' ? 'running' : instance.status,
                   uptime: instance.uptime || '99.9%',
                   messages: instance.messageCount || 0,
                   users: 1, // Will be tracked later
