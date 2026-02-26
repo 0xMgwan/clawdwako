@@ -84,13 +84,14 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { name, anthropicKey, openaiKey, googleKey } = body;
+    const { name, model, anthropicKey, openaiKey, googleKey } = body;
 
-    // Update instance
+    // Update instance in database
     const updatedInstance = await prisma.openClawInstance.update({
       where: { id },
       data: {
         ...(name && { name }),
+        ...(model && { model }),
         ...(anthropicKey && { anthropicKey }),
         ...(openaiKey && { openaiKey }),
         ...(googleKey && { googleKey }),
@@ -98,10 +99,37 @@ export async function PATCH(
       }
     });
 
-    // If API keys were updated, trigger redeploy
-    if (anthropicKey || openaiKey || googleKey) {
-      // TODO: Trigger Railway redeploy with new env vars
-      console.log('🔄 API keys updated, redeploy needed');
+    // If model or API keys were updated, update Railway env vars and redeploy
+    if (model || anthropicKey || openaiKey || googleKey) {
+      try {
+        const { getRailwayClient } = await import('@/lib/railway');
+        const railwayClient = getRailwayClient();
+        
+        const envVarsToUpdate: Record<string, string> = {};
+        if (model) envVarsToUpdate.MODEL = model;
+        if (anthropicKey) envVarsToUpdate.ANTHROPIC_API_KEY = anthropicKey;
+        if (openaiKey) envVarsToUpdate.OPENAI_API_KEY = openaiKey;
+        if (googleKey) envVarsToUpdate.GOOGLE_API_KEY = googleKey;
+        
+        await railwayClient.updateEnvVars(
+          instance.railwayProjectId,
+          instance.railwayServiceId,
+          envVarsToUpdate
+        );
+        
+        console.log('✅ Railway env vars updated, triggering redeploy...');
+        
+        // Trigger redeploy
+        await railwayClient.redeployService(
+          instance.railwayProjectId,
+          instance.railwayServiceId
+        );
+        
+        console.log('✅ Railway redeploy triggered');
+      } catch (error: any) {
+        console.error('❌ Failed to update Railway:', error.message);
+        // Continue - database is updated even if Railway update fails
+      }
     }
 
     return NextResponse.json({

@@ -14,7 +14,7 @@ export async function setupWebhookWhenReady(
   
   console.log(`🔄 Starting webhook setup polling for instance ${instanceId}`);
   
-  const instance = await prisma.OpenClawInstance.findUnique({
+  const instance = await prisma.openClawInstance.findUnique({
     where: { id: instanceId }
   });
 
@@ -42,7 +42,7 @@ export async function setupWebhookWhenReady(
         console.log('✅ OpenClaw instance is running (uses long polling, no webhook needed)');
         
         // Update instance in database
-        await prisma.OpenClawInstance.update({
+        await prisma.openClawInstance.update({
           where: { id: instanceId },
           data: {
             deploymentUrl: status.url,
@@ -75,7 +75,7 @@ export async function setupWebhookWhenReady(
   console.error(`❌ Failed to configure webhook after ${maxAttempts} attempts`);
   
   // Update instance to show it needs manual configuration
-  await prisma.OpenClawInstance.update({
+  await prisma.openClawInstance.update({
     where: { id: instanceId },
     data: {
       status: 'failed',
