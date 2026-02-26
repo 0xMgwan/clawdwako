@@ -61,6 +61,9 @@ export async function deployOpenClawInstance(
     OPENCLAW_LOG_LEVEL: 'info',
     OPENCLAW_WORKSPACE: '/openclaw/workspace',
     
+    // Railway Configuration - Tell Railway to use Dockerfile.openclaw
+    RAILWAY_DOCKERFILE_PATH: 'Dockerfile.openclaw',
+    
     // Node environment
     NODE_ENV: 'production',
     PORT: '3000',

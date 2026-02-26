@@ -202,31 +202,6 @@ export class RailwayClient {
     return await this.query(query, { serviceId });
   }
 
-  async configureDockerfile(serviceId: string, dockerfilePath: string, rootDirectory: string = '.') {
-    const query = `
-      mutation ServiceInstanceUpdate($serviceId: String!, $dockerfilePath: String!, $rootDirectory: String!) {
-        serviceInstanceUpdate(
-          input: {
-            serviceId: $serviceId
-            source: {
-              dockerfilePath: $dockerfilePath
-              rootDirectory: $rootDirectory
-            }
-          }
-        ) {
-          id
-        }
-      }
-    `;
-
-    try {
-      await this.query(query, { serviceId, dockerfilePath, rootDirectory });
-      console.log(`✅ Configured service to use ${dockerfilePath}`);
-    } catch (error: any) {
-      console.error('❌ Failed to configure Dockerfile:', error.message);
-      throw error;
-    }
-  }
 
   async updateEnvironmentVariable(
     projectId: string,
@@ -391,24 +366,31 @@ export class RailwayClient {
       anthropic: anthropicApiKey ? `${anthropicApiKey.substring(0, 10)}...` : 'NOT PROVIDED',
       openai: openaiApiKey ? `${openaiApiKey.substring(0, 10)}...` : 'NOT PROVIDED',
       google: googleAiApiKey ? `${googleAiApiKey.substring(0, 10)}...` : 'NOT PROVIDED',
+      telegram: telegramBotToken ? `${telegramBotToken.substring(0, 10)}...` : 'NOT PROVIDED',
       selectedModel,
-      botId: botId || 'NOT PROVIDED YET'
     });
     
-    // Set environment variables - BOT_ID will be updated after bot creation if not provided
+    // Set OpenClaw environment variables
     const envVars: Record<string, string> = {
-      PLATFORM_URL: process.env.NEXT_PUBLIC_URL || 'https://clawdwako.vercel.app',
+      // AI Provider Keys
+      ANTHROPIC_API_KEY: anthropicApiKey || '',
+      OPENAI_API_KEY: openaiApiKey || '',
+      GOOGLE_API_KEY: googleAiApiKey || '',
+      
+      // Telegram Bot Token
+      TELEGRAM_BOT_TOKEN: telegramBotToken || '',
+      
+      // OpenClaw Configuration
+      MODEL: selectedModel,
+      CHANNEL: 'telegram',
+      
+      // Railway Configuration - Tell Railway to use Dockerfile.openclaw
+      RAILWAY_DOCKERFILE_PATH: 'Dockerfile.openclaw',
+      
+      // Node environment
+      NODE_ENV: 'production',
+      PORT: '3000',
     };
-    
-    // Add BOT_ID if provided (for redeployments)
-    if (botId) {
-      envVars.BOT_ID = botId;
-      console.log('✅ BOT_ID provided, setting in initial deployment');
-    } else {
-      console.log('⚠️ BOT_ID not provided yet, will be set after bot creation');
-    }
-    
-    console.log('📝 API keys will be fetched from database by bot-runner using BOT_ID');
 
     try {
       await this.setEnvironmentVariables(project.id, service.id, envVars);
@@ -421,18 +403,13 @@ export class RailwayClient {
     }
 
     console.log('Step 4: Deploying OpenClaw from GitHub...');
-    // Deploy OpenClaw using Dockerfile.openclaw from root directory
     await this.deployFromGitHub(
       project.id,
       service.id,
       '0xMgwan/clawdwako',
       'main'
     );
-    console.log('GitHub deployment initiated');
-
-    console.log('Step 5: Configuring Railway to use Dockerfile.openclaw...');
-    await this.configureDockerfile(service.id, 'Dockerfile.openclaw', '.');
-    console.log('✅ Railway configured to use Dockerfile.openclaw');
+    console.log('✅ GitHub deployment initiated - Railway will use Dockerfile.openclaw');
 
     return {
       projectId: project.id,
