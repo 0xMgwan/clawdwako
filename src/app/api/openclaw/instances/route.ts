@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
+import { getRailwayClient } from '@/lib/railway';
 
 export async function GET(request: NextRequest) {
   try {
@@ -32,6 +33,8 @@ export async function GET(request: NextRequest) {
         channel: true,
         status: true,
         deploymentUrl: true,
+        railwayProjectId: true,
+        railwayServiceId: true,
         apiCalls: true,
         messageCount: true,
         uptime: true,
@@ -42,9 +45,46 @@ export async function GET(request: NextRequest) {
       }
     });
 
+    // Fetch real message counts from Railway logs for each instance
+    const railwayClient = getRailwayClient();
+    const instancesWithCounts = await Promise.all(
+      instances.map(async (instance) => {
+        let messageCount = 0;
+        
+        try {
+          // Get logs from Railway
+          const logs = await railwayClient.getLogs(
+            instance.railwayProjectId,
+            instance.railwayServiceId,
+            100
+          );
+          
+          // Count messages (look for telegram activity in logs)
+          messageCount = logs.filter((log: any) => {
+            const msg = log.message || '';
+            return msg.includes('[telegram]') || 
+                   msg.includes('telegram') ||
+                   msg.includes('message') ||
+                   msg.includes('user:');
+          }).length;
+        } catch (error) {
+          console.error(`Failed to fetch logs for instance ${instance.id}:`, error);
+          // Keep messageCount as 0 on error
+        }
+
+        return {
+          ...instance,
+          messageCount,
+          // Remove Railway IDs from response for security
+          railwayProjectId: undefined,
+          railwayServiceId: undefined
+        };
+      })
+    );
+
     return NextResponse.json({
       success: true,
-      instances
+      instances: instancesWithCounts
     });
 
   } catch (error: any) {
