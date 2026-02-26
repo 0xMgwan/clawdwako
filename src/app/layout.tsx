@@ -19,6 +19,28 @@ export const metadata: Metadata = {
     icon: '/claw4.jpg',
     apple: '/claw4.jpg',
   },
+  openGraph: {
+    title: "Clawdwako.ai - Deploy AI Agents in Seconds",
+    description: "Deploy powerful AI agents to Telegram in under 60 seconds. No coding required.",
+    url: "https://clawdwako.xyz",
+    siteName: "Clawdwako.ai",
+    images: [
+      {
+        url: '/claw4.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Clawdwako AI Agents',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Clawdwako.ai - Deploy AI Agents in Seconds",
+    description: "Deploy powerful AI agents to Telegram in under 60 seconds. No coding required.",
+    images: ['/claw4.jpg'],
+  },
 };
 
 export default function RootLayout({
