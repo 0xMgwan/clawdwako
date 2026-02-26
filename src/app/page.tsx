@@ -105,7 +105,7 @@ export default function Home() {
       console.log('🔍 DEBUG Frontend: Session user email:', session?.user?.email);
       console.log('🔍 DEBUG Frontend: Deployment payload:', deploymentPayload);
 
-      const response = await fetch("/api/deploy", {
+      const response = await fetch("/api/openclaw/deploy", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -140,9 +140,9 @@ export default function Home() {
       }
 
       // Show success modal instead of alert
-      setDeploymentResult(data.bot);
+      setDeploymentResult(data.instance);
       setShowSuccessModal(true);
-      console.log("Deployment started:", data);
+      console.log("OpenClaw deployment started:", data);
     } catch (error: any) {
       alert(`Deployment failed: ${error.message}`);
       console.error("Deployment error:", error);

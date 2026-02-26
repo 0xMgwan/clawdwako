@@ -56,66 +56,62 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Parse request body
+    // Parse request body from frontend
     const body = await request.json();
     const {
-      model,
-      channel,
-      anthropicKey,
-      openaiKey,
-      googleKey,
-      telegramToken,
-      discordToken,
-      whatsappToken,
+      botToken,
+      botUsername,
+      selectedModel,
+      userApiKeys,
       instanceName
     } = body;
 
     // Validate required fields
-    if (!model || !channel) {
+    if (!botToken || !selectedModel) {
       return NextResponse.json({ 
         error: 'Missing required fields',
-        message: 'Model and channel are required'
+        message: 'Bot token and model are required'
       }, { status: 400 });
     }
 
-    // Validate channel token
-    if (channel === 'telegram' && !telegramToken) {
-      return NextResponse.json({ 
-        error: 'Telegram bot token required'
-      }, { status: 400 });
+    // Extract API keys from userApiKeys object (if provided)
+    const anthropicKey = userApiKeys?.anthropic || '';
+    const openaiKey = userApiKeys?.openai || '';
+    const googleKey = userApiKeys?.google || '';
+
+    // Validate API key for selected model (only if user is using BYOK)
+    if (userApiKeys) {
+      if (selectedModel.includes('claude') && !anthropicKey) {
+        return NextResponse.json({ 
+          error: 'Anthropic API key required for Claude models'
+        }, { status: 400 });
+      }
+      if (selectedModel.includes('gpt') && !openaiKey) {
+        return NextResponse.json({ 
+          error: 'OpenAI API key required for GPT models'
+        }, { status: 400 });
+      }
+      if (selectedModel.includes('gemini') && !googleKey) {
+        return NextResponse.json({ 
+          error: 'Google API key required for Gemini models'
+        }, { status: 400 });
+      }
     }
 
-    // Validate API key for selected model
-    if (model.includes('claude') && !anthropicKey) {
-      return NextResponse.json({ 
-        error: 'Anthropic API key required for Claude models'
-      }, { status: 400 });
-    }
-    if (model.includes('gpt') && !openaiKey) {
-      return NextResponse.json({ 
-        error: 'OpenAI API key required for GPT models'
-      }, { status: 400 });
-    }
-    if (model.includes('gemini') && !googleKey) {
-      return NextResponse.json({ 
-        error: 'Google API key required for Gemini models'
-      }, { status: 400 });
-    }
-
-    console.log('🚀 Starting OpenClaw deployment for user:', user.id);
+    console.log('🚀 Deploying OpenClaw instance:', instanceName);
 
     // Deploy OpenClaw instance
     const instance = await deployOpenClawInstance({
       userId: user.id,
       userEmail: user.email!,
-      selectedModel: model,
-      channel,
+      selectedModel,
+      channel: 'telegram', // Default to Telegram for now
       anthropicKey,
       openaiKey,
       googleKey,
-      telegramToken,
-      discordToken,
-      whatsappToken
+      telegramToken: botToken,
+      discordToken: undefined,
+      whatsappToken: undefined
     });
 
     console.log('✅ OpenClaw instance deployed:', instance.instanceId);
@@ -124,19 +120,19 @@ export async function POST(request: NextRequest) {
     const dbInstance = await prisma.openClawInstance.create({
       data: {
         userId: user.id,
-        name: instanceName || 'My OpenClaw',
+        name: instanceName || botUsername || 'My OpenClaw',
         railwayProjectId: instance.railwayProjectId,
         railwayServiceId: instance.railwayServiceId,
         deploymentUrl: instance.deploymentUrl,
-        model,
-        channel,
+        model: selectedModel,
+        channel: 'telegram',
         status: instance.status,
         anthropicKey,
         openaiKey,
         googleKey,
-        telegramToken,
-        discordToken,
-        whatsappToken,
+        telegramToken: botToken,
+        discordToken: null,
+        whatsappToken: null,
         lastHealthCheck: new Date()
       }
     });
