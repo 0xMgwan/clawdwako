@@ -19,21 +19,10 @@ RUN npm install -g openclaw@latest
 # Create workspace directory
 WORKDIR /openclaw
 
-# Initialize OpenClaw workspace
-RUN openclaw init --non-interactive
-
-# Create health check endpoint script
-RUN echo '#!/bin/sh\ncurl -f http://localhost:3000/health || exit 1' > /healthcheck.sh && \
-    chmod +x /healthcheck.sh
-
 # Expose ports
 # 3000 - Gateway HTTP/WebSocket
-# 8080 - Alternative port
-EXPOSE 3000 8080
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
-    CMD /healthcheck.sh
+EXPOSE 3000
 
 # Start OpenClaw Gateway
+# OpenClaw will initialize workspace on first run
 CMD ["openclaw", "start", "--gateway", "--host", "0.0.0.0", "--port", "3000"]
