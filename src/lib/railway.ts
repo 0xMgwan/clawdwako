@@ -202,6 +202,32 @@ export class RailwayClient {
     return await this.query(query, { serviceId });
   }
 
+  async configureDockerfile(serviceId: string, dockerfilePath: string, rootDirectory: string = '.') {
+    const query = `
+      mutation ServiceInstanceUpdate($serviceId: String!, $dockerfilePath: String!, $rootDirectory: String!) {
+        serviceInstanceUpdate(
+          input: {
+            serviceId: $serviceId
+            source: {
+              dockerfilePath: $dockerfilePath
+              rootDirectory: $rootDirectory
+            }
+          }
+        ) {
+          id
+        }
+      }
+    `;
+
+    try {
+      await this.query(query, { serviceId, dockerfilePath, rootDirectory });
+      console.log(`✅ Configured service to use ${dockerfilePath}`);
+    } catch (error: any) {
+      console.error('❌ Failed to configure Dockerfile:', error.message);
+      throw error;
+    }
+  }
+
   async updateEnvironmentVariable(
     projectId: string,
     environmentId: string,
@@ -402,7 +428,11 @@ export class RailwayClient {
       '0xMgwan/clawdwako',
       'main'
     );
-    console.log('GitHub deployment initiated - Railway will use Dockerfile.openclaw');
+    console.log('GitHub deployment initiated');
+
+    console.log('Step 5: Configuring Railway to use Dockerfile.openclaw...');
+    await this.configureDockerfile(service.id, 'Dockerfile.openclaw', '.');
+    console.log('✅ Railway configured to use Dockerfile.openclaw');
 
     return {
       projectId: project.id,
