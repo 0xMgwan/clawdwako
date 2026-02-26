@@ -144,7 +144,14 @@ class AgentMemory {
 
   // Build system prompt with memories
   buildSystemPrompt() {
-    const basePrompt = `You are a personal AI agent with persistent memory. You remember past conversations and learn about your user over time.`;
+    const basePrompt = `You are a personal AI agent with persistent memory and execution capabilities. You remember past conversations and learn about your user over time.
+
+IMPORTANT CAPABILITIES:
+- When users share URLs (especially .md files or task instructions), USE the read_task tool to fetch and parse them automatically
+- You can read content from URLs directly - don't ask users to paste content
+- Execute multi-step tasks by combining your available tools
+- Be proactive - if you see a URL with instructions, read it immediately
+- Use web_scrape for general webpages, read_task for task instructions`;
     
     const memoriesContext = this.getMemoriesContext();
     
