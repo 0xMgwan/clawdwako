@@ -19,16 +19,15 @@ RUN npm install -g openclaw@latest
 # Create workspace directory
 WORKDIR /openclaw
 
-# Create OpenClaw config directory and config file
-RUN mkdir -p /root/.openclaw && \
-    echo '{"gateway":{"mode":"local","controlUi":{"allowedOrigins":["*"],"dangerouslyAllowHostHeaderOriginFallback":true}}}' > /root/.openclaw/openclaw.json
+# Create OpenClaw config directory
+RUN mkdir -p /root/.openclaw
+
+# Copy startup script
+COPY start-openclaw.sh /start-openclaw.sh
+RUN chmod +x /start-openclaw.sh
 
 # Expose ports
-# 3000 - Gateway HTTP/WebSocket
-EXPOSE 3000
+EXPOSE 8080
 
-# Start OpenClaw Gateway
-# OpenClaw will initialize workspace on first run
-# --bind lan allows external connections
-# Use shell form to properly expand $PORT environment variable
-CMD openclaw gateway --bind lan --port ${PORT:-3000}
+# Start OpenClaw Gateway via startup script
+CMD ["/bin/bash", "/start-openclaw.sh"]
