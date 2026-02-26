@@ -200,23 +200,25 @@ export default function Dashboard() {
   };
 
   const handleDelete = async (botId: string) => {
-    if (!confirm('Are you sure you want to delete this bot? This action cannot be undone.')) {
+    if (!confirm('Are you sure you want to delete this agent? This action cannot be undone.')) {
       return;
     }
     
     try {
-      const response = await fetch(`/api/bots/${botId}`, {
+      const response = await fetch(`/api/openclaw/instances/${botId}`, {
         method: 'DELETE'
       });
       
       if (response.ok) {
         setBots(bots.filter(bot => bot.id !== botId));
+        alert('Agent deleted successfully');
       } else {
-        alert('Failed to delete bot. Please try again.');
+        const data = await response.json();
+        alert(`Failed to delete agent: ${data.message || 'Please try again'}`);
       }
     } catch (error) {
-      console.error('Failed to delete bot:', error);
-      alert('Failed to delete bot. Please try again.');
+      console.error('Failed to delete agent:', error);
+      alert('Failed to delete agent. Please try again.');
     }
   };
 
