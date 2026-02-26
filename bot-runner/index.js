@@ -20,7 +20,7 @@ const OpenAI = require('openai').default;
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const axios = require('axios');
 const http = require('http');
-const { getClaudeTools, getGPTTools, getGeminiTools, executeTool } = require('./tools');
+const { getAllClaudeTools, getAllGPTTools, getAllGeminiTools, executeAnyTool } = require('./tools');
 
 // Get environment variables
 const BOT_ID = process.env.BOT_ID;
@@ -32,6 +32,16 @@ let SELECTED_MODEL = process.env.SELECTED_MODEL;
 let ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 let OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 let GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
+
+// Advanced tool configuration
+const TOOL_CONFIG = {
+  githubToken: process.env.GITHUB_TOKEN,
+  emailConfig: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+    service: process.env.EMAIL_SERVICE || 'gmail'
+  }
+};
 
 // Pricing per 1M tokens (approximate)
 const PRICING = {
@@ -199,7 +209,7 @@ async function handleClaudeWithTools(userMessage) {
       const response = await anthropic.messages.create({
         model: SELECTED_MODEL,
         max_tokens: 2048,
-        tools: getClaudeTools(),
+        tools: getAllClaudeTools(),
         messages: messages
       });
 
@@ -218,7 +228,7 @@ async function handleClaudeWithTools(userMessage) {
 
       // Execute the tool
       console.log(`🔧 Claude wants to use tool: ${toolUseBlock.name}`);
-      const toolResult = await executeTool(toolUseBlock.name, toolUseBlock.input);
+      const toolResult = await executeAnyTool(toolUseBlock.name, toolUseBlock.input, TOOL_CONFIG);
 
       // Add assistant response and tool result to messages
       messages.push({
@@ -262,7 +272,7 @@ async function handleGPTWithTools(userMessage) {
       const response = await openai.chat.completions.create({
         model: SELECTED_MODEL,
         messages: messages,
-        tools: getGPTTools(),
+        tools: getAllGPTTools(),
         max_tokens: 2048
       });
 
@@ -284,7 +294,7 @@ async function handleGPTWithTools(userMessage) {
       for (const toolCall of message.tool_calls) {
         console.log(`🔧 GPT wants to use function: ${toolCall.function.name}`);
         const args = JSON.parse(toolCall.function.arguments);
-        const toolResult = await executeTool(toolCall.function.name, args);
+        const toolResult = await executeAnyTool(toolCall.function.name, args, TOOL_CONFIG);
 
         messages.push({
           role: 'tool',
@@ -311,7 +321,7 @@ async function handleGeminiWithTools(userMessage) {
     const genAI = new GoogleGenerativeAI(GOOGLE_AI_API_KEY);
     const model = genAI.getGenerativeModel({
       model: SELECTED_MODEL,
-      tools: getGeminiTools()
+      tools: getAllGeminiTools()
     });
 
     const chat = model.startChat({
@@ -344,7 +354,7 @@ async function handleGeminiWithTools(userMessage) {
       const functionResponses = [];
       for (const call of functionCalls) {
         console.log(`🔧 Gemini wants to use function: ${call.name}`);
-        const toolResult = await executeTool(call.name, call.args);
+        const toolResult = await executeAnyTool(call.name, call.args, TOOL_CONFIG);
         functionResponses.push({
           name: call.name,
           response: toolResult

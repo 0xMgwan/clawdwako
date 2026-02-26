@@ -383,10 +383,55 @@ function getCurrentTime() {
   };
 }
 
+// Import advanced tools
+const {
+  getAdvancedClaudeTools,
+  getAdvancedGPTTools,
+  getAdvancedGeminiTools,
+  executeAdvancedTool
+} = require('./advanced-tools');
+
+// Merge basic and advanced tools
+function getAllClaudeTools() {
+  return [...getClaudeTools(), ...getAdvancedClaudeTools()];
+}
+
+function getAllGPTTools() {
+  return [...getGPTTools(), ...getAdvancedGPTTools()];
+}
+
+function getAllGeminiTools() {
+  const basic = getGeminiTools();
+  const advanced = getAdvancedGeminiTools();
+  return [{
+    functionDeclarations: [
+      ...basic[0].functionDeclarations,
+      ...advanced[0].functionDeclarations
+    ]
+  }];
+}
+
+// Unified tool executor
+async function executeAnyTool(toolName, args, config = {}) {
+  // Try basic tools first
+  const basicTools = ['web_search', 'web_scrape', 'execute_code', 'get_current_time'];
+  
+  if (basicTools.includes(toolName)) {
+    return await executeTool(toolName, args);
+  }
+  
+  // Execute advanced tools with config
+  return await executeAdvancedTool(toolName, args, config);
+}
+
 module.exports = {
   TOOL_DEFINITIONS,
   getClaudeTools,
   getGPTTools,
   getGeminiTools,
-  executeTool
+  executeTool,
+  getAllClaudeTools,
+  getAllGPTTools,
+  getAllGeminiTools,
+  executeAnyTool
 };
