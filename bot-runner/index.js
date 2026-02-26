@@ -21,6 +21,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const axios = require('axios');
 const http = require('http');
 const { getAllClaudeTools, getAllGPTTools, getAllGeminiTools, executeAnyTool } = require('./tools');
+const { AgentMemory } = require('./memory');
 
 // Get environment variables
 const BOT_ID = process.env.BOT_ID;
@@ -194,21 +195,35 @@ setInterval(() => {
 console.log('Bot is running and listening for messages...');
 
 // Handler for Claude with tool calling
-async function handleClaudeWithTools(userMessage) {
+async function handleClaudeWithTools(userMessage, memory = null) {
   try {
     const anthropic = new Anthropic({
       apiKey: ANTHROPIC_API_KEY
     });
 
-    const messages = [{ role: 'user', content: userMessage }];
+    // Build messages with conversation history and memory context
+    const messages = [];
+    
+    // Add conversation history if available
+    if (memory) {
+      const history = memory.getHistoryContext();
+      messages.push(...history);
+    }
+    
+    // Add current user message
+    messages.push({ role: 'user', content: userMessage });
     let totalInputTokens = 0;
     let totalOutputTokens = 0;
 
     // Agentic loop - allow up to 5 tool calls
     for (let i = 0; i < 5; i++) {
+      // Build system prompt with memories
+      const systemPrompt = memory ? memory.buildSystemPrompt() : 'You are a helpful AI assistant with tool-calling capabilities.';
+      
       const response = await anthropic.messages.create({
         model: SELECTED_MODEL,
         max_tokens: 2048,
+        system: systemPrompt,
         tools: getAllClaudeTools(),
         messages: messages
       });
@@ -257,13 +272,28 @@ async function handleClaudeWithTools(userMessage) {
 }
 
 // Handler for GPT with function calling
-async function handleGPTWithTools(userMessage) {
+async function handleGPTWithTools(userMessage, memory = null) {
   try {
     const openai = new OpenAI({
       apiKey: OPENAI_API_KEY
     });
 
-    const messages = [{ role: 'user', content: userMessage }];
+    // Build messages with conversation history and memory context
+    const messages = [];
+    
+    // Add system prompt with memories
+    if (memory) {
+      messages.push({ role: 'system', content: memory.buildSystemPrompt() });
+      
+      // Add conversation history
+      const history = memory.getHistoryContext();
+      messages.push(...history);
+    } else {
+      messages.push({ role: 'system', content: 'You are a helpful AI assistant with function-calling capabilities.' });
+    }
+    
+    // Add current user message
+    messages.push({ role: 'user', content: userMessage });
     let totalInputTokens = 0;
     let totalOutputTokens = 0;
 
@@ -316,16 +346,27 @@ async function handleGPTWithTools(userMessage) {
 }
 
 // Handler for Gemini with function calling
-async function handleGeminiWithTools(userMessage) {
+async function handleGeminiWithTools(userMessage, memory = null) {
   try {
     const genAI = new GoogleGenerativeAI(GOOGLE_AI_API_KEY);
+    
+    // Build system instruction with memories
+    const systemInstruction = memory ? memory.buildSystemPrompt() : 'You are a helpful AI assistant with function-calling capabilities.';
+    
     const model = genAI.getGenerativeModel({
       model: SELECTED_MODEL,
-      tools: getAllGeminiTools()
+      tools: getAllGeminiTools(),
+      systemInstruction
     });
 
+    // Build chat history from memory
+    const history = memory ? memory.getHistoryContext().map(msg => ({
+      role: msg.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: msg.content }]
+    })) : [];
+    
     const chat = model.startChat({
-      history: [],
+      history,
     });
 
     let totalInputTokens = 0;
@@ -400,6 +441,13 @@ function setupMessageHandler() {
   console.log(`Received message from ${chatId}: ${userMessage}`);
 
   try {
+    // Initialize memory for this conversation
+    const memory = new AgentMemory(BOT_ID, chatId.toString(), PLATFORM_URL);
+    
+    // Load conversation history and memories
+    await memory.loadHistory(20);
+    await memory.loadMemories();
+    
     let aiResponse = '';
 
     // Check if API keys are configured
@@ -408,17 +456,24 @@ function setupMessageHandler() {
     if (!hasApiKeys) {
       aiResponse = `🤖 Test Mode Response\n\nYou said: "${userMessage}"\n\nThis is a test response. The bot is working! Add API keys to enable AI responses.`;
     } else if (SELECTED_MODEL.includes('claude')) {
-      // Use Anthropic API with tool calling
-      aiResponse = await handleClaudeWithTools(userMessage);
+      // Use Anthropic API with tool calling and memory
+      aiResponse = await handleClaudeWithTools(userMessage, memory);
     } else if (SELECTED_MODEL.includes('gpt') || SELECTED_MODEL.includes('o1') || SELECTED_MODEL.includes('o3')) {
-      // Use OpenAI API with function calling
-      aiResponse = await handleGPTWithTools(userMessage);
+      // Use OpenAI API with function calling and memory
+      aiResponse = await handleGPTWithTools(userMessage, memory);
     } else if (SELECTED_MODEL.includes('gemini')) {
-      // Use Google Generative AI API with function calling
-      aiResponse = await handleGeminiWithTools(userMessage);
+      // Use Google Generative AI API with function calling and memory
+      aiResponse = await handleGeminiWithTools(userMessage, memory);
     } else {
       aiResponse = `Model ${SELECTED_MODEL} is not configured properly.`;
     }
+
+    // Save conversation to memory
+    await memory.saveMessage('user', userMessage, null, null, SELECTED_MODEL);
+    await memory.saveMessage('assistant', aiResponse, null, null, SELECTED_MODEL);
+    
+    // Extract and save important facts
+    await memory.extractAndSaveMemories(userMessage, aiResponse);
 
     // Send response back to user
     await bot.sendMessage(chatId, aiResponse);

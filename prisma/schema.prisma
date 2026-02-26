@@ -141,3 +141,57 @@ model ActivityLog {
   @@index([createdAt])
   @@index([type])
 }
+
+model ConversationMessage {
+  id              String   @id @default(cuid())
+  botId           String
+  chatId          String   // Telegram chat ID
+  role            String   // user, assistant, system
+  content         String   @db.Text
+  toolCalls       Json?    // Tool calls made in this message
+  toolResults     Json?    // Results from tool executions
+  model           String   // Which model generated this
+  tokenCount      Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  @@index([botId, chatId])
+  @@index([chatId])
+  @@index([createdAt])
+}
+
+model AgentMemory {
+  id              String   @id @default(cuid())
+  botId           String
+  chatId          String   // Telegram chat ID
+  memoryType      String   // fact, preference, task, context, skill
+  key             String   // Memory identifier (e.g., "user_name", "favorite_language")
+  value           String   @db.Text
+  importance      Int      @default(5) // 1-10, higher = more important
+  lastAccessed    DateTime @default(now())
+  accessCount     Int      @default(0)
+  metadata        Json?    // Additional context
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([botId, chatId])
+  @@index([chatId])
+  @@index([memoryType])
+  @@index([importance])
+  @@unique([botId, chatId, key])
+}
+
+model ConversationSummary {
+  id              String   @id @default(cuid())
+  botId           String
+  chatId          String   // Telegram chat ID
+  summary         String   @db.Text
+  messageCount    Int      @default(0)
+  startDate       DateTime
+  endDate         DateTime
+  topics          Json?    // Array of topics discussed
+  createdAt       DateTime @default(now())
+
+  @@index([botId, chatId])
+  @@index([chatId])
+  @@index([createdAt])
+}
