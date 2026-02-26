@@ -73,7 +73,7 @@ export async function PATCH(
       );
     }
 
-    const { status } = await request.json();
+    const body = await request.json();
     const params = await context.params;
     const botId = params.botId;
 
@@ -110,12 +110,17 @@ export async function PATCH(
       );
     }
 
-    console.log('Updating bot:', botId, 'to status:', status);
+    // Build update data object with only provided fields
+    const updateData: any = {};
+    if (body.status !== undefined) updateData.status = body.status;
+    if (body.selectedModel !== undefined) updateData.selectedModel = body.selectedModel;
+
+    console.log('Updating bot:', botId, 'with data:', updateData);
 
     // Update the bot (now verified to belong to the user)
     const bot = await prisma.bot.update({
       where: { id: botId },
-      data: { status }
+      data: updateData
     });
 
     return NextResponse.json({
