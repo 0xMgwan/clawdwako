@@ -189,17 +189,17 @@ export class RailwayClient {
     rootDirectory: string
   ) {
     const query = `
-      mutation ServiceUpdate($serviceId: String!, $rootDirectory: String) {
+      mutation ServiceUpdate($serviceId: String!) {
         serviceUpdate(
           id: $serviceId
-          input: { deploymentSource: { repo: { rootDirectory: $rootDirectory } } }
+          input: { name: "openclaw-service" }
         ) {
           id
         }
       }
     `;
 
-    return await this.query(query, { serviceId, rootDirectory });
+    return await this.query(query, { serviceId });
   }
 
   async updateEnvironmentVariable(
@@ -394,21 +394,15 @@ export class RailwayClient {
       throw new Error(`Failed to set Railway environment variables: ${error.message}`);
     }
 
-    console.log('Step 4: Deploying from GitHub...');
-    // Deploy the bot code from your GitHub repo
-    // Use owner/repo format instead of full URL
+    console.log('Step 4: Deploying OpenClaw from GitHub...');
+    // Deploy OpenClaw using Dockerfile.openclaw from root directory
     await this.deployFromGitHub(
       project.id,
       service.id,
       '0xMgwan/clawdwako',
       'main'
     );
-    console.log('GitHub deployment initiated');
-    
-    console.log('Step 5: Setting root directory to bot-runner...');
-    await this.setServiceSource(service.id, 'bot-runner');
-    console.log('Root directory set to bot-runner');
-    console.log('Railway will now detect the Dockerfile in bot-runner directory');
+    console.log('GitHub deployment initiated - Railway will use Dockerfile.openclaw');
 
     return {
       projectId: project.id,
