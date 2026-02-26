@@ -434,9 +434,200 @@ function setupMessageHandler() {
     return;
   }
   
+  // Command handlers
+  bot.onText(/\/start/, async (msg) => {
+    const chatId = msg.chat.id;
+    const welcomeMessage = `🤖 **Welcome to Your Personal AI Agent!**
+
+I'm an intelligent agent with persistent memory and execution capabilities.
+
+**Quick Commands:**
+/help - See all my capabilities
+/skills - View available tools
+/memory - Check what I remember about you
+
+Just chat with me naturally - I'll remember our conversations and can execute tasks for you!`;
+    
+    await bot.sendMessage(chatId, welcomeMessage, { parse_mode: 'Markdown' });
+  });
+
+  bot.onText(/\/help/, async (msg) => {
+    const chatId = msg.chat.id;
+    const helpMessage = `🦾 **Agent Capabilities**
+
+**🧠 Intelligence:**
+• Persistent memory - I remember our conversations
+• Context-aware responses
+• Learn your preferences over time
+• Multi-step task execution
+
+**🛠️ Tools & Skills:**
+
+**Web & Research:**
+• Web search (DuckDuckGo)
+• Web scraping & content extraction
+• Get current time/date
+
+**Code & Development:**
+• Execute code safely (JavaScript)
+• Generate code in any language
+• Create and manage files
+
+**GitHub Integration:**
+• Create repositories
+• Create issues
+• List your repos
+
+**Email & Communication:**
+• Send emails (Gmail)
+
+**Task Management:**
+• Schedule recurring tasks (cron)
+• List scheduled tasks
+• Cancel tasks
+
+**File Operations:**
+• Read files
+• Write files
+• List workspace files
+
+**💬 How to Use:**
+Just chat naturally! Examples:
+• "Search for AI news"
+• "Create a GitHub repo called my-project"
+• "Send an email to john@example.com"
+• "Generate a Python script for CSV parsing"
+• "Schedule a daily reminder at 9am"
+• "What's my name?" (I'll remember!)
+
+Type /skills for detailed tool information.`;
+    
+    await bot.sendMessage(chatId, helpMessage, { parse_mode: 'Markdown' });
+  });
+
+  bot.onText(/\/skills/, async (msg) => {
+    const chatId = msg.chat.id;
+    const skillsMessage = `🔧 **Available Tools & Skills**
+
+**1. web_search**
+Search the web using DuckDuckGo
+Example: "Search for latest AI developments"
+
+**2. web_scrape**
+Extract content from any webpage
+Example: "Summarize https://example.com"
+
+**3. execute_code**
+Run JavaScript code safely
+Example: "Calculate 15% tip on $87.50"
+
+**4. get_current_time**
+Get current date/time with timezone
+Example: "What time is it?"
+
+**5. github_create_repo**
+Create a new GitHub repository
+Example: "Create a repo called my-app"
+
+**6. github_create_issue**
+Create an issue on a repository
+Example: "Create an issue on owner/repo about bug XYZ"
+
+**7. github_list_repos**
+List your GitHub repositories
+Example: "Show me my GitHub repos"
+
+**8. send_email**
+Send emails via Gmail
+Example: "Email john@example.com about the meeting"
+
+**9. write_file**
+Create/write files in workspace
+Example: "Write my TODO list to tasks.txt"
+
+**10. read_file**
+Read file contents
+Example: "Read my notes.txt file"
+
+**11. list_files**
+List all workspace files
+Example: "Show me all my files"
+
+**12. generate_code**
+Generate code and save to file
+Example: "Generate a Python CSV parser"
+
+**13. schedule_task**
+Schedule recurring tasks (cron)
+Example: "Remind me daily at 9am to check emails"
+
+**14. list_scheduled_tasks**
+View all scheduled tasks
+Example: "What tasks are scheduled?"
+
+**15. cancel_scheduled_task**
+Cancel a scheduled task
+Example: "Cancel the daily reminder"
+
+**16. read_task**
+Read and execute tasks from URLs or text
+Example: "Read https://example.com/task.md and follow the instructions"
+
+**🎯 I can combine multiple tools to complete complex tasks!**
+
+Just like OpenClaw, I can:
+• Read task instructions from URLs
+• Parse multi-step tasks
+• Execute each step automatically
+• Use multiple tools in sequence
+
+Type /memory to see what I remember about you.`;
+    
+    await bot.sendMessage(chatId, skillsMessage, { parse_mode: 'Markdown' });
+  });
+
+  bot.onText(/\/memory/, async (msg) => {
+    const chatId = msg.chat.id;
+    
+    try {
+      const memory = new AgentMemory(BOT_ID, chatId.toString(), PLATFORM_URL);
+      await memory.loadMemories();
+      
+      const memories = memory.memories;
+      
+      if (memories.size === 0) {
+        await bot.sendMessage(chatId, "🧠 I don't have any memories about you yet. Chat with me and I'll learn about you!");
+        return;
+      }
+      
+      let memoryText = "🧠 **What I Remember About You:**\n\n";
+      
+      // Sort by importance
+      const sortedMemories = Array.from(memories.entries())
+        .sort((a, b) => b[1].importance - a[1].importance);
+      
+      for (const [key, data] of sortedMemories) {
+        const emoji = data.importance >= 8 ? '⭐' : data.importance >= 5 ? '📌' : '💡';
+        memoryText += `${emoji} **${key}**: ${data.value}\n`;
+      }
+      
+      memoryText += `\n_Total memories: ${memories.size}_`;
+      
+      await bot.sendMessage(chatId, memoryText, { parse_mode: 'Markdown' });
+    } catch (error) {
+      console.error('Error loading memories:', error);
+      await bot.sendMessage(chatId, "Sorry, I couldn't load my memories right now.");
+    }
+  });
+
   bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
   const userMessage = msg.text;
+
+  // Skip if it's a command
+  if (userMessage && userMessage.startsWith('/')) {
+    return;
+  }
 
   console.log(`Received message from ${chatId}: ${userMessage}`);
 

@@ -134,6 +134,18 @@ const ADVANCED_TOOLS = {
       },
       required: ['language', 'requirements', 'filename']
     }
+  },
+  read_task: {
+    name: 'read_task',
+    description: 'Read and parse a task from a URL or text. Extracts instructions and steps to execute.',
+    parameters: {
+      type: 'object',
+      properties: {
+        source: { type: 'string', description: 'URL or text containing the task' },
+        source_type: { type: 'string', enum: ['url', 'text'], description: 'Type of source' }
+      },
+      required: ['source', 'source_type']
+    }
   }
 };
 
@@ -207,6 +219,9 @@ async function executeAdvancedTool(toolName, args, config = {}) {
       
       case 'generate_code':
         return await generateCode(args);
+      
+      case 'read_task':
+        return await readTask(args);
       
       default:
         return { error: `Unknown advanced tool: ${toolName}` };
@@ -480,6 +495,89 @@ async function generateCode(args) {
     code,
     message: `Code generated and saved to ${args.filename}`
   };
+}
+
+// Read and Parse Task
+async function readTask(args) {
+  const axios = require('axios');
+  const cheerio = require('cheerio');
+  
+  try {
+    let taskContent = '';
+    
+    if (args.source_type === 'url') {
+      // Fetch content from URL
+      const response = await axios.get(args.source, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; TaskBot/1.0)'
+        },
+        timeout: 10000
+      });
+      
+      const $ = cheerio.load(response.data);
+      
+      // Remove script and style tags
+      $('script, style, nav, header, footer').remove();
+      
+      // Try to find main content
+      const mainContent = $('main, article, .content, #content, .markdown-body').first();
+      taskContent = mainContent.length > 0 ? mainContent.text() : $('body').text();
+      
+      // Clean up whitespace
+      taskContent = taskContent.replace(/\s+/g, ' ').trim();
+      
+    } else {
+      // Use provided text directly
+      taskContent = args.source;
+    }
+    
+    // Parse task into steps
+    const steps = [];
+    const lines = taskContent.split(/\n+/);
+    
+    let currentStep = '';
+    for (const line of lines) {
+      const trimmed = line.trim();
+      
+      // Detect numbered steps (1., 2., etc.) or bullet points
+      if (/^(\d+\.|\-|\*|\•)/.test(trimmed)) {
+        if (currentStep) {
+          steps.push(currentStep);
+        }
+        currentStep = trimmed.replace(/^(\d+\.|\-|\*|\•)\s*/, '');
+      } else if (trimmed && currentStep) {
+        currentStep += ' ' + trimmed;
+      } else if (trimmed && !currentStep) {
+        currentStep = trimmed;
+      }
+    }
+    
+    if (currentStep) {
+      steps.push(currentStep);
+    }
+    
+    // Extract key information
+    const taskInfo = {
+      success: true,
+      source: args.source,
+      source_type: args.source_type,
+      content: taskContent.substring(0, 1000), // First 1000 chars
+      steps: steps.slice(0, 20), // Max 20 steps
+      step_count: steps.length,
+      message: `Task read successfully. Found ${steps.length} steps to execute.`,
+      instructions: steps.length > 0 ? 
+        `I've read the task. Here are the steps:\n${steps.slice(0, 10).map((s, i) => `${i + 1}. ${s}`).join('\n')}` :
+        'Task content retrieved but no clear steps found. I can help execute based on the content.'
+    };
+    
+    return taskInfo;
+    
+  } catch (error) {
+    return { 
+      error: `Failed to read task: ${error.message}`,
+      source: args.source
+    };
+  }
 }
 
 module.exports = {
