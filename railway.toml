@@ -3,6 +3,5 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile.openclaw"
 
 [deploy]
-startCommand = "openclaw gateway --allow-unconfigured --bind lan --port $PORT"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
