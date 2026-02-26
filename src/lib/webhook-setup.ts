@@ -14,7 +14,7 @@ export async function setupWebhookWhenReady(
   
   console.log(`🔄 Starting webhook setup polling for instance ${instanceId}`);
   
-  const instance = await prisma.openClawInstance.findUnique({
+  const instance = await prisma.OpenClawInstance.findUnique({
     where: { id: instanceId }
   });
 
@@ -37,45 +37,22 @@ export async function setupWebhookWhenReady(
       if (status.state === 'SUCCESS' && status.url) {
         console.log(`✅ Railway deployment is live at: ${status.url}`);
         
-        // Try to configure webhook
-        try {
-          if (instance.channel === 'telegram' && instance.telegramToken) {
-            const webhookUrl = `${status.url}/telegram/webhook`;
-            
-            console.log(`📡 Configuring Telegram webhook: ${webhookUrl}`);
-            
-            const response = await axios.post(
-              `https://api.telegram.org/bot${instance.telegramToken}/setWebhook`,
-              {
-                url: webhookUrl,
-                allowed_updates: ['message', 'callback_query', 'inline_query'],
-              },
-              { timeout: 10000 }
-            );
-            
-            if (response.data.ok) {
-              console.log('✅ Telegram webhook configured successfully');
-              
-              // Update instance in database
-              await prisma.openClawInstance.update({
-                where: { id: instanceId },
-                data: {
-                  deploymentUrl: status.url,
-                  status: 'active',
-                  lastHealthCheck: new Date()
-                }
-              });
-              
-              console.log('✅ Instance updated to active status');
-              return; // Success!
-            } else {
-              console.error('❌ Telegram webhook setup failed:', response.data.description);
-            }
+        // OpenClaw uses long polling (not webhooks), so we just update status to active
+        // No webhook configuration needed - OpenClaw connects directly to Telegram API
+        console.log('✅ OpenClaw instance is running (uses long polling, no webhook needed)');
+        
+        // Update instance in database
+        await prisma.OpenClawInstance.update({
+          where: { id: instanceId },
+          data: {
+            deploymentUrl: status.url,
+            status: 'active',
+            lastHealthCheck: new Date()
           }
-        } catch (webhookError: any) {
-          console.error('❌ Failed to configure webhook:', webhookError.message);
-          // Continue polling in case it's a temporary error
-        }
+        });
+        
+        console.log('✅ Instance updated to active status');
+        return; // Success!
       } else {
         console.log(`⏳ Deployment status: ${status.state}, waiting...`);
       }
@@ -98,7 +75,7 @@ export async function setupWebhookWhenReady(
   console.error(`❌ Failed to configure webhook after ${maxAttempts} attempts`);
   
   // Update instance to show it needs manual configuration
-  await prisma.openClawInstance.update({
+  await prisma.OpenClawInstance.update({
     where: { id: instanceId },
     data: {
       status: 'failed',
