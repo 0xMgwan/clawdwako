@@ -158,6 +158,8 @@ export class RailwayClient {
     
     console.log(`✅ Found environment: ${environmentName} (${environmentId})`);
 
+    console.log(`🔧 Setting variables on service: ${serviceId}`);
+
     const mutations = Object.entries(variables).map(([key, value], index) => {
       // Escape special characters in values
       const escapedValue = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
@@ -166,6 +168,7 @@ export class RailwayClient {
         var${index}: variableUpsert(input: {
           projectId: "${projectId}"
           environmentId: "${environmentId}"
+          serviceId: "${serviceId}"
           name: "${key}"
           value: "${escapedValue}"
         })
