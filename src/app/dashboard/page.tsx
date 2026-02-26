@@ -150,28 +150,24 @@ export default function Dashboard() {
 
   const handleSaveConfig = async (botId: string, data: any) => {
     try {
-      const response = await fetch(`/api/bots/${botId}`, {
+      // Send model change to OpenClaw instances API
+      const response = await fetch(`/api/openclaw/instances/${botId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify({ model: data.selectedModel })
       });
+      
       if (response.ok) {
-        // Refresh bots
-        const botsResponse = await fetch('/api/bots');
-        const botsData = await botsResponse.json();
-        if (botsData.success) {
-          setBots(botsData.bots.map((bot: any) => ({
-            ...bot,
-            type: 'AI Agent',
-            uptime: '99.9%',
-            lastActive: new Date(bot.updatedAt).toLocaleString(),
-            cost: '$0.00/mo',
-            channels: ['Telegram']
-          })));
-        }
+        alert('Model updated! Railway is redeploying with the new model...');
+        // Refresh instances by reloading the page
+        window.location.reload();
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to update model: ${errorData.message || 'Please try again'}`);
       }
     } catch (error) {
       console.error('Error saving config:', error);
+      alert('Failed to update model. Please try again.');
     }
   };
 
