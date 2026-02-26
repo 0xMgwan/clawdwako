@@ -20,6 +20,7 @@ const OpenAI = require('openai').default;
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const axios = require('axios');
 const http = require('http');
+const { getClaudeTools, getGPTTools, getGeminiTools, executeTool } = require('./tools');
 
 // Get environment variables
 const BOT_ID = process.env.BOT_ID;
@@ -182,6 +183,199 @@ setInterval(() => {
 
 console.log('Bot is running and listening for messages...');
 
+// Handler for Claude with tool calling
+async function handleClaudeWithTools(userMessage) {
+  try {
+    const anthropic = new Anthropic({
+      apiKey: ANTHROPIC_API_KEY
+    });
+
+    const messages = [{ role: 'user', content: userMessage }];
+    let totalInputTokens = 0;
+    let totalOutputTokens = 0;
+
+    // Agentic loop - allow up to 5 tool calls
+    for (let i = 0; i < 5; i++) {
+      const response = await anthropic.messages.create({
+        model: SELECTED_MODEL,
+        max_tokens: 2048,
+        tools: getClaudeTools(),
+        messages: messages
+      });
+
+      totalInputTokens += response.usage.input_tokens;
+      totalOutputTokens += response.usage.output_tokens;
+
+      // Check if Claude wants to use tools
+      const toolUseBlock = response.content.find(block => block.type === 'tool_use');
+      
+      if (!toolUseBlock) {
+        // No tool use, return the text response
+        const textBlock = response.content.find(block => block.type === 'text');
+        await trackUsage(SELECTED_MODEL, 'anthropic', totalInputTokens, totalOutputTokens, true);
+        return textBlock ? textBlock.text : 'I processed your request.';
+      }
+
+      // Execute the tool
+      console.log(`🔧 Claude wants to use tool: ${toolUseBlock.name}`);
+      const toolResult = await executeTool(toolUseBlock.name, toolUseBlock.input);
+
+      // Add assistant response and tool result to messages
+      messages.push({
+        role: 'assistant',
+        content: response.content
+      });
+      messages.push({
+        role: 'user',
+        content: [{
+          type: 'tool_result',
+          tool_use_id: toolUseBlock.id,
+          content: JSON.stringify(toolResult)
+        }]
+      });
+    }
+
+    // If we've exhausted tool calls, return last response
+    await trackUsage(SELECTED_MODEL, 'anthropic', totalInputTokens, totalOutputTokens, true);
+    return 'I completed the task using multiple tools.';
+
+  } catch (error) {
+    console.error('Claude tool calling error:', error);
+    await trackUsage(SELECTED_MODEL, 'anthropic', 0, 0, false, error.message);
+    return `I'm having trouble processing your request. Error: ${error.message}`;
+  }
+}
+
+// Handler for GPT with function calling
+async function handleGPTWithTools(userMessage) {
+  try {
+    const openai = new OpenAI({
+      apiKey: OPENAI_API_KEY
+    });
+
+    const messages = [{ role: 'user', content: userMessage }];
+    let totalInputTokens = 0;
+    let totalOutputTokens = 0;
+
+    // Agentic loop - allow up to 5 function calls
+    for (let i = 0; i < 5; i++) {
+      const response = await openai.chat.completions.create({
+        model: SELECTED_MODEL,
+        messages: messages,
+        tools: getGPTTools(),
+        max_tokens: 2048
+      });
+
+      const message = response.choices[0].message;
+      totalInputTokens += response.usage.prompt_tokens;
+      totalOutputTokens += response.usage.completion_tokens;
+
+      // Check if GPT wants to call a function
+      if (!message.tool_calls || message.tool_calls.length === 0) {
+        // No function call, return the response
+        await trackUsage(SELECTED_MODEL, 'openai', totalInputTokens, totalOutputTokens, true);
+        return message.content || 'I processed your request.';
+      }
+
+      // Add assistant message to conversation
+      messages.push(message);
+
+      // Execute all tool calls
+      for (const toolCall of message.tool_calls) {
+        console.log(`🔧 GPT wants to use function: ${toolCall.function.name}`);
+        const args = JSON.parse(toolCall.function.arguments);
+        const toolResult = await executeTool(toolCall.function.name, args);
+
+        messages.push({
+          role: 'tool',
+          tool_call_id: toolCall.id,
+          content: JSON.stringify(toolResult)
+        });
+      }
+    }
+
+    // If we've exhausted function calls, return last response
+    await trackUsage(SELECTED_MODEL, 'openai', totalInputTokens, totalOutputTokens, true);
+    return 'I completed the task using multiple functions.';
+
+  } catch (error) {
+    console.error('GPT function calling error:', error);
+    await trackUsage(SELECTED_MODEL, 'openai', 0, 0, false, error.message);
+    return `I'm having trouble processing your request. Error: ${error.message}`;
+  }
+}
+
+// Handler for Gemini with function calling
+async function handleGeminiWithTools(userMessage) {
+  try {
+    const genAI = new GoogleGenerativeAI(GOOGLE_AI_API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: SELECTED_MODEL,
+      tools: getGeminiTools()
+    });
+
+    const chat = model.startChat({
+      history: [],
+    });
+
+    let totalInputTokens = 0;
+    let totalOutputTokens = 0;
+
+    // Agentic loop - allow up to 5 function calls
+    for (let i = 0; i < 5; i++) {
+      const result = await chat.sendMessage(userMessage);
+      const response = await result.response;
+
+      // Estimate tokens
+      totalInputTokens += Math.ceil(userMessage.length / 4);
+      const responseText = response.text();
+      totalOutputTokens += Math.ceil(responseText.length / 4);
+
+      // Check for function calls
+      const functionCalls = response.functionCalls();
+      
+      if (!functionCalls || functionCalls.length === 0) {
+        // No function call, return the response
+        await trackUsage(SELECTED_MODEL, 'google', totalInputTokens, totalOutputTokens, true);
+        return responseText;
+      }
+
+      // Execute all function calls
+      const functionResponses = [];
+      for (const call of functionCalls) {
+        console.log(`🔧 Gemini wants to use function: ${call.name}`);
+        const toolResult = await executeTool(call.name, call.args);
+        functionResponses.push({
+          name: call.name,
+          response: toolResult
+        });
+      }
+
+      // Send function results back
+      const functionResult = await chat.sendMessage(functionResponses);
+      const finalResponse = await functionResult.response;
+      const finalText = finalResponse.text();
+      
+      totalOutputTokens += Math.ceil(finalText.length / 4);
+      
+      // Check if this response has more function calls
+      if (!finalResponse.functionCalls() || finalResponse.functionCalls().length === 0) {
+        await trackUsage(SELECTED_MODEL, 'google', totalInputTokens, totalOutputTokens, true);
+        return finalText;
+      }
+    }
+
+    // If we've exhausted function calls, return last response
+    await trackUsage(SELECTED_MODEL, 'google', totalInputTokens, totalOutputTokens, true);
+    return 'I completed the task using multiple functions.';
+
+  } catch (error) {
+    console.error('Gemini function calling error:', error);
+    await trackUsage(SELECTED_MODEL, 'google', 0, 0, false, error.message);
+    return `I'm having trouble processing your request. Error: ${error.message}`;
+  }
+}
+
 // Message handler function
 function setupMessageHandler() {
   if (!bot) {
@@ -204,94 +398,14 @@ function setupMessageHandler() {
     if (!hasApiKeys) {
       aiResponse = `🤖 Test Mode Response\n\nYou said: "${userMessage}"\n\nThis is a test response. The bot is working! Add API keys to enable AI responses.`;
     } else if (SELECTED_MODEL.includes('claude')) {
-      // Use Anthropic API
-      try {
-        const anthropic = new Anthropic({
-          apiKey: ANTHROPIC_API_KEY
-        });
-
-        const response = await anthropic.messages.create({
-          model: SELECTED_MODEL,
-          max_tokens: 1024,
-          messages: [{ role: 'user', content: userMessage }]
-        });
-
-        aiResponse = response.content[0].text;
-        
-        // Track usage
-        await trackUsage(
-          SELECTED_MODEL,
-          'anthropic',
-          response.usage.input_tokens,
-          response.usage.output_tokens,
-          true
-        );
-      } catch (error) {
-        console.error('Anthropic API error:', error);
-        aiResponse = `I'm having trouble connecting to Claude right now. Error: ${error.message}`;
-        
-        // Track failed usage
-        await trackUsage(SELECTED_MODEL, 'anthropic', 0, 0, false, error.message);
-      }
-    } else if (SELECTED_MODEL.includes('gpt')) {
-      // Use OpenAI API
-      try {
-        const openai = new OpenAI({
-          apiKey: OPENAI_API_KEY
-        });
-
-        const response = await openai.chat.completions.create({
-          model: SELECTED_MODEL,
-          messages: [{ role: 'user', content: userMessage }],
-          max_tokens: 1024
-        });
-
-        aiResponse = response.choices[0].message.content;
-        
-        // Track usage
-        await trackUsage(
-          SELECTED_MODEL,
-          'openai',
-          response.usage.prompt_tokens,
-          response.usage.completion_tokens,
-          true
-        );
-      } catch (error) {
-        console.error('OpenAI API error:', error);
-        aiResponse = `I'm having trouble connecting to GPT right now. Error: ${error.message}`;
-        
-        // Track failed usage
-        await trackUsage(SELECTED_MODEL, 'openai', 0, 0, false, error.message);
-      }
+      // Use Anthropic API with tool calling
+      aiResponse = await handleClaudeWithTools(userMessage);
+    } else if (SELECTED_MODEL.includes('gpt') || SELECTED_MODEL.includes('o1') || SELECTED_MODEL.includes('o3')) {
+      // Use OpenAI API with function calling
+      aiResponse = await handleGPTWithTools(userMessage);
     } else if (SELECTED_MODEL.includes('gemini')) {
-      // Use Google Generative AI API
-      try {
-        const genAI = new GoogleGenerativeAI(GOOGLE_AI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: SELECTED_MODEL });
-
-        const result = await model.generateContent(userMessage);
-        const response = await result.response;
-        aiResponse = response.text();
-        
-        // Gemini doesn't provide token counts in the same way, estimate based on text length
-        const inputTokens = Math.ceil(userMessage.length / 4);
-        const outputTokens = Math.ceil(aiResponse.length / 4);
-        
-        // Track usage
-        await trackUsage(
-          SELECTED_MODEL,
-          'google',
-          inputTokens,
-          outputTokens,
-          true
-        );
-      } catch (error) {
-        console.error('Google AI API error:', error);
-        aiResponse = `I'm having trouble connecting to Gemini right now. Error: ${error.message}`;
-        
-        // Track failed usage
-        await trackUsage(SELECTED_MODEL, 'google', 0, 0, false, error.message);
-      }
+      // Use Google Generative AI API with function calling
+      aiResponse = await handleGeminiWithTools(userMessage);
     } else {
       aiResponse = `Model ${SELECTED_MODEL} is not configured properly.`;
     }

@@ -11,7 +11,9 @@
     "@anthropic-ai/sdk": "^0.74.0",
     "openai": "^4.77.3",
     "@google/generative-ai": "^0.24.1",
-    "axios": "^1.6.0"
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "vm2": "^3.9.19"
   },
   "engines": {
     "node": ">=18.0.0"
