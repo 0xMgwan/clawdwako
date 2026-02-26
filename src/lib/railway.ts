@@ -251,7 +251,7 @@ export class RailwayClient {
     return data.serviceConnect;
   }
 
-  async getDeploymentStatus(serviceId: string) {
+  async getDeploymentStatus(projectId: string, serviceId: string) {
     const query = `
       query Service($id: String!) {
         service(id: $id) {
@@ -272,7 +272,70 @@ export class RailwayClient {
     `;
 
     const data = await this.query(query, { id: serviceId });
-    return data.service;
+    const deployment = data.service.deployments.edges[0]?.node;
+    
+    return {
+      state: deployment?.status || 'UNKNOWN',
+      url: deployment?.url || null,
+      createdAt: deployment?.createdAt || null
+    };
+  }
+
+  async stopService(projectId: string, serviceId: string) {
+    const query = `
+      mutation ServiceInstanceUpdate($serviceId: String!) {
+        serviceInstanceUpdate(input: { serviceId: $serviceId, numReplicas: 0 }) {
+          id
+        }
+      }
+    `;
+
+    await this.query(query, { serviceId });
+    console.log('✅ Service stopped:', serviceId);
+  }
+
+  async redeployService(projectId: string, serviceId: string) {
+    const query = `
+      mutation ServiceInstanceRedeploy($serviceId: String!) {
+        serviceInstanceRedeploy(serviceId: $serviceId)
+      }
+    `;
+
+    await this.query(query, { serviceId });
+    console.log('✅ Service redeployed:', serviceId);
+  }
+
+  async getLogs(projectId: string, serviceId: string, limit: number = 100) {
+    const query = `
+      query ServiceLogs($serviceId: String!, $limit: Int!) {
+        logs(serviceId: $serviceId, limit: $limit) {
+          edges {
+            node {
+              message
+              timestamp
+            }
+          }
+        }
+      }
+    `;
+
+    try {
+      const data = await this.query(query, { serviceId, limit });
+      return data.logs.edges.map((edge: any) => edge.node.message);
+    } catch (error) {
+      console.error('Failed to fetch logs:', error);
+      return [];
+    }
+  }
+
+  async updateEnvVars(
+    projectId: string,
+    serviceId: string,
+    variables: Record<string, string>
+  ) {
+    console.log('🔧 Updating environment variables...');
+    await this.setEnvironmentVariables(projectId, serviceId, variables);
+    console.log('✅ Environment variables updated');
   }
 
   async deployOpenClaw(options: RailwayDeploymentOptions & { botId?: string }) {

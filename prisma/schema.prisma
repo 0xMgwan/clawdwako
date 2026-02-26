@@ -35,16 +35,18 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  bots          Bot[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                String              @id @default(cuid())
+  name              String?
+  email             String?             @unique
+  emailVerified     DateTime?
+  image             String?
+  accounts          Account[]
+  sessions          Session[]
+  bots              Bot[]
+  openclawInstances OpenClawInstance[]
+  subscription      Subscription?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
 }
 
 model VerificationToken {
@@ -194,4 +196,81 @@ model ConversationSummary {
   @@index([botId, chatId])
   @@index([chatId])
   @@index([createdAt])
+}
+
+model OpenClawInstance {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Deployment info
+  railwayProjectId  String    @unique
+  railwayServiceId  String    @unique
+  deploymentUrl     String?
+  
+  // Configuration
+  name              String    @default("My OpenClaw")
+  model             String    // "claude-opus-4.5", "gpt-5.2", "gemini-3-flash"
+  channel           String    // "telegram", "discord", "whatsapp"
+  status            String    @default("deploying") // "deploying", "active", "stopped", "failed", "error"
+  
+  // Encrypted API Keys
+  anthropicKey      String?   @db.Text
+  openaiKey         String?   @db.Text
+  googleKey         String?   @db.Text
+  
+  // Encrypted Channel Tokens
+  telegramToken     String?   @db.Text
+  discordToken      String?   @db.Text
+  whatsappToken     String?   @db.Text
+  
+  // Metrics
+  apiCalls          Int       @default(0)
+  messageCount      Int       @default(0)
+  uptime            Float     @default(0)
+  lastActive        DateTime?
+  lastHealthCheck   DateTime?
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Subscription {
+  id                      String   @id @default(cuid())
+  userId                  String   @unique
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Subscription details
+  tier                    String   @default("starter") // "starter", "pro", "enterprise"
+  status                  String   @default("active") // "active", "cancelled", "past_due", "trialing"
+  
+  // Stripe integration
+  stripeCustomerId        String?  @unique
+  stripeSubscriptionId    String?  @unique
+  stripePriceId           String?
+  
+  // Limits based on tier
+  maxInstances            Int      @default(1)
+  maxApiCalls             Int      @default(10000)
+  
+  // Billing period
+  currentPeriodStart      DateTime
+  currentPeriodEnd        DateTime
+  cancelAtPeriodEnd       Boolean  @default(false)
+  
+  // Trial
+  trialStart              DateTime?
+  trialEnd                DateTime?
+  
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
 }

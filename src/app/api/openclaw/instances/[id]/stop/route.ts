@@ -1,0 +1,66 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { prisma } from '@/lib/prisma';
+import { stopOpenClawInstance } from '@/lib/openclaw-deploy';
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email }
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    const instance = await prisma.openClawInstance.findFirst({
+      where: {
+        id,
+        userId: user.id
+      }
+    });
+
+    if (!instance) {
+      return NextResponse.json({ error: 'Instance not found' }, { status: 404 });
+    }
+
+    // Stop the Railway service
+    await stopOpenClawInstance(
+      instance.railwayProjectId,
+      instance.railwayServiceId
+    );
+
+    // Update instance status
+    await prisma.openClawInstance.update({
+      where: { id },
+      data: {
+        status: 'stopped',
+        updatedAt: new Date()
+      }
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Instance stopped successfully'
+    });
+
+  } catch (error: any) {
+    console.error('❌ Failed to stop instance:', error);
+    
+    return NextResponse.json({ 
+      error: 'Failed to stop instance',
+      message: error.message 
+    }, { status: 500 });
+  }
+}

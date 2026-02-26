@@ -11,6 +11,7 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 console.log('=== Bot Runner Starting ===');
+console.log('Version: 2.0 - With Task Execution & Memory');
 console.log('Node version:', process.version);
 console.log('Environment:', process.env.NODE_ENV || 'development');
 
