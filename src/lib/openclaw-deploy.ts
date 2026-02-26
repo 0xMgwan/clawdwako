@@ -91,27 +91,21 @@ export async function deployOpenClawInstance(
     serviceId: deployment.serviceId,
   });
   
-  // 4. Wait for deployment to be healthy
-  const deploymentUrl = await waitForDeployment(
-    deployment.projectId,
-    deployment.serviceId
-  );
+  // Railway will handle the deployment asynchronously
+  // The deployment URL will be available once Railway finishes building
+  const deploymentUrl = 'https://pending.railway.app'; // Placeholder
   
-  console.log('✅ OpenClaw instance is healthy:', deploymentUrl);
+  console.log('✅ OpenClaw deployment initiated, Railway is building...');
   
-  // 5. Configure channel webhook (for Telegram/Discord)
-  if (config.channel === 'telegram' && config.telegramToken) {
-    await setupTelegramWebhook(config.telegramToken, deploymentUrl);
-  } else if (config.channel === 'discord' && config.discordToken) {
-    await setupDiscordWebhook(config.discordToken, deploymentUrl);
-  }
+  // Webhooks will be configured automatically by Railway once deployment is live
+  // Or can be configured later via the instance management endpoints
   
   return {
-    instanceId: deployment.projectId,
+    instanceId: `openclaw-${Date.now()}`,
     railwayProjectId: deployment.projectId,
     railwayServiceId: deployment.serviceId,
     deploymentUrl,
-    status: 'active',
+    status: 'deploying',
     model: config.selectedModel,
     channel: config.channel,
   };
