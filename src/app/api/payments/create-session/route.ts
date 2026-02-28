@@ -62,8 +62,8 @@ export async function POST(request: NextRequest) {
     
     // Use WEBHOOK_URL (ngrok HTTPS) for webhooks, NEXT_PUBLIC_URL for redirects
     // Snippe requires HTTPS for webhooks
-    const webhookBaseUrl = process.env.WEBHOOK_URL || process.env.NEXT_PUBLIC_URL || 'https://clawdwako.vercel.app';
-    const redirectBaseUrl = process.env.NEXT_PUBLIC_URL || process.env.WEBHOOK_URL || 'https://clawdwako.vercel.app';
+    const webhookBaseUrl = process.env.WEBHOOK_URL || process.env.NEXT_PUBLIC_URL || 'https://clawdwako.xyz';
+    const redirectBaseUrl = process.env.NEXT_PUBLIC_URL || process.env.WEBHOOK_URL || 'https://clawdwako.xyz';
 
     let requestBody: any;
 

@@ -72,37 +72,68 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: 'Already deployed', alreadyDeployed: true });
     }
 
-    // If payment not yet completed in DB, verify with Snippe API directly
-    if (payment.status !== 'completed' && SNIPPE_API_KEY) {
-      console.log('Payment not completed in DB, checking Snippe API...');
-      const snippeRef = payment.reference || payment.sessionId;
-      if (snippeRef) {
-        try {
-          const snippeResponse = await fetch(`${SNIPPE_API_URL}/v1/payments/${snippeRef}`, {
-            headers: {
-              'Authorization': `Bearer ${SNIPPE_API_KEY}`,
-              'Content-Type': 'application/json'
+    // If payment not yet completed in DB, verify with payment provider API
+    if (payment.status !== 'completed') {
+      // Check if this is a crypto payment (USD) or Snippe payment (TZS)
+      const isCryptoPayment = payment.currency === 'USD';
+      
+      if (isCryptoPayment) {
+        // For crypto payments, the webhook should have updated the status
+        // If not completed yet, wait a bit for webhook to process
+        console.log('Crypto payment not yet marked completed, checking if webhook is processing...');
+        
+        // Check if payment was created very recently (within last 30 seconds)
+        const paymentAge = Date.now() - new Date(payment.createdAt).getTime();
+        if (paymentAge < 30000) {
+          console.log('Payment is very recent, webhook may still be processing. Waiting...');
+          await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 3 seconds
+          
+          // Re-fetch payment to see if webhook updated it
+          payment = await prisma.payment.findUnique({
+            where: { id: payment.id }
+          }) || payment;
+        }
+        
+        // If still not completed, it's likely the webhook hasn't fired yet or payment isn't confirmed
+        if (payment.status !== 'completed') {
+          console.log('Crypto payment still pending. Status:', payment.status);
+          return NextResponse.json({ 
+            error: 'Crypto payment is still being confirmed. Please wait a moment and try again.',
+            status: payment.status 
+          }, { status: 400 });
+        }
+      } else if (SNIPPE_API_KEY) {
+        // For Snippe payments (card/mobile), verify with Snippe API
+        console.log('Payment not completed in DB, checking Snippe API...');
+        const snippeRef = payment.reference || payment.sessionId;
+        if (snippeRef) {
+          try {
+            const snippeResponse = await fetch(`${SNIPPE_API_URL}/v1/payments/${snippeRef}`, {
+              headers: {
+                'Authorization': `Bearer ${SNIPPE_API_KEY}`,
+                'Content-Type': 'application/json'
+              }
+            });
+            if (snippeResponse.ok) {
+              const snippeData = await snippeResponse.json();
+              const snippeStatus = snippeData.data?.status;
+              console.log('Snippe API status:', snippeStatus);
+              
+              if (snippeStatus === 'completed' || snippeStatus === 'successful' || snippeStatus === 'success' || snippeStatus === 'paid') {
+                // Update DB
+                payment = await prisma.payment.update({
+                  where: { id: payment.id },
+                  data: { status: 'completed', completedAt: new Date() }
+                });
+                console.log('✅ Payment marked completed from Snippe API');
+              } else {
+                console.log('Payment still not completed on Snippe:', snippeStatus);
+                return NextResponse.json({ error: `Payment status: ${snippeStatus}` }, { status: 400 });
+              }
             }
-          });
-          if (snippeResponse.ok) {
-            const snippeData = await snippeResponse.json();
-            const snippeStatus = snippeData.data?.status;
-            console.log('Snippe API status:', snippeStatus);
-            
-            if (snippeStatus === 'completed' || snippeStatus === 'successful' || snippeStatus === 'success' || snippeStatus === 'paid') {
-              // Update DB
-              payment = await prisma.payment.update({
-                where: { id: payment.id },
-                data: { status: 'completed', completedAt: new Date() }
-              });
-              console.log('✅ Payment marked completed from Snippe API');
-            } else {
-              console.log('Payment still not completed on Snippe:', snippeStatus);
-              return NextResponse.json({ error: `Payment status: ${snippeStatus}` }, { status: 400 });
-            }
+          } catch (e: any) {
+            console.error('Snippe check failed:', e.message);
           }
-        } catch (e: any) {
-          console.error('Snippe check failed:', e.message);
         }
       }
     }
