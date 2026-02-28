@@ -18,20 +18,6 @@ interface PaymentPackageModalProps {
 
 const PACKAGES = [
   {
-    id: 'test',
-    name: 'Test',
-    price: 1,
-    features: [
-      '1 AI Bot Deployment',
-      'All AI Models Available',
-      '~100 Messages/Month',
-      'Basic Support',
-      '7 Days Active'
-    ],
-    popular: false,
-    icon: Bot
-  },
-  {
     id: 'starter',
     name: 'Starter',
     price: 20,

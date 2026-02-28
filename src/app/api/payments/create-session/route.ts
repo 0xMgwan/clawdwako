@@ -7,7 +7,6 @@ const SNIPPE_API_KEY = process.env.SNIPPE_API_KEY;
 const SNIPPE_API_URL = 'https://api.snippe.sh';
 
 const PACKAGES = {
-  test: { amount: 1, name: 'Test Package' },
   starter: { amount: 20, name: 'Starter Package' },
   professional: { amount: 50, name: 'Professional Package' },
   enterprise: { amount: 100, name: 'Enterprise Package' }
@@ -70,7 +69,6 @@ export async function POST(request: NextRequest) {
 
     if (paymentMethod === 'card') {
       // Card payment format per Snippe docs
-      // Note: We'll add the reference to redirect_url after creating the payment
       requestBody = {
         payment_type: 'card',
         details: {
@@ -79,15 +77,15 @@ export async function POST(request: NextRequest) {
           redirect_url: `${redirectBaseUrl}/payment-success`,
           cancel_url: `${redirectBaseUrl}?payment=cancelled`
         },
-        phone_number: phoneNumber || '255000000000',
+        phone_number: phoneNumber || '255700000000',
         customer: {
           firstname: nameParts[0] || 'Customer',
           lastname: nameParts[1] || 'Name',
-          email: user.email,
-          address: cardDetails?.addressLine1 || 'N/A',
-          city: cardDetails?.city || 'Dar es Salaam',
-          state: 'DSM',
-          postcode: cardDetails?.postalCode || '14101',
+          email: user.email || 'customer@example.com',
+          address: 'Masaki Peninsula',
+          city: 'Dar es Salaam',
+          state: 'Dar es Salaam',
+          postcode: '14111',
           country: 'TZ'
         },
         webhook_url: `${webhookBaseUrl}/api/webhooks/snippe`,
