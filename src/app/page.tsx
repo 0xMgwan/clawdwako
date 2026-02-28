@@ -663,11 +663,16 @@ export default function Home() {
                       </div>
                       <CustomSelect
                         options={[
+                          { value: 'gemini-3.0-flash-exp', label: 'Gemini 3.0 Flash - Newest experimental' },
                           { value: 'gemini-2.0-flash-exp', label: 'Gemini 2.0 Flash - Experimental' },
+                          { value: 'gemini-2.0-flash-thinking-exp', label: 'Gemini 2.0 Flash Thinking - Advanced reasoning' },
                           { value: 'gemini-exp-1206', label: 'Gemini Exp 1206 - Experimental' },
+                          { value: 'gemini-1.5-pro-latest', label: 'Gemini 1.5 Pro Latest - Most recent stable' },
                           { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro - Most capable' },
                           { value: 'gemini-1.5-pro-exp-0827', label: 'Gemini 1.5 Pro Exp - Extended' },
+                          { value: 'gemini-1.5-flash-latest', label: 'Gemini 1.5 Flash Latest - Most recent fast' },
                           { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash - Fast' },
+                          { value: 'gemini-1.5-flash-8b-latest', label: 'Gemini 1.5 Flash 8B Latest - Ultra fast' },
                           { value: 'gemini-1.5-flash-8b', label: 'Gemini 1.5 Flash 8B - Ultra fast' },
                           { value: 'gemini-1.0-pro', label: 'Gemini 1.0 Pro - Stable' }
                         ]}
@@ -1207,6 +1212,11 @@ export default function Home() {
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
         onPackageSelected={handlePaymentSuccess}
+        botConfig={telegramBotInfo ? {
+          botToken: telegramBotInfo.token,
+          botUsername: telegramBotInfo.botInfo?.username || '',
+          selectedModel: selectedModel,
+        } : null}
       />
     </div>
   );

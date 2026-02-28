@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Get all instances for this user
+    // Get all instances for this user (from OpenClawInstance table)
     const instances = await prisma.openClawInstance.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: 'desc' },
@@ -45,28 +45,71 @@ export async function GET(request: NextRequest) {
       }
     });
 
+    // ALSO get bots from Bot table (created by deploy-after-payment)
+    const bots = await prisma.bot.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        selectedModel: true,
+        status: true,
+        railwayProjectId: true,
+        railwayServiceId: true,
+        deployedAt: true,
+        createdAt: true,
+        updatedAt: true,
+        telegramBotUsername: true,
+      }
+    });
+
+    // Convert Bot records to instance format
+    const botsAsInstances = bots.map(bot => ({
+      id: bot.id,
+      name: bot.name || bot.telegramBotUsername || 'Telegram Bot',
+      model: bot.selectedModel,
+      channel: 'telegram',
+      status: bot.status === 'running' ? 'active' : bot.status,
+      deploymentUrl: null,
+      railwayProjectId: bot.railwayProjectId,
+      railwayServiceId: bot.railwayServiceId,
+      apiCalls: 0,
+      messageCount: 0,
+      uptime: '99.9%',
+      lastActive: bot.deployedAt || bot.createdAt,
+      lastHealthCheck: bot.updatedAt,
+      createdAt: bot.createdAt,
+      updatedAt: bot.updatedAt,
+    }));
+
+    // Merge both lists
+    const allInstances = [...instances, ...botsAsInstances];
+
     // Fetch real message counts from Railway logs for each instance
     const railwayClient = getRailwayClient();
     const instancesWithCounts = await Promise.all(
-      instances.map(async (instance) => {
+      allInstances.map(async (instance) => {
         let messageCount = 0;
         
         try {
-          // Get logs from Railway
-          const logs = await railwayClient.getLogs(
-            instance.railwayProjectId,
-            instance.railwayServiceId,
-            100
-          );
+          // Only fetch logs if Railway IDs exist
+          if (instance.railwayProjectId && instance.railwayServiceId) {
+            // Get logs from Railway
+            const logs = await railwayClient.getLogs(
+              instance.railwayProjectId,
+              instance.railwayServiceId,
+              100
+            );
           
-          // Count messages (look for telegram activity in logs)
-          messageCount = logs.filter((log: any) => {
-            const msg = log.message || '';
-            return msg.includes('[telegram]') || 
-                   msg.includes('telegram') ||
-                   msg.includes('message') ||
-                   msg.includes('user:');
-          }).length;
+            // Count messages (look for telegram activity in logs)
+            messageCount = logs.filter((log: any) => {
+              const msg = log.message || '';
+              return msg.includes('[telegram]') || 
+                     msg.includes('telegram') ||
+                     msg.includes('message') ||
+                     msg.includes('user:');
+            }).length;
+          }
         } catch (error) {
           console.error(`Failed to fetch logs for instance ${instance.id}:`, error);
           // Keep messageCount as 0 on error

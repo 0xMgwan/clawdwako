@@ -38,7 +38,7 @@ export function AIBrainSelector({
     // Auto-select default model for the tab
     if (tab === 'claude') setSelectedModel('claude-opus-4-20250514');
     if (tab === 'gpt') setSelectedModel('gpt-4o');
-    if (tab === 'gemini') setSelectedModel('gemini-2.0-flash-exp');
+    if (tab === 'gemini') setSelectedModel('gemini-3.0-flash-exp');
   };
 
   return (
@@ -150,28 +150,26 @@ export function AIBrainSelector({
       {activeTab === 'gemini' && (
         <CustomSelect
           options={[
+            { value: 'gemini-3.0-flash-exp', label: 'Gemini 3.0 Flash Exp - Newest experimental' },
             { value: 'gemini-2.0-flash-exp', label: 'Gemini 2.0 Flash Exp - Latest experimental' },
             { value: 'gemini-2.0-flash-thinking-exp-1219', label: 'Gemini 2.0 Flash Thinking - Reasoning' },
+            { value: 'gemini-2.0-flash-thinking-exp', label: 'Gemini 2.0 Flash Thinking - Advanced reasoning' },
             { value: 'gemini-exp-1206', label: 'Gemini Exp 1206 - Experimental' },
             { value: 'gemini-exp-1121', label: 'Gemini Exp 1121 - Experimental' },
+            { value: 'gemini-1.5-pro-latest', label: 'Gemini 1.5 Pro Latest - Most recent stable' },
             { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro - Most capable' },
             { value: 'gemini-1.5-pro-002', label: 'Gemini 1.5 Pro 002 - Latest stable' },
-            { value: 'gemini-1.5-pro-001', label: 'Gemini 1.5 Pro 001' },
-            { value: 'gemini-1.5-pro-exp-0827', label: 'Gemini 1.5 Pro Exp 0827' },
-            { value: 'gemini-1.5-pro-exp-0801', label: 'Gemini 1.5 Pro Exp 0801' },
+            { value: 'gemini-1.5-pro-exp-0827', label: 'Gemini 1.5 Pro Exp - Extended' },
+            { value: 'gemini-1.5-flash-latest', label: 'Gemini 1.5 Flash Latest - Most recent fast' },
             { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash - Fast' },
             { value: 'gemini-1.5-flash-002', label: 'Gemini 1.5 Flash 002 - Latest fast' },
-            { value: 'gemini-1.5-flash-001', label: 'Gemini 1.5 Flash 001' },
+            { value: 'gemini-1.5-flash-8b-latest', label: 'Gemini 1.5 Flash 8B Latest - Ultra fast' },
             { value: 'gemini-1.5-flash-8b', label: 'Gemini 1.5 Flash 8B - Ultra fast' },
-            { value: 'gemini-1.5-flash-8b-001', label: 'Gemini 1.5 Flash 8B 001' },
-            { value: 'gemini-1.5-flash-8b-exp-0924', label: 'Gemini 1.5 Flash 8B Exp' },
-            { value: 'gemini-1.0-pro', label: 'Gemini 1.0 Pro - Stable' },
-            { value: 'gemini-1.0-pro-001', label: 'Gemini 1.0 Pro 001' },
-            { value: 'gemini-1.0-pro-vision', label: 'Gemini 1.0 Pro Vision - Multimodal' }
+            { value: 'gemini-1.0-pro', label: 'Gemini 1.0 Pro - Stable' }
           ]}
           value={selectedModel}
           onChange={setSelectedModel}
-          isActive={true}
+          isActive={activeTab === 'gemini'}
         />
       )}
 

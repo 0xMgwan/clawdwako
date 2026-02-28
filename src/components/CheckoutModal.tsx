@@ -14,6 +14,11 @@ interface CheckoutModalProps {
     price: number;
   } | null;
   onPaymentSuccess: () => void;
+  botConfig?: {
+    botToken: string;
+    botUsername: string;
+    selectedModel: string;
+  } | null;
 }
 
 const MOBILE_MONEY_PROVIDERS = [
@@ -28,7 +33,7 @@ const MOBILE_MONEY_PROVIDERS = [
   { id: 'telebirr', name: 'Telebirr', logo: '/telebirr-logo.png' },
 ];
 
-export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }: CheckoutModalProps) {
+export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, botConfig }: CheckoutModalProps) {
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'mobile' | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -45,6 +50,10 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
   });
   const [processing, setProcessing] = useState(false);
   const [paymentComplete, setPaymentComplete] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [redirectCountdown, setRedirectCountdown] = useState(0);
+  const [deployStatus, setDeployStatus] = useState<string>('');
+  const [paymentRef, setPaymentRef] = useState<string>('');
 
   if (!isOpen || !packageInfo) return null;
 
@@ -86,6 +95,59 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
     }
   };
 
+  const redirectToDashboard = async (reference?: string) => {
+    setPaymentSuccess(true);
+    setPaymentComplete(false);
+    
+    // Use passed reference (avoids stale closure) or fall back to state
+    const ref = reference || paymentRef;
+    console.log('redirectToDashboard called with ref:', ref, 'botConfig:', botConfig);
+    
+    // Deploy bot after successful payment — MUST complete before redirect
+    if (botConfig && ref) {
+      setDeployStatus('Deploying your AI bot...');
+      try {
+        console.log('Calling deploy-after-payment with reference:', ref);
+        const deployResponse = await fetch('/api/payments/deploy-after-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paymentReference: ref })
+        });
+        
+        const deployData = await deployResponse.json();
+        console.log('Deploy response:', deployResponse.status, deployData);
+        
+        if (deployResponse.ok) {
+          console.log('✅ Bot deployed after payment:', deployData);
+          setDeployStatus('Bot deployed successfully! Redirecting...');
+        } else {
+          console.error('Bot deploy failed:', deployData.error);
+          setDeployStatus('Deploy issue - redirecting to dashboard...');
+        }
+      } catch (error) {
+        console.error('Deploy after payment error:', error);
+        setDeployStatus('Deploy issue - redirecting to dashboard...');
+      }
+    } else {
+      console.warn('Skipping deploy: botConfig=', botConfig, 'ref=', ref);
+      setDeployStatus('Redirecting to dashboard...');
+    }
+    
+    // Start countdown AFTER deploy completes (not in parallel)
+    setRedirectCountdown(3);
+    const countdownInterval = setInterval(() => {
+      setRedirectCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownInterval);
+          onPaymentSuccess();
+          window.location.replace('/dashboard');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
   const handlePayment = async () => {
     setProcessing(true);
     
@@ -99,7 +161,8 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
           paymentMethod: paymentMethod,
           provider: selectedProvider,
           phoneNumber: phoneNumber,
-          cardDetails: paymentMethod === 'card' ? cardDetails : undefined
+          cardDetails: paymentMethod === 'card' ? cardDetails : undefined,
+          botConfig: botConfig || null
         })
       });
 
@@ -109,6 +172,11 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
         throw new Error(data.error || 'Payment failed');
       }
 
+      // Get the payment reference for polling
+      const paymentReference = data.reference || data.sessionId;
+      setPaymentRef(paymentReference || '');
+      console.log('Payment created:', { reference: data.reference, sessionId: data.sessionId, paymentReference, data });
+      
       // Handle different payment methods
       if (data.paymentMethod === 'card' && data.checkoutUrl) {
         // Open Snippe checkout in new window for card payments
@@ -118,26 +186,60 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
         setProcessing(false);
         setPaymentComplete(true);
         
-        // Poll for payment status
-        const paymentReference = data.reference;
+        // Only poll if we have a valid reference
+        if (paymentReference) {
+          const pollInterval = setInterval(async () => {
+            try {
+              const statusResponse = await fetch(`/api/payments/status?reference=${paymentReference}`);
+              if (!statusResponse.ok) return; // Skip this poll cycle on error
+              const statusData = await statusResponse.json();
+              
+              if (statusData.status === 'completed') {
+                clearInterval(pollInterval);
+                if (paymentWindow && !paymentWindow.closed) {
+                  paymentWindow.close();
+                }
+                redirectToDashboard(paymentReference);
+              } else if (statusData.status === 'failed') {
+                clearInterval(pollInterval);
+                if (paymentWindow && !paymentWindow.closed) {
+                  paymentWindow.close();
+                }
+                alert('Payment failed. Please try again.');
+                onClose();
+              }
+            } catch (error) {
+              console.error('Error checking payment status:', error);
+            }
+          }, 3000);
+          
+          // Stop polling after 10 minutes
+          setTimeout(() => clearInterval(pollInterval), 600000);
+        }
+        return;
+      }
+
+      // For mobile money, show waiting message and poll for payment status
+      setProcessing(false);
+      setPaymentComplete(true);
+      
+      // Only poll if we have a valid reference
+      if (paymentReference) {
         const pollInterval = setInterval(async () => {
           try {
             const statusResponse = await fetch(`/api/payments/status?reference=${paymentReference}`);
+            if (!statusResponse.ok) {
+              console.log('Status poll error:', statusResponse.status);
+              return;
+            }
             const statusData = await statusResponse.json();
+            console.log('Payment status poll:', statusData);
             
             if (statusData.status === 'completed') {
               clearInterval(pollInterval);
-              if (paymentWindow && !paymentWindow.closed) {
-                paymentWindow.close();
-              }
-              onPaymentSuccess();
-              // Redirect to dashboard
-              window.location.href = '/dashboard';
+              redirectToDashboard(paymentReference);
             } else if (statusData.status === 'failed') {
               clearInterval(pollInterval);
-              if (paymentWindow && !paymentWindow.closed) {
-                paymentWindow.close();
-              }
               alert('Payment failed. Please try again.');
               onClose();
             }
@@ -146,43 +248,9 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
           }
         }, 3000);
         
-        // Stop polling after 10 minutes
-        setTimeout(() => {
-          clearInterval(pollInterval);
-        }, 600000);
-        return;
+        // Stop polling after 5 minutes
+        setTimeout(() => clearInterval(pollInterval), 300000);
       }
-
-      // For mobile money, show waiting message and poll for payment status
-      setProcessing(false);
-      setPaymentComplete(true);
-      
-      // Poll for payment status
-      const paymentReference = data.reference;
-      const pollInterval = setInterval(async () => {
-        try {
-          const statusResponse = await fetch(`/api/payments/status?reference=${paymentReference}`);
-          const statusData = await statusResponse.json();
-          
-          if (statusData.status === 'completed') {
-            clearInterval(pollInterval);
-            onPaymentSuccess();
-            // Redirect to dashboard
-            window.location.href = '/dashboard';
-          } else if (statusData.status === 'failed') {
-            clearInterval(pollInterval);
-            alert('Payment failed. Please try again.');
-            onClose();
-          }
-        } catch (error) {
-          console.error('Error checking payment status:', error);
-        }
-      }, 3000); // Check every 3 seconds
-      
-      // Stop polling after 5 minutes
-      setTimeout(() => {
-        clearInterval(pollInterval);
-      }, 300000);
     } catch (error: any) {
       setProcessing(false);
       alert(`Payment error: ${error.message}`);
@@ -215,12 +283,12 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
         <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-3 sm:p-4 rounded-t-2xl sm:rounded-t-3xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {(paymentMethod || paymentComplete) && (
+              {(paymentMethod || paymentComplete) && !paymentSuccess && (
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={handleBack} 
-                  disabled={processing}
+                  disabled={processing || paymentSuccess}
                   className="text-white hover:bg-white/20"
                 >
                   <ArrowLeft className="h-5 w-5" />
@@ -239,7 +307,7 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-white">
-                    {paymentComplete ? 'Payment Successful!' : 'Complete Payment'}
+                    {paymentSuccess ? 'Payment Successful!' : paymentComplete ? 'Processing Payment...' : 'Complete Payment'}
                   </h2>
                   <p className="text-xs text-white/90">
                     {packageInfo.name} - <span className="font-bold">${packageInfo.price}</span>
@@ -251,7 +319,7 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
               variant="ghost" 
               size="sm" 
               onClick={onClose} 
-              disabled={processing}
+              disabled={processing || paymentSuccess}
               className="text-white hover:bg-white/20"
             >
               <X className="h-5 w-5" />
@@ -263,32 +331,48 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
         <div className="p-3 sm:p-4">
 
           {/* Payment Complete */}
-          {paymentComplete && (
+          {(paymentComplete || paymentSuccess) && (
             <div className="text-center py-6">
               <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full mb-3 shadow-lg">
-                {paymentMethod === 'card' ? (
+                {paymentSuccess ? (
+                  <Check className="w-7 h-7 text-white" />
+                ) : paymentMethod === 'card' ? (
                   <CreditCard className="w-7 h-7 text-white animate-pulse" />
                 ) : (
                   <Smartphone className="w-7 h-7 text-white animate-pulse" />
                 )}
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-1.5">
-                {paymentMethod === 'card' ? 'Complete Payment' : 'Check Your Phone'}
+                {paymentSuccess 
+                  ? 'Payment Successful!' 
+                  : paymentMethod === 'card' 
+                    ? 'Complete Payment' 
+                    : 'Check Your Phone'}
               </h3>
               <p className="text-gray-600 mb-3 text-sm">
-                {paymentMethod === 'card' 
-                  ? 'Please complete the payment in the popup window to continue.'
-                  : 'A USSD prompt has been sent to your phone. Please complete the payment to continue.'}
+                {paymentSuccess 
+                  ? (deployStatus || `Redirecting to dashboard in ${redirectCountdown}s...`)
+                  : paymentMethod === 'card' 
+                    ? 'Please complete the payment in the popup window to continue.'
+                    : 'A USSD prompt has been sent to your phone. Please complete the payment to continue.'}
               </p>
-              <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500"></div>
-                <span>Waiting for payment confirmation...</span>
-              </div>
+              {!paymentSuccess && (
+                <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500"></div>
+                  <span>Waiting for payment confirmation...</span>
+                </div>
+              )}
+              {paymentSuccess && (
+                <div className="flex items-center justify-center gap-2 text-sm text-green-600">
+                  <Check className="h-4 w-4" />
+                  <span>Payment confirmed! Redirecting...</span>
+                </div>
+              )}
             </div>
           )}
 
           {/* Payment Method Selection */}
-          {!paymentMethod && !paymentComplete && (
+          {!paymentMethod && !paymentComplete && !paymentSuccess && (
             <div className="space-y-2.5">
               <div className="relative overflow-hidden rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50/70 via-white to-white p-2.5">
                 <div className="absolute -right-8 -top-8 h-16 w-16 rounded-full bg-emerald-200/30 blur-xl" />
@@ -368,7 +452,7 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
           )}
 
         {/* Card Payment Form */}
-        {paymentMethod === 'card' && !paymentComplete && (
+        {paymentMethod === 'card' && !paymentComplete && !paymentSuccess && (
           <div className="space-y-2">
             <p className="text-xs font-semibold text-gray-700">Enter Payment Details</p>
             <div>
@@ -430,7 +514,7 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
         )}
 
         {/* Mobile Money Provider Selection */}
-        {paymentMethod === 'mobile' && !selectedProvider && !paymentComplete && (
+        {paymentMethod === 'mobile' && !selectedProvider && !paymentComplete && !paymentSuccess && (
           <div>
             <p className="text-[10px] font-medium text-gray-500 mb-2">Select your mobile money provider</p>
             <div className="grid grid-cols-3 gap-2">
@@ -453,7 +537,7 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess }
         )}
 
         {/* Mobile Money Payment Form */}
-        {paymentMethod === 'mobile' && selectedProvider && !paymentComplete && (
+        {paymentMethod === 'mobile' && selectedProvider && !paymentComplete && !paymentSuccess && (
           <div className="space-y-2.5">
             <div className="flex items-center gap-2.5 p-2.5 bg-gray-50 rounded-xl border border-gray-200">
               <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center p-1.5 shadow-sm shrink-0">

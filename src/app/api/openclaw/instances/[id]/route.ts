@@ -171,24 +171,54 @@ export async function DELETE(
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const instance = await prisma.openClawInstance.findFirst({
+    // Try to find in OpenClawInstance table first
+    let instance = await prisma.openClawInstance.findFirst({
       where: {
         id,
         userId: user.id
       }
     });
 
+    let isBot = false;
+    let railwayProjectId = null;
+    let railwayServiceId = null;
+
+    // If not found, try Bot table
     if (!instance) {
-      return NextResponse.json({ error: 'Instance not found' }, { status: 404 });
+      const bot = await prisma.bot.findFirst({
+        where: {
+          id,
+          userId: user.id
+        }
+      });
+
+      if (!bot) {
+        return NextResponse.json({ error: 'Instance not found' }, { status: 404 });
+      }
+
+      isBot = true;
+      railwayProjectId = bot.railwayProjectId;
+      railwayServiceId = bot.railwayServiceId;
+    } else {
+      railwayProjectId = instance.railwayProjectId;
+      railwayServiceId = instance.railwayServiceId;
     }
 
     // TODO: Stop Railway service before deleting
-    console.log('🛑 Stopping Railway service:', instance.railwayServiceId);
+    if (railwayServiceId) {
+      console.log('🛑 Stopping Railway service:', railwayServiceId);
+    }
 
-    // Delete instance from database
-    await prisma.openClawInstance.delete({
-      where: { id }
-    });
+    // Delete from appropriate table
+    if (isBot) {
+      await prisma.bot.delete({
+        where: { id }
+      });
+    } else {
+      await prisma.openClawInstance.delete({
+        where: { id }
+      });
+    }
 
     return NextResponse.json({
       success: true,

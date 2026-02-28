@@ -131,14 +131,19 @@ export function ConfigureModal({ bot, onClose, onSave }: ConfigureModalProps) {
                 onChange={(e) => setSelectedModel(e.target.value)}
                 className="w-full p-2 rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:border-green-400 focus:outline-none"
               >
+                <option value="gemini-3.0-flash-exp">3.0 Flash Exp</option>
                 <option value="gemini-2.0-flash-exp">2.0 Flash Exp</option>
                 <option value="gemini-2.0-flash-thinking-exp-1219">2.0 Flash Thinking</option>
+                <option value="gemini-2.0-flash-thinking-exp">2.0 Flash Thinking Exp</option>
                 <option value="gemini-exp-1206">Exp 1206</option>
                 <option value="gemini-exp-1121">Exp 1121</option>
+                <option value="gemini-1.5-pro-latest">1.5 Pro Latest</option>
                 <option value="gemini-1.5-pro">1.5 Pro</option>
                 <option value="gemini-1.5-pro-002">1.5 Pro 002</option>
+                <option value="gemini-1.5-flash-latest">1.5 Flash Latest</option>
                 <option value="gemini-1.5-flash">1.5 Flash</option>
                 <option value="gemini-1.5-flash-002">1.5 Flash 002</option>
+                <option value="gemini-1.5-flash-8b-latest">1.5 Flash 8B Latest</option>
                 <option value="gemini-1.5-flash-8b">1.5 Flash 8B</option>
                 <option value="gemini-1.0-pro">1.0 Pro</option>
               </select>

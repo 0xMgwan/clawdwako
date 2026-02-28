@@ -7,6 +7,7 @@ const SNIPPE_API_KEY = process.env.SNIPPE_API_KEY;
 const SNIPPE_API_URL = 'https://api.snippe.sh';
 
 const PACKAGES = {
+  test: { amount: 1, name: 'Test Package' },
   starter: { amount: 20, name: 'Starter Package' },
   professional: { amount: 50, name: 'Professional Package' },
   enterprise: { amount: 100, name: 'Enterprise Package' }
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { packageType, phoneNumber, paymentMethod, provider } = await request.json();
+    const { packageType, phoneNumber, paymentMethod, provider, botConfig } = await request.json();
 
     if (!packageType || !PACKAGES[packageType as keyof typeof PACKAGES]) {
       return NextResponse.json({ error: 'Invalid package type' }, { status: 400 });
@@ -109,7 +110,7 @@ export async function POST(request: NextRequest) {
 
     const snippeData = JSON.parse(responseText);
 
-    // Store payment in database
+    // Store payment in database (include botConfig for auto-deploy after payment)
     await prisma.payment.create({
       data: {
         userId: user.id,
@@ -120,7 +121,10 @@ export async function POST(request: NextRequest) {
         package: packageType,
         status: 'pending',
         checkoutUrl: snippeData.data?.payment_url || snippeData.data?.checkout_url,
-        metadata: snippeData.data || {}
+        metadata: {
+          ...(snippeData.data || {}),
+          botConfig: botConfig || null
+        }
       }
     });
 

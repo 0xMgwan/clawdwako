@@ -9,9 +9,28 @@ interface PaymentPackageModalProps {
   isOpen: boolean;
   onClose: () => void;
   onPackageSelected: (packageType: string, checkoutUrl: string) => void;
+  botConfig?: {
+    botToken: string;
+    botUsername: string;
+    selectedModel: string;
+  } | null;
 }
 
 const PACKAGES = [
+  {
+    id: 'test',
+    name: 'Test',
+    price: 1,
+    features: [
+      '1 AI Bot Deployment',
+      'All AI Models Available',
+      '~100 Messages/Month',
+      'Basic Support',
+      '7 Days Active'
+    ],
+    popular: false,
+    icon: Bot
+  },
   {
     id: 'starter',
     name: 'Starter',
@@ -60,7 +79,7 @@ const PACKAGES = [
   }
 ];
 
-export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: PaymentPackageModalProps) {
+export function PaymentPackageModal({ isOpen, onClose, onPackageSelected, botConfig }: PaymentPackageModalProps) {
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [showCheckout, setShowCheckout] = useState(false);
 
@@ -205,6 +224,7 @@ export function PaymentPackageModal({ isOpen, onClose, onPackageSelected }: Paym
           price: selectedPackageInfo.price
         } : null}
         onPaymentSuccess={handlePaymentSuccess}
+        botConfig={botConfig}
       />
     </div>
   );
