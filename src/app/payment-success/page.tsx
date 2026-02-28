@@ -52,7 +52,12 @@ function PaymentSuccessContent() {
           }, 1000);
         } else {
           setStage('success');
-          setStatus('Payment verified! Setting up your bot...');
+          // Check if it's a missing config error
+          if (deployData.missingConfig) {
+            setStatus('Payment successful! Please deploy your bot from the dashboard.');
+          } else {
+            setStatus('Payment verified! You can now deploy your bot from the dashboard.');
+          }
           setTimeout(() => router.push('/dashboard'), 3000);
         }
       } catch (error: any) {

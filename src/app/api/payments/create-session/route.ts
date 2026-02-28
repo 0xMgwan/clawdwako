@@ -67,6 +67,84 @@ export async function POST(request: NextRequest) {
 
     let requestBody: any;
 
+    // Handle Crypto payments (Coinbase Commerce)
+    if (paymentMethod === 'crypto') {
+      const COINBASE_API_KEY = process.env.COINBASE_COMMERCE_API_KEY;
+      if (!COINBASE_API_KEY) {
+        return NextResponse.json({ error: 'Coinbase Commerce not configured' }, { status: 500 });
+      }
+
+      try {
+        // Create Coinbase Commerce charge
+        const chargeResponse = await fetch('https://api.commerce.coinbase.com/charges', {
+          method: 'POST',
+          headers: {
+            'X-CC-Api-Key': COINBASE_API_KEY,
+            'Content-Type': 'application/json',
+            'X-CC-Version': '2018-03-22'
+          },
+          body: JSON.stringify({
+            name: `${pkg.name} - AI Bot Deployment`,
+            description: 'Telegram AI Bot Deployment on Railway',
+            pricing_type: 'fixed_price',
+            local_price: {
+              amount: pkg.amount.toString(),
+              currency: 'USD'
+            },
+            redirect_url: `${webhookBaseUrl}/payment-success`,
+            cancel_url: `${webhookBaseUrl}?payment=cancelled`,
+            metadata: {
+              userId: user.id,
+              package: packageType,
+              email: user.email,
+              paymentMethod: 'crypto',
+              botConfig: JSON.stringify(botConfig || {})
+            }
+          })
+        });
+
+        if (!chargeResponse.ok) {
+          const errorText = await chargeResponse.text();
+          console.error('Coinbase Commerce API error:', errorText);
+          return NextResponse.json({ error: 'Failed to create crypto payment' }, { status: 500 });
+        }
+
+        const chargeData = await chargeResponse.json();
+        console.log('Coinbase charge created:', chargeData.data.code);
+
+        // Store payment in database
+        await prisma.payment.create({
+          data: {
+            userId: user.id,
+            sessionId: chargeData.data.id,
+            reference: chargeData.data.code,
+            amount: pkg.amount,
+            currency: 'USD',
+            package: packageType,
+            status: 'pending',
+            checkoutUrl: chargeData.data.hosted_url,
+            metadata: {
+              coinbase: chargeData.data,
+              botConfig: botConfig || null
+            }
+          }
+        });
+
+        return NextResponse.json({
+          success: true,
+          paymentMethod: 'crypto',
+          message: 'Redirecting to Coinbase Commerce...',
+          checkoutUrl: chargeData.data.hosted_url,
+          sessionId: chargeData.data.id,
+          reference: chargeData.data.code,
+          status: 'pending'
+        });
+      } catch (error: any) {
+        console.error('Coinbase Commerce error:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+    }
+
     if (paymentMethod === 'card') {
       // Card payment format per Snippe docs
       requestBody = {

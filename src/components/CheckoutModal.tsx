@@ -49,6 +49,8 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
     city: ''
   });
   const [processing, setProcessing] = useState(false);
+  const [cardProcessing, setCardProcessing] = useState(false);
+  const [cryptoProcessing, setCryptoProcessing] = useState(false);
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [redirectCountdown, setRedirectCountdown] = useState(0);
@@ -413,11 +415,11 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
                       throw new Error('No checkout URL received');
                     }
                   } catch (error: any) {
-                    setProcessing(false);
+                    setCardProcessing(false);
                     alert(`Payment error: ${error.message}`);
                   }
                 }}
-                disabled={processing}
+                disabled={cardProcessing}
                 className="group relative w-full rounded-xl p-[1.5px] bg-gradient-to-r from-emerald-400 via-green-300 to-teal-400 shadow-[0_8px_20px_-12px_rgba(16,185,129,0.9)] transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50"
               >
                 <div className="relative overflow-hidden rounded-[11px] bg-gradient-to-br from-white via-emerald-50/40 to-emerald-100/55 px-3 py-2.5">
@@ -425,7 +427,7 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
                   <div className="relative flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-green-600 rounded-lg flex items-center justify-center shadow-md group-hover:scale-105 transition-transform shrink-0">
-                        {processing ? (
+                        {cardProcessing ? (
                           <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
                         ) : (
                           <CreditCard className="w-4 h-4 text-white" />
@@ -434,14 +436,14 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
                       <div className="text-left min-w-0">
                         <div className="flex items-center gap-1.5">
                           <p className="text-sm text-gray-900 font-bold leading-tight">
-                            {processing ? 'Redirecting...' : 'Card Payment'}
+                            {cardProcessing ? 'Redirecting...' : 'Card Payment'}
                           </p>
-                          {!processing && (
+                          {!cardProcessing && (
                             <span className="text-[9px] font-semibold text-emerald-800 bg-emerald-100 border border-emerald-200 px-1.5 py-0.5 rounded-full">Recommended</span>
                           )}
                         </div>
                         <p className="text-[10px] text-gray-500 mt-0.5">
-                          {processing ? 'Please wait...' : 'Visa, Mastercard & more'}
+                          {cardProcessing ? 'Please wait...' : 'Visa, Mastercard & more'}
                         </p>
                       </div>
                     </div>
@@ -453,6 +455,70 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
                         <img src="/mastercard.png" alt="Mastercard" className="h-3 w-auto object-contain" />
                       </span>
                       <span className="text-emerald-600 text-sm font-semibold">›</span>
+                    </div>
+                  </div>
+                </div>
+              </button>
+
+              {/* Crypto Payment */}
+              <button
+                onClick={async () => {
+                  setCryptoProcessing(true);
+                  
+                  try {
+                    const response = await fetch('/api/payments/create-session', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        packageType: packageInfo?.id,
+                        paymentMethod: 'crypto',
+                        botConfig: botConfig || null
+                      })
+                    });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Payment failed');
+                    
+                    if (data.checkoutUrl) {
+                      window.location.href = data.checkoutUrl;
+                    } else {
+                      throw new Error('No checkout URL received');
+                    }
+                  } catch (error: any) {
+                    setCryptoProcessing(false);
+                    alert(`Payment error: ${error.message}`);
+                  }
+                }}
+                disabled={cryptoProcessing}
+                className="group relative w-full rounded-xl p-[1.5px] bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 shadow-[0_8px_20px_-12px_rgba(251,146,60,0.85)] transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50"
+              >
+                <div className="relative overflow-hidden rounded-[11px] bg-gradient-to-br from-white via-orange-50/40 to-amber-100/50 px-3 py-2.5">
+                  <div className="absolute -right-4 -top-4 h-12 w-12 rounded-full bg-orange-300/30 blur-lg" />
+                  <div className="relative flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-md group-hover:scale-105 transition-transform shrink-0">
+                        {cryptoProcessing ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent"></div>
+                        ) : (
+                          <img src="/usdc-logo.png" alt="USDC" className="w-5 h-5 object-contain" />
+                        )}
+                      </div>
+                      <div className="text-left min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-sm text-gray-900 font-bold leading-tight">
+                            {cryptoProcessing ? 'Redirecting...' : 'Crypto Payment'}
+                          </p>
+                          {!cryptoProcessing && (
+                            <span className="text-[9px] font-semibold text-orange-800 bg-orange-100 border border-orange-200 px-1.5 py-0.5 rounded-full">Global</span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-gray-500 mt-0.5">
+                          {cryptoProcessing ? 'Please wait...' : 'BTC, ETH, USDC, USDT & more'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <img src="/usdc-logo.png" alt="USDC" className="h-4 w-4 object-contain" />
+                      <span className="text-orange-600 text-sm font-semibold">›</span>
                     </div>
                   </div>
                 </div>
