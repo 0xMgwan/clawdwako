@@ -89,7 +89,7 @@ export default function PaymentSuccess() {
               </svg>
             )}
             {stage === 'success' && (
-              <svg className="w-10 h-10 sm:w-12 sm:h-12 text-white animate-scale-in" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-10 h-10 sm:w-12 sm:h-12 text-white animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
               </svg>
             )}
@@ -97,7 +97,7 @@ export default function PaymentSuccess() {
         </div>
         
         {/* Title with gradient */}
-        <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 bg-clip-text text-transparent mb-3">
+        <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 bg-clip-text text-transparent mb-3 animate-fade-in">
           {stage === 'success' ? '🎉 Success!' : 'Processing...'}
         </h1>
         
@@ -129,25 +129,6 @@ export default function PaymentSuccess() {
         <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-br from-emerald-200/30 to-green-200/30 rounded-full blur-2xl"></div>
         <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-br from-teal-200/30 to-emerald-200/30 rounded-full blur-2xl"></div>
       </div>
-
-      <style jsx>{`
-        @keyframes scale-in {
-          0% {
-            transform: scale(0);
-            opacity: 0;
-          }
-          50% {
-            transform: scale(1.2);
-          }
-          100% {
-            transform: scale(1);
-            opacity: 1;
-          }
-        }
-        .animate-scale-in {
-          animation: scale-in 0.5s ease-out;
-        }
-      `}</style>
     </div>
   );
 }
