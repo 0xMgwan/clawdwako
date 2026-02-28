@@ -182,6 +182,13 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
         // Open Snippe checkout in new window for card payments
         const paymentWindow = window.open(data.checkoutUrl, '_blank', 'width=600,height=700');
         
+        // Check if popup was blocked
+        if (!paymentWindow || paymentWindow.closed || typeof paymentWindow.closed === 'undefined') {
+          alert('Popup blocked! Please allow popups for this site and try again.\n\nOr click here to open payment page: ' + data.checkoutUrl);
+          setProcessing(false);
+          return;
+        }
+        
         // Show waiting message
         setProcessing(false);
         setPaymentComplete(true);
@@ -382,22 +389,60 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
 
               {/* Card Payment */}
               <button
-                onClick={() => setPaymentMethod('card')}
-                className="group relative w-full rounded-xl p-[1.5px] bg-gradient-to-r from-emerald-400 via-green-300 to-teal-400 shadow-[0_8px_20px_-12px_rgba(16,185,129,0.9)] transition-all duration-300 hover:-translate-y-0.5"
+                onClick={async () => {
+                  setProcessing(true);
+                  
+                  // Create payment session and redirect to Snippe
+                  try {
+                    const response = await fetch('/api/payments/create-session', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        packageType: packageInfo?.id,
+                        paymentMethod: 'card',
+                        botConfig: botConfig || null
+                      })
+                    });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Payment failed');
+                    
+                    if (data.checkoutUrl) {
+                      // Redirect to Snippe checkout page
+                      window.location.href = data.checkoutUrl;
+                    } else {
+                      throw new Error('No checkout URL received');
+                    }
+                  } catch (error: any) {
+                    setProcessing(false);
+                    alert(`Payment error: ${error.message}`);
+                  }
+                }}
+                disabled={processing}
+                className="group relative w-full rounded-xl p-[1.5px] bg-gradient-to-r from-emerald-400 via-green-300 to-teal-400 shadow-[0_8px_20px_-12px_rgba(16,185,129,0.9)] transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50"
               >
                 <div className="relative overflow-hidden rounded-[11px] bg-gradient-to-br from-white via-emerald-50/40 to-emerald-100/55 px-3 py-2.5">
                   <div className="absolute -right-4 -top-4 h-12 w-12 rounded-full bg-emerald-300/30 blur-lg" />
                   <div className="relative flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-green-600 rounded-lg flex items-center justify-center shadow-md group-hover:scale-105 transition-transform shrink-0">
-                        <CreditCard className="w-4 h-4 text-white" />
+                        {processing ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        ) : (
+                          <CreditCard className="w-4 h-4 text-white" />
+                        )}
                       </div>
                       <div className="text-left min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <p className="text-sm text-gray-900 font-bold leading-tight">Card Payment</p>
-                          <span className="text-[9px] font-semibold text-emerald-800 bg-emerald-100 border border-emerald-200 px-1.5 py-0.5 rounded-full">Recommended</span>
+                          <p className="text-sm text-gray-900 font-bold leading-tight">
+                            {processing ? 'Redirecting...' : 'Card Payment'}
+                          </p>
+                          {!processing && (
+                            <span className="text-[9px] font-semibold text-emerald-800 bg-emerald-100 border border-emerald-200 px-1.5 py-0.5 rounded-full">Recommended</span>
+                          )}
                         </div>
-                        <p className="text-[10px] text-gray-500 mt-0.5">Visa, Mastercard & more</p>
+                        <p className="text-[10px] text-gray-500 mt-0.5">
+                          {processing ? 'Please wait...' : 'Visa, Mastercard & more'}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">

@@ -25,15 +25,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Payment reference is required' }, { status: 400 });
     }
 
-    // Find the payment
-    let payment = await prisma.payment.findFirst({
-      where: { reference: paymentReference }
+    // Get user
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email }
     });
 
-    if (!payment) {
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Find the payment
+    let payment;
+    
+    if (paymentReference === 'latest') {
+      // Get the most recent completed payment for this user
       payment = await prisma.payment.findFirst({
-        where: { sessionId: paymentReference }
+        where: { 
+          userId: user.id,
+          status: 'completed'
+        },
+        orderBy: { completedAt: 'desc' }
       });
+    } else {
+      payment = await prisma.payment.findFirst({
+        where: { reference: paymentReference }
+      });
+
+      if (!payment) {
+        payment = await prisma.payment.findFirst({
+          where: { sessionId: paymentReference }
+        });
+      }
     }
 
     if (!payment) {
@@ -100,15 +122,6 @@ export async function POST(request: NextRequest) {
         error: 'Bot configuration not found in payment. Please deploy manually from the dashboard.',
         missingConfig: true
       }, { status: 400 });
-    }
-
-    // Get the user
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Determine which platform API key to use based on selected model
