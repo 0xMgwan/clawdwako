@@ -49,7 +49,7 @@ export function PricingCard({
         }
       }}
       className={`
-        relative flex flex-col rounded-2xl border p-5 sm:p-6 transition-all duration-200 ease-out cursor-pointer
+        relative flex flex-col rounded-xl border p-4 sm:p-5 transition-all duration-200 ease-out cursor-pointer
         focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background
         ${isFeatured
           ? "bg-card border-primary/30 dark:border-primary/40 shadow-lg shadow-primary/10 dark:shadow-primary/5 scale-[1.02] sm:scale-105"
@@ -63,35 +63,35 @@ export function PricingCard({
     >
       {/* Featured badge */}
       {isFeatured && (
-        <div className="mb-3">
-          <span className="inline-block rounded-full bg-primary/15 dark:bg-primary/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
+        <div className="mb-2">
+          <span className="inline-block rounded-full bg-primary/15 dark:bg-primary/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
             Most popular
           </span>
         </div>
       )}
 
       {/* Plan name + best for */}
-      <div className={isFeatured ? "" : "mt-1"}>
-        <h3 className="text-xl font-semibold text-foreground">{plan.name}</h3>
-        <p className="mt-1 text-sm text-muted-foreground">{plan.bestFor}</p>
+      <div className={isFeatured ? "" : "mt-0.5"}>
+        <h3 className="text-lg font-semibold text-foreground">{plan.name}</h3>
+        <p className="mt-0.5 text-xs text-muted-foreground">{plan.bestFor}</p>
       </div>
 
       {/* Price */}
-      <div className="mt-4 flex items-baseline gap-1.5">
-        <span className="text-5xl font-bold tracking-tight text-foreground">
+      <div className="mt-3 flex items-baseline gap-1">
+        <span className="text-4xl font-bold tracking-tight text-foreground">
           ${plan.price}
         </span>
-        <span className="text-sm font-medium text-muted-foreground">
+        <span className="text-xs font-medium text-muted-foreground">
           {plan.billing}
         </span>
       </div>
 
       {/* Highlights */}
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-2.5 flex flex-wrap gap-1.5">
         {plan.highlights.map((highlight) => (
           <span
             key={highlight}
-            className="inline-flex items-center rounded-full bg-primary/10 dark:bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary"
+            className="inline-flex items-center rounded-full bg-primary/10 dark:bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary"
           >
             {highlight}
           </span>
@@ -99,24 +99,24 @@ export function PricingCard({
       </div>
 
       {/* Divider */}
-      <div className="my-5 h-px bg-border" />
+      <div className="my-3 h-px bg-border" />
 
       {/* Feature groups */}
-      <div className="flex-1 space-y-4">
+      <div className="flex-1 space-y-3">
         {Object.entries(plan.features).map(([groupTitle, items]) => (
           <div key={groupTitle}>
-            <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+            <h4 className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
               {groupTitle}
             </h4>
-            <ul className="space-y-2" role="list">
+            <ul className="space-y-1.5" role="list">
               {items.map((item) => (
-                <li key={item.label} className="flex items-center gap-2.5">
+                <li key={item.label} className="flex items-center gap-2">
                   {item.value === "—" ? (
-                    <Minus className="h-4 w-4 shrink-0 text-muted-foreground/40" />
+                    <Minus className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40" />
                   ) : (
-                    <Check className="h-4 w-4 shrink-0 text-primary" />
+                    <Check className="h-3.5 w-3.5 shrink-0 text-primary" />
                   )}
-                  <span className="text-sm text-foreground/80">
+                  <span className="text-xs text-foreground/80">
                     <span className="font-medium text-foreground">
                       {item.label}
                     </span>{" "}
@@ -140,15 +140,15 @@ export function PricingCard({
         disabled={isLoading}
         aria-label={isLoading ? "Processing payment" : plan.cta.text}
         className={`
-          mt-6 w-full rounded-xl py-3 text-sm font-semibold transition-all duration-200 ease-out
+          mt-4 w-full rounded-xl py-2.5 text-xs font-semibold transition-all duration-200 ease-out
           focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background
           disabled:cursor-not-allowed
           ${ctaClasses}
         `}
       >
         {isLoading ? (
-          <span className="inline-flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
+          <span className="inline-flex items-center gap-1.5">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
             Processing…
           </span>
         ) : (

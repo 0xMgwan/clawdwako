@@ -177,12 +177,12 @@ export function PricingModal({
           <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-2/3 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
           {/* Header */}
-          <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-5 sm:px-8 sm:py-6">
-            <div className="space-y-1.5">
-              <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4 sm:px-6 sm:py-4">
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
                 Choose a plan that matches your rollout
               </h2>
-              <p className="text-sm text-muted-foreground sm:text-base">
+              <p className="text-xs text-muted-foreground sm:text-sm">
                 Deploy AI bots in minutes. Upgrade anytime.
               </p>
             </div>
@@ -197,13 +197,13 @@ export function PricingModal({
           </div>
 
           {/* Billing toggle row */}
-          <div className="flex items-center justify-center px-5 py-4 sm:px-8">
+          <div className="flex items-center justify-center px-5 py-3 sm:px-6">
             <BillingToggle value={billingCycle} onChange={setBillingCycle} />
           </div>
 
           {/* Cards grid */}
           <div
-            className="grid grid-cols-1 gap-4 px-5 sm:gap-6 sm:px-8 md:grid-cols-3"
+            className="grid grid-cols-1 gap-3 px-5 sm:gap-4 sm:px-6 md:grid-cols-3"
             role="radiogroup"
             aria-label="Pricing plans"
           >
@@ -221,15 +221,15 @@ export function PricingModal({
 
           {/* Error state */}
           {error && (
-            <div className="mx-5 mt-4 flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 sm:mx-8">
-              <AlertCircle className="h-4 w-4 shrink-0 text-destructive" />
-              <p className="text-sm text-destructive">{error}</p>
+            <div className="mx-5 mt-3 flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 sm:mx-6">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0 text-destructive" />
+              <p className="text-xs text-destructive">{error}</p>
               <button
                 onClick={() => {
                   setError(null);
                   if (selectedPlan) handleSelectPlan(selectedPlan);
                 }}
-                className="ml-auto text-xs font-semibold text-destructive underline underline-offset-2 hover:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="ml-auto text-[11px] font-semibold text-destructive underline underline-offset-2 hover:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 Retry
               </button>
@@ -237,12 +237,12 @@ export function PricingModal({
           )}
 
           {/* API key note */}
-          <div className="mx-5 mt-4 sm:mx-8">
-            <div className="rounded-xl border border-blue-200 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/5 px-4 py-3">
-              <p className="text-xs font-semibold text-blue-900 dark:text-blue-300 mb-0.5">
+          <div className="mx-5 mt-3 sm:mx-6">
+            <div className="rounded-lg border border-blue-200 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/5 px-3 py-2">
+              <p className="text-[11px] font-semibold text-blue-900 dark:text-blue-300 mb-0.5">
                 💡 Have your own API key?
               </p>
-              <p className="text-xs text-blue-700 dark:text-blue-400">
+              <p className="text-[10px] text-blue-700 dark:text-blue-400">
                 Skip payment and deploy directly using your own API credits. Add
                 your key on the homepage or in the Telegram connection modal.
               </p>
@@ -250,23 +250,23 @@ export function PricingModal({
           </div>
 
           {/* Footer reassurance */}
-          <div className="border-t border-border mt-6 px-5 py-5 sm:px-8 sm:py-6">
-            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+          <div className="border-t border-border mt-4 px-5 py-3 sm:px-6 sm:py-4">
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5">
               {FOOTER_REASSURANCE.map((item, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-1.5 text-xs text-muted-foreground"
+                  className="flex items-center gap-1 text-[11px] text-muted-foreground"
                 >
-                  {i === 0 && <Zap className="h-3.5 w-3.5 text-primary" />}
-                  {i === 1 && <Shield className="h-3.5 w-3.5 text-primary" />}
+                  {i === 0 && <Zap className="h-3 w-3 text-primary" />}
+                  {i === 1 && <Shield className="h-3 w-3 text-primary" />}
                   {i === 2 && (
-                    <ArrowUpRight className="h-3.5 w-3.5 text-primary" />
+                    <ArrowUpRight className="h-3 w-3 text-primary" />
                   )}
                   <span>{item}</span>
                 </div>
               ))}
             </div>
-            <p className="mt-3 text-center text-xs text-muted-foreground/60">
+            <p className="mt-2 text-center text-[10px] text-muted-foreground/60">
               Questions?{" "}
               <a
                 href="#"
