@@ -49,7 +49,7 @@ export const PRICING_PLANS: PricingPlan[] = [
         { label: "Integrations", value: "—" },
       ],
     },
-    cta: { text: "Start with Starter", style: "secondary" },
+    cta: { text: "Start with Starter", style: "primary" },
     featured: false,
   },
   {
