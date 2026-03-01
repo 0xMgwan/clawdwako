@@ -3,11 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 import { getRailwayClient } from '@/lib/railway';
+import { allocateApiKey } from '@/lib/apiKeyAllocator';
 
-// Platform API keys - used when users pay instead of providing their own keys
-const PLATFORM_ANTHROPIC_API_KEY = process.env.PLATFORM_ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY;
-const PLATFORM_OPENAI_API_KEY = process.env.PLATFORM_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
-const PLATFORM_GOOGLE_API_KEY = process.env.PLATFORM_GOOGLE_API_KEY || process.env.GOOGLE_API_KEY;
 const SNIPPE_API_KEY = process.env.SNIPPE_API_KEY;
 const SNIPPE_API_URL = 'https://api.snippe.sh';
 
@@ -156,12 +153,30 @@ export async function POST(request: NextRequest) {
     }
 
     // Determine which platform API key to use based on selected model
+    // Uses round-robin allocation to distribute users across multiple API keys
     const selectedModel = botConfig.selectedModel;
     const platformApiKeys = {
-      anthropic: selectedModel.includes('claude') ? PLATFORM_ANTHROPIC_API_KEY : '',
-      openai: selectedModel.includes('gpt') ? PLATFORM_OPENAI_API_KEY : '',
-      google: selectedModel.includes('gemini') ? PLATFORM_GOOGLE_API_KEY : '',
+      anthropic: '',
+      openai: '',
+      google: '',
     };
+
+    // Allocate API key based on the selected model
+    try {
+      if (selectedModel.includes('claude')) {
+        platformApiKeys.anthropic = allocateApiKey('anthropic', user.id);
+      } else if (selectedModel.includes('gpt')) {
+        platformApiKeys.openai = allocateApiKey('openai', user.id);
+      } else if (selectedModel.includes('gemini')) {
+        platformApiKeys.google = allocateApiKey('google', user.id);
+      }
+    } catch (error: any) {
+      console.error('Failed to allocate API key:', error.message);
+      return NextResponse.json({ 
+        error: `API key allocation failed: ${error.message}`,
+        hint: 'Please configure PLATFORM_ANTHROPIC_API_KEYS, PLATFORM_OPENAI_API_KEYS, or PLATFORM_GOOGLE_API_KEYS in your environment.'
+      }, { status: 500 });
+    }
 
     console.log('🚀 Auto-deploying bot after payment:', {
       botUsername: botConfig.botUsername,
