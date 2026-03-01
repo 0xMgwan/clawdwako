@@ -884,21 +884,21 @@ export default function Home() {
                     Deploy your own AI agent in under 60 seconds
                   </p>
                   <p className="text-base leading-relaxed text-muted-foreground">
-                    Clawdwako is your personal AI automation platform. Connect your Telegram, choose your AI brain (Claude, GPT, or Gemini), and deploy. Your agent instantly becomes available to handle thousands of tasks — from answering questions and translating messages to automating customer support and managing workflows.
+                    Clawdwako is your personal AI automation platform. Connect your Telegram, choose your AI brain (Claude, GPT, or Gemini), and deploy. Your agent instantly becomes available to handle thousands of tasks. From answering questions and translating messages to automating customer support and managing workflows.
                   </p>
                   <div className="space-y-3 pt-2">
                     <div className="flex items-start gap-3">
                       <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 shrink-0" />
                       <div>
                         <h4 className="font-semibold text-foreground text-sm">Own Your Agent</h4>
-                        <p className="text-sm text-muted-foreground">Your bot, your data, your control. No vendor lock-in.</p>
+                        <p className="text-sm text-muted-foreground">Your agent, your data, your control. No vendor lock-in.</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
                       <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 shrink-0" />
                       <div>
                         <h4 className="font-semibold text-foreground text-sm">Pick Your Brain</h4>
-                        <p className="text-sm text-muted-foreground">Claude, GPT-4, Gemini — use your own API keys or ours.</p>
+                        <p className="text-sm text-muted-foreground">Claude, GPT, Gemini with a variety of models.</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
@@ -908,38 +908,20 @@ export default function Home() {
                         <p className="text-sm text-muted-foreground">No servers to manage, no code to write. Just deploy.</p>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Feature List */}
-              <div className="space-y-4 pt-8 border-t border-border">
-                <div className="flex items-start gap-4">
-                  <div className="w-1 h-1 rounded-full bg-green-400 mt-2" />
-                  <div>
-                    <h3 className="font-medium mb-1">Multi-Model Intelligence</h3>
-                    <p className="text-sm text-muted-foreground">Choose from Claude, GPT, or Gemini models</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-1 h-1 rounded-full bg-green-400 mt-2" />
-                  <div>
-                    <h3 className="font-medium mb-1">Zero Configuration</h3>
-                    <p className="text-sm text-muted-foreground">Deploy in under 60 seconds, no coding required</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-1 h-1 rounded-full bg-green-400 mt-2" />
-                  <div>
-                    <h3 className="font-medium mb-1">Enterprise Security</h3>
-                    <p className="text-sm text-muted-foreground">Bank-grade encryption and data protection</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-1 h-1 rounded-full bg-green-400 mt-2" />
-                  <div>
-                    <h3 className="font-medium mb-1">24/7 Operation</h3>
-                    <p className="text-sm text-muted-foreground">Always online, always responsive</p>
+                    <div className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 shrink-0" />
+                      <div>
+                        <h4 className="font-semibold text-foreground text-sm">Enterprise Security</h4>
+                        <p className="text-sm text-muted-foreground">Bank-grade encryption and data protection</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 shrink-0" />
+                      <div>
+                        <h4 className="font-semibold text-foreground text-sm">24/7 Operation</h4>
+                        <p className="text-sm text-muted-foreground">Always online, always responsive</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
