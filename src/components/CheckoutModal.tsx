@@ -437,19 +437,19 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
                           <div className="flex items-center gap-1 shrink-0 mr-2">
                             {method.id === 'card' && (
                               <>
-                                <img src="/visa.png" alt="Visa" className="h-3.5 w-auto object-contain opacity-60" />
-                                <img src="/mastercard.png" alt="Mastercard" className="h-3.5 w-auto object-contain opacity-60" />
+                                <img src="/visa.png" alt="Visa" className="h-3.5 w-auto object-contain" />
+                                <img src="/mastercard.png" alt="Mastercard" className="h-3.5 w-auto object-contain" />
                               </>
                             )}
                             {method.id === 'crypto' && (
                               <>
-                                <img src="/usdc-logo.png" alt="USDC" className="h-3.5 w-auto object-contain opacity-60" />
+                                <img src="/usdc-logo.png" alt="USDC" className="h-3.5 w-auto object-contain" />
                               </>
                             )}
                             {method.id === 'mobile' && (
                               <>
-                                <img src="/M-pesa-logo.png" alt="M-Pesa" className="h-3.5 w-auto object-contain opacity-60" />
-                                <img src="/Airtel_Tanzania-Logo.wine.png" alt="Airtel" className="h-3.5 w-auto object-contain opacity-60" />
+                                <img src="/M-pesa-logo.png" alt="M-Pesa" className="h-3.5 w-auto object-contain" />
+                                <img src="/Airtel_Tanzania-Logo.wine.png" alt="Airtel" className="h-3.5 w-auto object-contain" />
                               </>
                             )}
                           </div>
