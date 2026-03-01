@@ -188,7 +188,7 @@ export function TelegramBotModal({ open, onOpenChange, onSuccess }: TelegramBotM
           <Button
             onClick={handleSubmit}
             disabled={loading || !token.trim()}
-            className="w-full bg-muted hover:bg-muted/80 text-foreground"
+            className="w-full bg-muted hover:bg-muted/80 text-foreground border-2 border-primary/40 hover:border-primary/60"
             size="lg"
           >
             {loading ? (
