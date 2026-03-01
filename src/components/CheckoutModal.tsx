@@ -481,12 +481,8 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="inline-flex h-6 items-center rounded-md bg-background border border-border px-1.5">
-                      <img src="/visa.png" alt="Visa" className="h-3 w-auto object-contain dark:brightness-0 dark:invert dark:opacity-60" />
-                    </span>
-                    <span className="inline-flex h-6 items-center rounded-md bg-background border border-border px-1.5">
-                      <img src="/mastercard.png" alt="Mastercard" className="h-3 w-auto object-contain" />
-                    </span>
+                    <img src="/visa.png" alt="Visa" className="h-4 w-auto object-contain" />
+                    <img src="/mastercard.png" alt="Mastercard" className="h-4 w-auto object-contain" />
                     <svg className="w-4 h-4 text-muted-foreground/40 group-hover:text-emerald-500 transition-colors" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
                   </div>
                 </div>
@@ -550,9 +546,7 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="inline-flex h-6 items-center rounded-md bg-background border border-border px-1.5">
-                      <img src="/usdc-logo.png" alt="USDC" className="h-3.5 w-auto object-contain" />
-                    </span>
+                    <img src="/usdc-logo.png" alt="USDC" className="h-4 w-auto object-contain" />
                     <svg className="w-4 h-4 text-muted-foreground/40 group-hover:text-amber-500 transition-colors" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
                   </div>
                 </div>
@@ -580,15 +574,9 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="inline-flex h-6 items-center rounded-md bg-background border border-border px-1.5">
-                      <img src="/M-pesa-logo.png" alt="M-Pesa" className="h-3.5 w-auto object-contain" />
-                    </span>
-                    <span className="inline-flex h-6 items-center rounded-md bg-background border border-border px-1.5">
-                      <img src="/Airtel_Tanzania-Logo.wine.png" alt="Airtel" className="h-3.5 w-auto object-contain" />
-                    </span>
-                    <span className="inline-flex h-6 items-center rounded-md bg-background border border-border px-1.5">
-                      <img src="/yas.jpg" alt="Yas" className="h-3.5 w-auto object-contain rounded" />
-                    </span>
+                    <img src="/M-pesa-logo.png" alt="M-Pesa" className="h-4 w-auto object-contain" />
+                    <img src="/Airtel_Tanzania-Logo.wine.png" alt="Airtel" className="h-4 w-auto object-contain" />
+                    <img src="/yas.jpg" alt="Yas" className="h-4 w-auto object-contain" />
                     <svg className="w-4 h-4 text-muted-foreground/40 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
                   </div>
                 </div>
