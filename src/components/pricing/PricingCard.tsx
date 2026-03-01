@@ -7,6 +7,7 @@ interface PricingCardProps {
   plan: PricingPlan;
   isSelected: boolean;
   isLoading: boolean;
+  billingCycle: "one-time" | "monthly";
   onSelect: (planId: string) => void;
   onCardClick: (planId: string) => void;
 }
@@ -15,6 +16,7 @@ export function PricingCard({
   plan,
   isSelected,
   isLoading,
+  billingCycle,
   onSelect,
   onCardClick,
 }: PricingCardProps) {
@@ -79,10 +81,10 @@ export function PricingCard({
       {/* Price */}
       <div className="mt-3 flex items-baseline gap-1">
         <span className="text-4xl font-bold tracking-tight text-foreground">
-          ${plan.price}
+          ${billingCycle === "monthly" ? plan.monthlyPrice : plan.price}
         </span>
         <span className="text-xs font-medium text-muted-foreground">
-          {plan.billing}
+          {billingCycle === "monthly" ? "/month" : "one-time"}
         </span>
       </div>
 

@@ -183,7 +183,7 @@ export function PricingModal({
                 Choose a plan that matches your rollout
               </h2>
               <p className="text-xs text-muted-foreground sm:text-sm">
-                Deploy AI bots in minutes. Upgrade anytime.
+                Deploy AI agents in minutes. Upgrade anytime.
               </p>
             </div>
             <button
@@ -196,10 +196,10 @@ export function PricingModal({
             </button>
           </div>
 
-          {/* Billing toggle row */}
-          <div className="flex items-center justify-center px-5 py-3 sm:px-6">
+          {/* Billing toggle row - hidden for now */}
+          {/* <div className="flex items-center justify-center px-5 py-3 sm:px-6">
             <BillingToggle value={billingCycle} onChange={setBillingCycle} />
-          </div>
+          </div> */}
 
           {/* Cards grid */}
           <div
@@ -213,6 +213,7 @@ export function PricingModal({
                 plan={plan}
                 isSelected={selectedPlan === plan.id}
                 isLoading={loadingPlan === plan.id}
+                billingCycle={billingCycle}
                 onSelect={handleSelectPlan}
                 onCardClick={handleCardClick}
               />

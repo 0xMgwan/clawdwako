@@ -15,6 +15,7 @@ export type PricingPlan = {
   name: string;
   bestFor: string;
   price: number;
+  monthlyPrice: number;
   currency: string;
   billing: string;
   highlights: string[];
@@ -32,6 +33,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     name: "Starter",
     bestFor: "Solo builders & quick prototypes",
     price: 20,
+    monthlyPrice: 10,
     currency: "USD",
     billing: "one-time",
     highlights: ["1 deployment", "≈1,000 messages / month"],
@@ -53,8 +55,9 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     id: "professional",
     name: "Professional",
-    bestFor: "Teams shipping multiple bots",
+    bestFor: "Teams shipping multiple agents",
     price: 50,
+    monthlyPrice: 25,
     currency: "USD",
     billing: "one-time",
     highlights: ["3 deployments", "Priority support"],
@@ -78,6 +81,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     name: "Enterprise",
     bestFor: "Scale, security, and custom workflows",
     price: 100,
+    monthlyPrice: 50,
     currency: "USD",
     billing: "one-time",
     highlights: ["Unlimited deployments", "Custom integrations"],
