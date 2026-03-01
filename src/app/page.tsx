@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Bot, Mail, Moon, Sun, LogOut, User as UserIcon, Sparkles, Zap, Shield, Rocket, ArrowRight, Check, Star, Cpu, Globe, Lock, TrendingUp, Users, MessageSquare, BarChart3, Layers, Send, Settings } from "lucide-react";
 import { TelegramBotModal } from "@/components/TelegramBotModal";
 import { DeploymentSuccessModal } from "@/components/DeploymentSuccessModal";
-import { PaymentPackageModal } from "@/components/PaymentPackageModal";
+import { PricingModal } from "@/components/pricing/PricingModal";
 import { CustomSelect } from "@/components/CustomSelect";
 import { MobileConfigSection } from "@/components/MobileConfigSection";
 import { AIBrainSelector } from "@/components/AIBrainSelector";
@@ -1229,11 +1229,11 @@ export default function Home() {
         />
       )}
 
-      {/* Payment Package Modal */}
-      <PaymentPackageModal
-        isOpen={showPaymentModal}
+      {/* Pricing Modal */}
+      <PricingModal
+        open={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
-        onPackageSelected={handlePaymentSuccess}
+        onSelectPlan={(planId) => handlePaymentSuccess(planId, 'checkout-complete')}
         botConfig={telegramBotInfo ? {
           botToken: telegramBotInfo.token,
           botUsername: telegramBotInfo.botInfo?.username || '',
