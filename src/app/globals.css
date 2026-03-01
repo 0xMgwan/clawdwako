@@ -160,11 +160,22 @@ select option:checked {
 }
 
 .animate-scroll-left {
-  animation: scroll-left 15s linear infinite;
+  animation: scroll-left 8s linear infinite;
 }
 
 .animate-scroll-right {
-  animation: scroll-right 15s linear infinite;
+  animation: scroll-right 8s linear infinite;
+}
+
+/* Slower animation on desktop for better readability */
+@media (min-width: 1024px) {
+  .animate-scroll-left {
+    animation: scroll-left 15s linear infinite;
+  }
+
+  .animate-scroll-right {
+    animation: scroll-right 15s linear infinite;
+  }
 }
 
 /* Modern animations */

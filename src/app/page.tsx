@@ -983,7 +983,7 @@ export default function Home() {
                   <div className="text-lg font-semibold mb-2">Total</div>
                   <div className="text-3xl font-bold text-foreground">60 min</div>
                   <p className="text-xs text-muted-foreground mt-2 italic">
-                    If you're <span className="text-red-400">non-technical</span>, multiply these <span className="text-red-400">times by 10</span> — you have to learn each step before doing.
+                    If you're <span className="text-red-400 font-bold">non-technical</span>, multiply these <span className="text-red-400 font-bold">times by 10</span> — you have to learn each step before doing.
                   </p>
                 </div>
               </div>
@@ -998,7 +998,7 @@ export default function Home() {
                   Pick a model, connect Telegram, deploy — done under 1 minute.
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Servers, SSH and OpenClaw Environment are already set up, waiting to get assigned. Simple, secure and fast connection to your bot.
+                  Servers, SSH and OpenClaw Environment are already set up, waiting to get assigned. Simple, secure and fast connection to your agent.
                 </p>
               </div>
             </div>
