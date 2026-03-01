@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { X, CreditCard, Smartphone, ArrowLeft, Loader2, Check } from "lucide-react";
+import { X, CreditCard, Smartphone, ArrowLeft, Loader2, Check, Shield, Lock, Zap } from "lucide-react";
 import { CountrySelector } from "@/components/CountrySelector";
 
 interface CheckoutModalProps {
@@ -286,79 +287,103 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/30 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[96vh] overflow-y-auto shadow-2xl">
-        {/* Logo Header */}
-        <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-3 sm:p-4 rounded-t-2xl sm:rounded-t-3xl">
+    <AnimatePresence>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 backdrop-blur-md"
+    >
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        className="relative bg-gradient-to-b from-gray-950 to-gray-900 rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[96vh] overflow-y-auto shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] border border-white/10"
+      >
+        {/* Ambient glow effects */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
+        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-60 h-40 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Header */}
+        <div className="relative p-4 sm:p-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {(paymentMethod || paymentComplete) && !paymentSuccess && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <button 
                   onClick={handleBack} 
                   disabled={processing || paymentSuccess}
-                  className="text-white hover:bg-white/20"
+                  className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
                 >
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
               )}
               <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg overflow-hidden bg-white p-0.5">
-                  <img 
-                    src="/claw.jpg" 
-                    alt="Clawdwako" 
-                    className="h-full w-full object-cover rounded"
-                    style={{
-                      filter: 'hue-rotate(100deg) saturate(1.2) brightness(1.1)'
-                    }}
-                  />
+                <div className="relative">
+                  <div className="h-10 w-10 rounded-xl overflow-hidden bg-gradient-to-br from-emerald-400 to-green-600 p-0.5 shadow-lg shadow-emerald-500/20">
+                    <img 
+                      src="/claw.jpg" 
+                      alt="Clawdwako" 
+                      className="h-full w-full object-cover rounded-[10px]"
+                      style={{
+                        filter: 'hue-rotate(100deg) saturate(1.2) brightness(1.1)'
+                      }}
+                    />
+                  </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-gray-950" />
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-white">
+                  <h2 className="text-sm font-semibold text-white">
                     {paymentSuccess ? 'Payment Successful!' : paymentComplete ? 'Processing Payment...' : 'Complete Payment'}
                   </h2>
-                  <p className="text-xs text-white/90">
-                    {packageInfo.name} - <span className="font-bold">${packageInfo.price}</span>
+                  <p className="text-xs text-white/50">
+                    {packageInfo.name} &middot; <span className="text-emerald-400 font-semibold">${packageInfo.price}</span>
                   </p>
                 </div>
               </div>
             </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <button 
               onClick={onClose} 
               disabled={processing || paymentSuccess}
-              className="text-white hover:bg-white/20"
+              className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
             >
-              <X className="h-5 w-5" />
-            </Button>
+              <X className="h-4 w-4" />
+            </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-3 sm:p-4">
+        <div className="px-4 sm:px-5 pb-4 sm:pb-5">
 
           {/* Payment Complete */}
           {(paymentComplete || paymentSuccess) && (
-            <div className="text-center py-6">
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full mb-3 shadow-lg">
-                {paymentSuccess ? (
-                  <Check className="w-7 h-7 text-white" />
-                ) : paymentMethod === 'card' ? (
-                  <CreditCard className="w-7 h-7 text-white animate-pulse" />
-                ) : (
-                  <Smartphone className="w-7 h-7 text-white animate-pulse" />
-                )}
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center py-8"
+            >
+              <div className="relative inline-flex items-center justify-center w-16 h-16 mb-4">
+                <div className={`absolute inset-0 rounded-full ${paymentSuccess ? 'bg-emerald-500/20' : 'bg-emerald-500/10'} ${!paymentSuccess ? 'animate-ping' : ''}`} />
+                <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                  {paymentSuccess ? (
+                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', damping: 15 }}>
+                      <Check className="w-7 h-7 text-white" />
+                    </motion.div>
+                  ) : paymentMethod === 'card' ? (
+                    <CreditCard className="w-7 h-7 text-white animate-pulse" />
+                  ) : (
+                    <Smartphone className="w-7 h-7 text-white animate-pulse" />
+                  )}
+                </div>
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-1.5">
+              <h3 className="text-lg font-bold text-white mb-2">
                 {paymentSuccess 
                   ? 'Payment Successful!' 
                   : paymentMethod === 'card' 
                     ? 'Complete Payment' 
                     : 'Check Your Phone'}
               </h3>
-              <p className="text-gray-600 mb-3 text-sm">
+              <p className="text-white/50 mb-4 text-sm leading-relaxed">
                 {paymentSuccess 
                   ? (deployStatus || `Redirecting to dashboard in ${redirectCountdown}s...`)
                   : paymentMethod === 'card' 
@@ -366,35 +391,46 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
                     : 'A USSD prompt has been sent to your phone. Please complete the payment to continue.'}
               </p>
               {!paymentSuccess && (
-                <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500"></div>
-                  <span>Waiting for payment confirmation...</span>
+                <div className="inline-flex items-center gap-2 text-sm text-white/40 bg-white/5 px-4 py-2 rounded-full border border-white/10">
+                  <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-emerald-400 border-t-transparent"></div>
+                  <span>Waiting for confirmation...</span>
                 </div>
               )}
               {paymentSuccess && (
-                <div className="flex items-center justify-center gap-2 text-sm text-green-600">
-                  <Check className="h-4 w-4" />
-                  <span>Payment confirmed! Redirecting...</span>
+                <div className="inline-flex items-center gap-2 text-sm text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-full border border-emerald-500/20">
+                  <Check className="h-3.5 w-3.5" />
+                  <span>Confirmed! Redirecting...</span>
                 </div>
               )}
-            </div>
+            </motion.div>
           )}
 
           {/* Payment Method Selection */}
           {!paymentMethod && !paymentComplete && !paymentSuccess && (
-            <div className="space-y-2.5">
-              <div className="relative overflow-hidden rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50/70 via-white to-white p-2.5">
-                <div className="absolute -right-8 -top-8 h-16 w-16 rounded-full bg-emerald-200/30 blur-xl" />
-                <p className="relative text-gray-900 text-sm font-semibold tracking-tight">Choose your payment rail</p>
-                <p className="relative text-[10px] text-gray-500 mt-0.5">Secure checkout • encrypted end-to-end</p>
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-white text-sm font-medium">Select payment method</p>
+                  <p className="text-[11px] text-white/40 mt-0.5">All transactions are encrypted end-to-end</p>
+                </div>
+                <div className="flex items-center gap-1.5 text-white/30">
+                  <Shield className="h-3.5 w-3.5" />
+                  <Lock className="h-3.5 w-3.5" />
+                </div>
               </div>
 
               {/* Card Payment */}
-              <button
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={async () => {
                   setProcessing(true);
                   
-                  // Create payment session and redirect to Snippe
                   try {
                     const response = await fetch('/api/payments/create-session', {
                       method: 'POST',
@@ -409,7 +445,6 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
                     if (!response.ok) throw new Error(data.error || 'Payment failed');
                     
                     if (data.checkoutUrl) {
-                      // Redirect to Snippe checkout page
                       window.location.href = data.checkoutUrl;
                     } else {
                       throw new Error('No checkout URL received');
@@ -420,48 +455,48 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
                   }
                 }}
                 disabled={cardProcessing}
-                className="group relative w-full rounded-xl p-[1.5px] bg-gradient-to-r from-emerald-400 via-green-300 to-teal-400 shadow-[0_8px_20px_-12px_rgba(16,185,129,0.9)] transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50"
+                className="group relative w-full rounded-xl bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 hover:bg-white/[0.06] transition-all duration-300 disabled:opacity-50 overflow-hidden"
               >
-                <div className="relative overflow-hidden rounded-[11px] bg-gradient-to-br from-white via-emerald-50/40 to-emerald-100/55 px-3 py-2.5">
-                  <div className="absolute -right-4 -top-4 h-12 w-12 rounded-full bg-emerald-300/30 blur-lg" />
-                  <div className="relative flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-green-600 rounded-lg flex items-center justify-center shadow-md group-hover:scale-105 transition-transform shrink-0">
-                        {cardProcessing ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                        ) : (
-                          <CreditCard className="w-4 h-4 text-white" />
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative flex items-center justify-between gap-3 px-3.5 py-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:shadow-emerald-500/30 transition-shadow shrink-0">
+                      {cardProcessing ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      ) : (
+                        <CreditCard className="w-4.5 h-4.5 text-white" />
+                      )}
+                    </div>
+                    <div className="text-left min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm text-white font-semibold leading-tight">
+                          {cardProcessing ? 'Redirecting...' : 'Card Payment'}
+                        </p>
+                        {!cardProcessing && (
+                          <span className="text-[9px] font-semibold text-emerald-300 bg-emerald-500/15 border border-emerald-500/20 px-1.5 py-0.5 rounded-full">Recommended</span>
                         )}
                       </div>
-                      <div className="text-left min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-sm text-gray-900 font-bold leading-tight">
-                            {cardProcessing ? 'Redirecting...' : 'Card Payment'}
-                          </p>
-                          {!cardProcessing && (
-                            <span className="text-[9px] font-semibold text-emerald-800 bg-emerald-100 border border-emerald-200 px-1.5 py-0.5 rounded-full">Recommended</span>
-                          )}
-                        </div>
-                        <p className="text-[10px] text-gray-500 mt-0.5">
-                          {cardProcessing ? 'Please wait...' : 'Visa, Mastercard & more'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <span className="inline-flex h-5 items-center rounded bg-white border border-gray-200 px-1 shadow-sm">
-                        <img src="/visa.png" alt="Visa" className="h-3 w-auto object-contain" />
-                      </span>
-                      <span className="inline-flex h-5 items-center rounded bg-white border border-gray-200 px-1 shadow-sm">
-                        <img src="/mastercard.png" alt="Mastercard" className="h-3 w-auto object-contain" />
-                      </span>
-                      <span className="text-emerald-600 text-sm font-semibold">›</span>
+                      <p className="text-[11px] text-white/40 mt-0.5">
+                        {cardProcessing ? 'Please wait...' : 'Visa, Mastercard & more'}
+                      </p>
                     </div>
                   </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="inline-flex h-6 items-center rounded-md bg-white/10 px-1.5">
+                      <img src="/visa.png" alt="Visa" className="h-3 w-auto object-contain brightness-0 invert opacity-60" />
+                    </span>
+                    <span className="inline-flex h-6 items-center rounded-md bg-white/10 px-1.5">
+                      <img src="/mastercard.png" alt="Mastercard" className="h-3 w-auto object-contain" />
+                    </span>
+                    <svg className="w-4 h-4 text-white/20 group-hover:text-emerald-400 transition-colors" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                  </div>
                 </div>
-              </button>
+              </motion.button>
 
               {/* Crypto Payment */}
-              <button
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={async () => {
                   setCryptoProcessing(true);
                   
@@ -489,85 +524,98 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
                   }
                 }}
                 disabled={cryptoProcessing}
-                className="group relative w-full rounded-xl p-[1.5px] bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 shadow-[0_8px_20px_-12px_rgba(251,146,60,0.85)] transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50"
+                className="group relative w-full rounded-xl bg-white/[0.03] border border-white/10 hover:border-amber-500/30 hover:bg-white/[0.06] transition-all duration-300 disabled:opacity-50 overflow-hidden"
               >
-                <div className="relative overflow-hidden rounded-[11px] bg-gradient-to-br from-white via-orange-50/40 to-amber-100/50 px-3 py-2.5">
-                  <div className="absolute -right-4 -top-4 h-12 w-12 rounded-full bg-orange-300/30 blur-lg" />
-                  <div className="relative flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-md group-hover:scale-105 transition-transform shrink-0">
-                        {cryptoProcessing ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent"></div>
-                        ) : (
-                          <img src="/usdc-logo.png" alt="USDC" className="w-5 h-5 object-contain" />
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative flex items-center justify-between gap-3 px-3.5 py-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:shadow-amber-500/30 transition-shadow shrink-0">
+                      {cryptoProcessing ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      ) : (
+                        <img src="/usdc-logo.png" alt="USDC" className="w-5 h-5 object-contain" />
+                      )}
+                    </div>
+                    <div className="text-left min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm text-white font-semibold leading-tight">
+                          {cryptoProcessing ? 'Redirecting...' : 'Crypto Payment'}
+                        </p>
+                        {!cryptoProcessing && (
+                          <span className="text-[9px] font-semibold text-amber-300 bg-amber-500/15 border border-amber-500/20 px-1.5 py-0.5 rounded-full">Global</span>
                         )}
                       </div>
-                      <div className="text-left min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-sm text-gray-900 font-bold leading-tight">
-                            {cryptoProcessing ? 'Redirecting...' : 'Crypto Payment'}
-                          </p>
-                          {!cryptoProcessing && (
-                            <span className="text-[9px] font-semibold text-orange-800 bg-orange-100 border border-orange-200 px-1.5 py-0.5 rounded-full">Global</span>
-                          )}
-                        </div>
-                        <p className="text-[10px] text-gray-500 mt-0.5">
-                          {cryptoProcessing ? 'Please wait...' : 'BTC, ETH, USDC, USDT & more'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <img src="/usdc-logo.png" alt="USDC" className="h-4 w-4 object-contain" />
-                      <span className="text-orange-600 text-sm font-semibold">›</span>
+                      <p className="text-[11px] text-white/40 mt-0.5">
+                        {cryptoProcessing ? 'Please wait...' : 'BTC, ETH, USDC, USDT & more'}
+                      </p>
                     </div>
                   </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="inline-flex h-6 items-center rounded-md bg-white/10 px-1.5">
+                      <img src="/usdc-logo.png" alt="USDC" className="h-3.5 w-auto object-contain" />
+                    </span>
+                    <svg className="w-4 h-4 text-white/20 group-hover:text-amber-400 transition-colors" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                  </div>
                 </div>
-              </button>
+              </motion.button>
 
               {/* Mobile Money */}
-              <button
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setPaymentMethod('mobile')}
-                className="group relative w-full rounded-xl p-[1.5px] bg-gradient-to-r from-indigo-400 via-blue-400 to-cyan-400 shadow-[0_8px_20px_-12px_rgba(37,99,235,0.85)] transition-all duration-300 hover:-translate-y-0.5"
+                className="group relative w-full rounded-xl bg-white/[0.03] border border-white/10 hover:border-blue-500/30 hover:bg-white/[0.06] transition-all duration-300 overflow-hidden"
               >
-                <div className="relative overflow-hidden rounded-[11px] bg-gradient-to-br from-white via-blue-50/40 to-indigo-100/50 px-3 py-2.5">
-                  <div className="absolute -right-4 -top-4 h-12 w-12 rounded-full bg-blue-300/30 blur-lg" />
-                  <div className="relative flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-md group-hover:scale-105 transition-transform shrink-0">
-                        <Smartphone className="w-4 h-4 text-white" />
-                      </div>
-                      <div className="text-left min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-sm text-gray-900 font-bold leading-tight">Mobile Money</p>
-                          <span className="text-[9px] font-semibold text-blue-800 bg-blue-100 border border-blue-200 px-1.5 py-0.5 rounded-full">East Africa</span>
-                        </div>
-                        <p className="text-[10px] text-gray-500 mt-0.5">M-Pesa, Airtel, Yas & more</p>
-                      </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative flex items-center justify-between gap-3 px-3.5 py-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/30 transition-shadow shrink-0">
+                      <Smartphone className="w-4.5 h-4.5 text-white" />
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <span className="inline-flex h-5 items-center rounded bg-white border border-gray-200 px-1 shadow-sm">
-                        <img src="/M-pesa-logo.png" alt="M-Pesa" className="h-3 w-auto object-contain" />
-                      </span>
-                      <span className="inline-flex h-5 items-center rounded bg-white border border-gray-200 px-1 shadow-sm">
-                        <img src="/Airtel_Tanzania-Logo.wine.png" alt="Airtel" className="h-3 w-auto object-contain" />
-                      </span>
-                      <span className="inline-flex h-5 items-center rounded bg-white border border-gray-200 px-1 shadow-sm">
-                        <img src="/yas.jpg" alt="Yas" className="h-3 w-auto object-contain rounded" />
-                      </span>
-                      <span className="text-blue-600 text-sm font-semibold">›</span>
+                    <div className="text-left min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm text-white font-semibold leading-tight">Mobile Money</p>
+                        <span className="text-[9px] font-semibold text-blue-300 bg-blue-500/15 border border-blue-500/20 px-1.5 py-0.5 rounded-full">East Africa</span>
+                      </div>
+                      <p className="text-[11px] text-white/40 mt-0.5">M-Pesa, Airtel, Yas & more</p>
                     </div>
                   </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="inline-flex h-6 items-center rounded-md bg-white/10 px-1.5">
+                      <img src="/M-pesa-logo.png" alt="M-Pesa" className="h-3.5 w-auto object-contain" />
+                    </span>
+                    <span className="inline-flex h-6 items-center rounded-md bg-white/10 px-1.5">
+                      <img src="/Airtel_Tanzania-Logo.wine.png" alt="Airtel" className="h-3.5 w-auto object-contain" />
+                    </span>
+                    <span className="inline-flex h-6 items-center rounded-md bg-white/10 px-1.5">
+                      <img src="/yas.jpg" alt="Yas" className="h-3.5 w-auto object-contain rounded" />
+                    </span>
+                    <svg className="w-4 h-4 text-white/20 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                  </div>
                 </div>
-              </button>
-            </div>
+              </motion.button>
+
+              {/* Security footer */}
+              <div className="flex items-center justify-center gap-2 pt-2">
+                <div className="flex items-center gap-1.5 text-white/25 text-[10px]">
+                  <Lock className="h-3 w-3" />
+                  <span>256-bit SSL encrypted</span>
+                </div>
+                <span className="text-white/10">•</span>
+                <div className="flex items-center gap-1.5 text-white/25 text-[10px]">
+                  <Zap className="h-3 w-3" />
+                  <span>Instant confirmation</span>
+                </div>
+              </div>
+            </motion.div>
           )}
 
         {/* Card Payment Form */}
         {paymentMethod === 'card' && !paymentComplete && !paymentSuccess && (
-          <div className="space-y-2">
-            <p className="text-xs font-semibold text-gray-700">Enter Payment Details</p>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+            <p className="text-xs font-semibold text-white/70">Enter Payment Details</p>
             <div>
-              <label className="block text-[10px] font-medium text-gray-500 mb-1">Card information *</label>
+              <label className="block text-[10px] font-medium text-white/40 mb-1">Card information *</label>
               <div className="relative">
                 <input
                   type="text"
@@ -575,83 +623,86 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
                   maxLength={19}
                   value={cardDetails.number}
                   onChange={(e) => setCardDetails({ ...cardDetails, number: formatCardNumber(e.target.value) })}
-                  className="w-full px-2.5 py-2 bg-gray-50 border border-gray-300 rounded-t-lg text-gray-900 text-xs focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
+                  className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-t-xl text-white text-xs placeholder:text-white/25 focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/40 outline-none transition-all"
                 />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                  <img src="/visa.png" alt="Visa" className="h-4 w-auto object-contain opacity-60" />
-                  <img src="/mastercard.png" alt="Mastercard" className="h-4 w-auto object-contain opacity-60" />
+                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                  <img src="/visa.png" alt="Visa" className="h-4 w-auto object-contain brightness-0 invert opacity-30" />
+                  <img src="/mastercard.png" alt="Mastercard" className="h-4 w-auto object-contain opacity-40" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-0">
                 <input type="text" placeholder="MM/YY" maxLength={5} value={cardDetails.expiry}
                   onChange={(e) => setCardDetails({ ...cardDetails, expiry: formatExpiry(e.target.value) })}
-                  className="w-full px-2.5 py-2 bg-gray-50 border border-gray-300 border-t-0 rounded-bl-lg text-gray-900 text-xs focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none" />
+                  className="w-full px-3 py-2.5 bg-white/5 border border-white/10 border-t-0 rounded-bl-xl text-white text-xs placeholder:text-white/25 focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/40 outline-none transition-all" />
                 <input type="text" placeholder="CVV" maxLength={4} value={cardDetails.cvv}
                   onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value.replace(/[^0-9]/g, '') })}
-                  className="w-full px-2.5 py-2 bg-gray-50 border border-gray-300 border-t-0 border-l-0 rounded-br-lg text-gray-900 text-xs focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none" />
+                  className="w-full px-3 py-2.5 bg-white/5 border border-white/10 border-t-0 border-l-0 rounded-br-xl text-white text-xs placeholder:text-white/25 focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/40 outline-none transition-all" />
               </div>
             </div>
             <div>
-              <label className="block text-[10px] font-medium text-gray-500 mb-1">Cardholder Name *</label>
+              <label className="block text-[10px] font-medium text-white/40 mb-1">Cardholder Name *</label>
               <input type="text" placeholder="Full name on card" value={cardDetails.name}
                 onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
-                className="w-full px-2.5 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-xs focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none" />
+                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-xs placeholder:text-white/25 focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/40 outline-none transition-all" />
             </div>
             <div>
-              <label className="block text-[10px] font-medium text-gray-500 mb-1">Country *</label>
+              <label className="block text-[10px] font-medium text-white/40 mb-1">Country *</label>
               <div className="mb-1.5">
                 <CountrySelector value={cardDetails.country} onChange={(country) => setCardDetails({ ...cardDetails, country })} />
               </div>
               <input type="text" placeholder="Address" value={cardDetails.addressLine1}
                 onChange={(e) => setCardDetails({ ...cardDetails, addressLine1: e.target.value })}
-                className="w-full px-2.5 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-xs focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none mb-1.5" />
+                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-xs placeholder:text-white/25 focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/40 outline-none transition-all mb-1.5" />
               <div className="grid grid-cols-2 gap-1.5">
                 <input type="text" placeholder="Postal code" value={cardDetails.postalCode}
                   onChange={(e) => setCardDetails({ ...cardDetails, postalCode: e.target.value })}
-                  className="w-full px-2.5 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-xs focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none" />
+                  className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-xs placeholder:text-white/25 focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/40 outline-none transition-all" />
                 <input type="text" placeholder="City" value={cardDetails.city}
                   onChange={(e) => setCardDetails({ ...cardDetails, city: e.target.value })}
-                  className="w-full px-2.5 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 text-xs focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none" />
+                  className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-xs placeholder:text-white/25 focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/40 outline-none transition-all" />
               </div>
             </div>
-            <Button
+            <button
               onClick={handlePayment}
               disabled={processing || !cardDetails.number || !cardDetails.expiry || !cardDetails.cvv || !cardDetails.name || !cardDetails.addressLine1 || !cardDetails.city}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white h-10 text-sm font-bold rounded-xl transition-all shadow-md hover:shadow-lg mt-1"
+              className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white h-11 text-sm font-semibold rounded-xl transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 disabled:opacity-40 disabled:cursor-not-allowed mt-1"
             >
-              {processing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Processing...</> : 'Pay now'}
-            </Button>
-          </div>
+              {processing ? <span className="flex items-center justify-center"><Loader2 className="h-4 w-4 mr-2 animate-spin" />Processing...</span> : 'Pay now'}
+            </button>
+          </motion.div>
         )}
 
         {/* Mobile Money Provider Selection */}
         {paymentMethod === 'mobile' && !selectedProvider && !paymentComplete && !paymentSuccess && (
-          <div>
-            <p className="text-[10px] font-medium text-gray-500 mb-2">Select your mobile money provider</p>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            <p className="text-[11px] font-medium text-white/40 mb-3">Select your mobile money provider</p>
             <div className="grid grid-cols-3 gap-2">
-              {MOBILE_MONEY_PROVIDERS.map((provider) => (
-                <button
+              {MOBILE_MONEY_PROVIDERS.map((provider, i) => (
+                <motion.button
                   key={provider.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.03 }}
                   onClick={() => setSelectedProvider(provider.id)}
-                  className="bg-gray-50 border border-gray-200 rounded-xl p-2.5 hover:border-green-500 hover:bg-green-50 hover:shadow-sm transition-all cursor-pointer"
+                  className="group bg-white/[0.03] border border-white/10 rounded-xl p-2.5 hover:border-emerald-500/30 hover:bg-white/[0.06] transition-all cursor-pointer"
                 >
                   <div className="flex flex-col items-center gap-1.5">
-                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center p-1.5 shadow-sm">
+                    <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center p-1.5 group-hover:bg-white/15 transition-colors">
                       <img src={provider.logo} alt={provider.name} className="w-full h-full object-contain" onError={(e) => { e.currentTarget.src = '/M-pesa-logo.png'; }} />
                     </div>
-                    <span className="text-[10px] font-medium text-gray-800 text-center leading-tight">{provider.name}</span>
+                    <span className="text-[10px] font-medium text-white/60 text-center leading-tight group-hover:text-white/80 transition-colors">{provider.name}</span>
                   </div>
-                </button>
+                </motion.button>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Mobile Money Payment Form */}
         {paymentMethod === 'mobile' && selectedProvider && !paymentComplete && !paymentSuccess && (
-          <div className="space-y-2.5">
-            <div className="flex items-center gap-2.5 p-2.5 bg-gray-50 rounded-xl border border-gray-200">
-              <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center p-1.5 shadow-sm shrink-0">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+            <div className="flex items-center gap-3 p-3 bg-white/[0.03] rounded-xl border border-white/10">
+              <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center p-1.5 shrink-0">
                 <img
                   src={MOBILE_MONEY_PROVIDERS.find(p => p.id === selectedProvider)?.logo}
                   alt={MOBILE_MONEY_PROVIDERS.find(p => p.id === selectedProvider)?.name}
@@ -659,35 +710,36 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
                 />
               </div>
               <div>
-                <p className="text-sm font-bold text-gray-900 leading-tight">
+                <p className="text-sm font-semibold text-white leading-tight">
                   {MOBILE_MONEY_PROVIDERS.find(p => p.id === selectedProvider)?.name}
                 </p>
-                <p className="text-[10px] text-gray-500">Enter your phone number to pay</p>
+                <p className="text-[11px] text-white/40">Enter your phone number to pay</p>
               </div>
             </div>
             <div>
-              <label className="block text-[10px] font-medium text-gray-500 mb-1">Phone Number</label>
+              <label className="block text-[10px] font-medium text-white/40 mb-1">Phone Number</label>
               <input
                 type="tel"
                 placeholder="+255 XXX XXX XXX"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
-                className="w-full px-2.5 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-xs focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
+                className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-xs placeholder:text-white/25 focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/40 outline-none transition-all"
               />
-              <p className="text-[10px] text-gray-400 mt-1">You will receive a USSD prompt to complete payment</p>
+              <p className="text-[10px] text-white/30 mt-1">You will receive a USSD prompt to complete payment</p>
             </div>
-            <Button
+            <button
               onClick={handlePayment}
               disabled={processing || !phoneNumber}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white h-10 text-sm font-bold rounded-xl transition-all shadow-md"
+              className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white h-11 text-sm font-semibold rounded-xl transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {processing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Sending prompt...</> : 'Pay now'}
-            </Button>
-          </div>
+              {processing ? <span className="flex items-center justify-center"><Loader2 className="h-4 w-4 mr-2 animate-spin" />Sending prompt...</span> : 'Pay now'}
+            </button>
+          </motion.div>
         )}
 
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+    </AnimatePresence>
   );
 }
