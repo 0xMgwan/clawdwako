@@ -884,7 +884,7 @@ export default function Home() {
                     Deploy your own AI agent in under 60 seconds
                   </p>
                   <p className="text-base leading-relaxed text-muted-foreground">
-                    Clawdwako is your personal AI automation platform. Connect your Telegram, choose your AI brain (Claude, GPT, or Gemini), and deploy. Your agent instantly becomes available to handle thousands of tasks. From answering questions and translating messages to automating customer support and managing workflows.
+                    Clawdwako is your personal openclaw AI agent. Connect your Telegram, choose your AI brain (Claude, GPT, or Gemini), and deploy. Your agent instantly becomes available to handle thousands of tasks. From answering questions and translating messages to automating customer support and managing workflows.
                   </p>
                   <div className="space-y-3 pt-2">
                     <div className="flex items-start gap-3">
