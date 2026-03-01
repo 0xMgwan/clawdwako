@@ -875,13 +875,41 @@ export default function Home() {
             <div className="lg:pt-32 space-y-8">
               <div className="space-y-6">
                 <button className="group px-6 py-3 bg-foreground text-background rounded-full text-sm font-medium hover:bg-green-400 transition-all flex items-center gap-2">
-                  DISCOVER CLAWDWAKO
+                  HOW IT WORKS
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
                 
-                <p className="text-xl leading-relaxed text-muted-foreground">
-                  Clawdwako is our next-gen AI automation unit, providing highly efficient services across various use cases, starting with Telegram applications
-                </p>
+                <div className="space-y-4">
+                  <p className="text-xl font-semibold text-foreground">
+                    Deploy your own AI agent in under 60 seconds
+                  </p>
+                  <p className="text-base leading-relaxed text-muted-foreground">
+                    Clawdwako is your personal AI automation platform. Connect your Telegram, choose your AI brain (Claude, GPT, or Gemini), and deploy. Your agent instantly becomes available to handle thousands of tasks — from answering questions and translating messages to automating customer support and managing workflows.
+                  </p>
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 shrink-0" />
+                      <div>
+                        <h4 className="font-semibold text-foreground text-sm">Own Your Agent</h4>
+                        <p className="text-sm text-muted-foreground">Your bot, your data, your control. No vendor lock-in.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 shrink-0" />
+                      <div>
+                        <h4 className="font-semibold text-foreground text-sm">Pick Your Brain</h4>
+                        <p className="text-sm text-muted-foreground">Claude, GPT-4, Gemini — use your own API keys or ours.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 shrink-0" />
+                      <div>
+                        <h4 className="font-semibold text-foreground text-sm">Instant Deployment</h4>
+                        <p className="text-sm text-muted-foreground">No servers to manage, no code to write. Just deploy.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Feature List */}
