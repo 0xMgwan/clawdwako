@@ -270,7 +270,9 @@ export function PricingModal({
             <p className="mt-2 text-center text-[10px] text-muted-foreground/60">
               Questions?{" "}
               <a
-                href="#"
+                href="https://t.me/Chuche0x"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="underline underline-offset-2 hover:text-foreground transition-colors"
               >
                 Chat with support
