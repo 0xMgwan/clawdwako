@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { X, CreditCard, Smartphone, ArrowLeft, Loader2, Check, Shield, Lock, Zap } from "lucide-react";
+import { X, CreditCard, Smartphone, ArrowLeft, Loader2, Check, Shield, Lock, Zap, AlertCircle, ChevronRight, Coins } from "lucide-react";
 import { CountrySelector } from "@/components/CountrySelector";
 
 interface CheckoutModalProps {
@@ -34,20 +33,62 @@ const MOBILE_MONEY_PROVIDERS = [
   { id: 'telebirr', name: 'Telebirr', logo: '/telebirr-logo.png' },
 ];
 
+type PaymentMethodId = 'card' | 'crypto' | 'mobile';
+
+const PAYMENT_METHODS = [
+  {
+    id: 'card' as PaymentMethodId,
+    title: 'Card',
+    caption: 'Visa, Mastercard, and more',
+    chip: 'Recommended',
+    chipColor: 'text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border-emerald-500/20',
+    accentFrom: 'from-emerald-400',
+    accentTo: 'to-green-600',
+    shadowColor: 'shadow-emerald-500/20',
+    hoverBorder: 'hover:border-emerald-500/40',
+    selectedBorder: 'border-emerald-500/50',
+    selectedGlow: 'shadow-emerald-500/20',
+    nextStep: "You'll be redirected to secure card checkout",
+  },
+  {
+    id: 'crypto' as PaymentMethodId,
+    title: 'Crypto',
+    caption: 'BTC, ETH, USDC, USDT, and more',
+    chip: 'Global',
+    chipColor: 'text-amber-700 dark:text-amber-300 bg-amber-500/10 border-amber-500/20',
+    accentFrom: 'from-amber-400',
+    accentTo: 'to-orange-600',
+    shadowColor: 'shadow-amber-500/20',
+    hoverBorder: 'hover:border-amber-500/40',
+    selectedBorder: 'border-amber-500/50',
+    selectedGlow: 'shadow-amber-500/20',
+    nextStep: "You'll be redirected to crypto payment gateway",
+  },
+  {
+    id: 'mobile' as PaymentMethodId,
+    title: 'Mobile Money',
+    caption: 'M-Pesa, Airtel, Yas, and more',
+    chip: 'East Africa',
+    chipColor: 'text-blue-700 dark:text-blue-300 bg-blue-500/10 border-blue-500/20',
+    accentFrom: 'from-blue-400',
+    accentTo: 'to-indigo-600',
+    shadowColor: 'shadow-blue-500/20',
+    hoverBorder: 'hover:border-blue-500/40',
+    selectedBorder: 'border-blue-500/50',
+    selectedGlow: 'shadow-blue-500/20',
+    nextStep: "Select your provider and enter your phone number",
+  },
+];
+
 export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, botConfig }: CheckoutModalProps) {
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethodId>('card');
+  const [step, setStep] = useState<'select' | 'form' | 'processing' | 'success'>('select');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'mobile' | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [cardDetails, setCardDetails] = useState({
-    number: '',
-    expiry: '',
-    cvv: '',
-    name: '',
-    country: 'Tanzania',
-    addressLine1: '',
-    addressLine2: '',
-    postalCode: '',
-    city: ''
+    number: '', expiry: '', cvv: '', name: '',
+    country: 'Tanzania', addressLine1: '', addressLine2: '', postalCode: '', city: ''
   });
   const [processing, setProcessing] = useState(false);
   const [cardProcessing, setCardProcessing] = useState(false);
@@ -57,213 +98,153 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
   const [redirectCountdown, setRedirectCountdown] = useState(0);
   const [deployStatus, setDeployStatus] = useState<string>('');
   const [paymentRef, setPaymentRef] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
+  const [continueLoading, setContinueLoading] = useState(false);
 
-  if (!isOpen || !packageInfo) return null;
+  const modalRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  const handleBack = () => {
+  // Focus trap + ESC close
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { onClose(); return; }
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', handleKeyDown); document.body.style.overflow = ''; };
+  }, [isOpen, onClose]);
+
+  const resetCardDetails = () => setCardDetails({
+    number: '', expiry: '', cvv: '', name: '',
+    country: 'Tanzania', addressLine1: '', addressLine2: '', postalCode: '', city: ''
+  });
+
+  const handleBack = useCallback(() => {
     if (paymentComplete) {
-      setPaymentComplete(false);
-      setPaymentMethod(null);
-      setSelectedProvider(null);
-      setPhoneNumber('');
-      setCardDetails({ 
-        number: '', 
-        expiry: '', 
-        cvv: '', 
-        name: '',
-        country: 'Tanzania',
-        addressLine1: '',
-        addressLine2: '',
-        postalCode: '',
-        city: ''
-      });
-      onClose();
+      setPaymentComplete(false); setPaymentMethod(null); setSelectedProvider(null);
+      setPhoneNumber(''); resetCardDetails(); onClose();
     } else if (selectedProvider || cardDetails.number) {
-      setSelectedProvider(null);
-      setCardDetails({ 
-        number: '', 
-        expiry: '', 
-        cvv: '', 
-        name: '',
-        country: 'Tanzania',
-        addressLine1: '',
-        addressLine2: '',
-        postalCode: '',
-        city: ''
-      });
+      setSelectedProvider(null); resetCardDetails();
     } else if (paymentMethod) {
-      setPaymentMethod(null);
+      setPaymentMethod(null); setStep('select');
     } else {
       onClose();
     }
-  };
+  }, [paymentComplete, selectedProvider, cardDetails.number, paymentMethod, onClose]);
 
   const redirectToDashboard = async (reference?: string) => {
-    setPaymentSuccess(true);
-    setPaymentComplete(false);
-    
-    // Use passed reference (avoids stale closure) or fall back to state
+    setPaymentSuccess(true); setPaymentComplete(false); setStep('success');
     const ref = reference || paymentRef;
-    console.log('redirectToDashboard called with ref:', ref, 'botConfig:', botConfig);
-    
-    // Deploy bot after successful payment — MUST complete before redirect
     if (botConfig && ref) {
-      setDeployStatus('Deploying your AI bot...');
+      setDeployStatus('Deploying your AI agent...');
       try {
-        console.log('Calling deploy-after-payment with reference:', ref);
         const deployResponse = await fetch('/api/payments/deploy-after-payment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ paymentReference: ref })
         });
-        
         const deployData = await deployResponse.json();
-        console.log('Deploy response:', deployResponse.status, deployData);
-        
-        if (deployResponse.ok) {
-          console.log('✅ Bot deployed after payment:', deployData);
-          setDeployStatus('Bot deployed successfully! Redirecting...');
-        } else {
-          console.error('Bot deploy failed:', deployData.error);
-          setDeployStatus('Deploy issue - redirecting to dashboard...');
-        }
-      } catch (error) {
-        console.error('Deploy after payment error:', error);
-        setDeployStatus('Deploy issue - redirecting to dashboard...');
-      }
-    } else {
-      console.warn('Skipping deploy: botConfig=', botConfig, 'ref=', ref);
-      setDeployStatus('Redirecting to dashboard...');
-    }
-    
-    // Start countdown AFTER deploy completes (not in parallel)
+        if (deployResponse.ok) { setDeployStatus('Agent deployed successfully! Redirecting...'); }
+        else { setDeployStatus('Deploy issue - redirecting to dashboard...'); }
+      } catch { setDeployStatus('Deploy issue - redirecting to dashboard...'); }
+    } else { setDeployStatus('Redirecting to dashboard...'); }
     setRedirectCountdown(3);
     const countdownInterval = setInterval(() => {
       setRedirectCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(countdownInterval);
-          onPaymentSuccess();
-          window.location.replace('/dashboard');
-          return 0;
-        }
+        if (prev <= 1) { clearInterval(countdownInterval); onPaymentSuccess(); window.location.replace('/dashboard'); return 0; }
         return prev - 1;
       });
     }, 1000);
   };
 
   const handlePayment = async () => {
-    setProcessing(true);
-    
+    setProcessing(true); setError(null);
     try {
-      // Call Snippe API to create payment session
       const response = await fetch('/api/payments/create-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          packageType: packageInfo?.id,
-          paymentMethod: paymentMethod,
-          provider: selectedProvider,
-          phoneNumber: phoneNumber,
+          packageType: packageInfo?.id, paymentMethod: paymentMethod,
+          provider: selectedProvider, phoneNumber: phoneNumber,
           cardDetails: paymentMethod === 'card' ? cardDetails : undefined,
           botConfig: botConfig || null
         })
       });
-
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Payment failed');
-      }
-
-      // Get the payment reference for polling
+      if (!response.ok) throw new Error(data.error || 'Payment failed');
       const paymentReference = data.reference || data.sessionId;
       setPaymentRef(paymentReference || '');
-      console.log('Payment created:', { reference: data.reference, sessionId: data.sessionId, paymentReference, data });
-      
-      // Handle different payment methods
       if (data.paymentMethod === 'card' && data.checkoutUrl) {
-        // Open Snippe checkout in new window for card payments
         const paymentWindow = window.open(data.checkoutUrl, '_blank', 'width=600,height=700');
-        
-        // Check if popup was blocked
         if (!paymentWindow || paymentWindow.closed || typeof paymentWindow.closed === 'undefined') {
           alert('Popup blocked! Please allow popups for this site and try again.\n\nOr click here to open payment page: ' + data.checkoutUrl);
-          setProcessing(false);
-          return;
+          setProcessing(false); return;
         }
-        
-        // Show waiting message
-        setProcessing(false);
-        setPaymentComplete(true);
-        
-        // Only poll if we have a valid reference
+        setProcessing(false); setPaymentComplete(true); setStep('processing');
         if (paymentReference) {
           const pollInterval = setInterval(async () => {
             try {
               const statusResponse = await fetch(`/api/payments/status?reference=${paymentReference}`);
-              if (!statusResponse.ok) return; // Skip this poll cycle on error
+              if (!statusResponse.ok) return;
               const statusData = await statusResponse.json();
-              
-              if (statusData.status === 'completed') {
-                clearInterval(pollInterval);
-                if (paymentWindow && !paymentWindow.closed) {
-                  paymentWindow.close();
-                }
-                redirectToDashboard(paymentReference);
-              } else if (statusData.status === 'failed') {
-                clearInterval(pollInterval);
-                if (paymentWindow && !paymentWindow.closed) {
-                  paymentWindow.close();
-                }
-                alert('Payment failed. Please try again.');
-                onClose();
-              }
-            } catch (error) {
-              console.error('Error checking payment status:', error);
-            }
+              if (statusData.status === 'completed') { clearInterval(pollInterval); if (paymentWindow && !paymentWindow.closed) paymentWindow.close(); redirectToDashboard(paymentReference); }
+              else if (statusData.status === 'failed') { clearInterval(pollInterval); if (paymentWindow && !paymentWindow.closed) paymentWindow.close(); setError('Payment failed. Please try again.'); setStep('select'); setPaymentComplete(false); }
+            } catch {}
           }, 3000);
-          
-          // Stop polling after 10 minutes
           setTimeout(() => clearInterval(pollInterval), 600000);
         }
         return;
       }
-
-      // For mobile money, show waiting message and poll for payment status
-      setProcessing(false);
-      setPaymentComplete(true);
-      
-      // Only poll if we have a valid reference
+      setProcessing(false); setPaymentComplete(true); setStep('processing');
       if (paymentReference) {
         const pollInterval = setInterval(async () => {
           try {
             const statusResponse = await fetch(`/api/payments/status?reference=${paymentReference}`);
-            if (!statusResponse.ok) {
-              console.log('Status poll error:', statusResponse.status);
-              return;
-            }
+            if (!statusResponse.ok) return;
             const statusData = await statusResponse.json();
-            console.log('Payment status poll:', statusData);
-            
-            if (statusData.status === 'completed') {
-              clearInterval(pollInterval);
-              redirectToDashboard(paymentReference);
-            } else if (statusData.status === 'failed') {
-              clearInterval(pollInterval);
-              alert('Payment failed. Please try again.');
-              onClose();
-            }
-          } catch (error) {
-            console.error('Error checking payment status:', error);
-          }
+            if (statusData.status === 'completed') { clearInterval(pollInterval); redirectToDashboard(paymentReference); }
+            else if (statusData.status === 'failed') { clearInterval(pollInterval); setError('Payment failed. Please try again.'); setStep('select'); setPaymentComplete(false); }
+          } catch {}
         }, 3000);
-        
-        // Stop polling after 5 minutes
         setTimeout(() => clearInterval(pollInterval), 300000);
       }
     } catch (error: any) {
-      setProcessing(false);
-      alert(`Payment error: ${error.message}`);
+      setProcessing(false); setError(error.message);
+    }
+  };
+
+  const handleContinue = async () => {
+    setContinueLoading(true); setError(null);
+    if (selectedMethod === 'card') {
+      try {
+        const response = await fetch('/api/payments/create-session', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ packageType: packageInfo?.id, paymentMethod: 'card', botConfig: botConfig || null })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Payment failed');
+        if (data.checkoutUrl) { window.location.href = data.checkoutUrl; } else { throw new Error('No checkout URL received'); }
+      } catch (error: any) { setContinueLoading(false); setError(error.message); }
+    } else if (selectedMethod === 'crypto') {
+      try {
+        const response = await fetch('/api/payments/create-session', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ packageType: packageInfo?.id, paymentMethod: 'crypto', botConfig: botConfig || null })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Payment failed');
+        if (data.checkoutUrl) { window.location.href = data.checkoutUrl; } else { throw new Error('No checkout URL received'); }
+      } catch (error: any) { setContinueLoading(false); setError(error.message); }
+    } else if (selectedMethod === 'mobile') {
+      setPaymentMethod('mobile'); setStep('form'); setContinueLoading(false);
     }
   };
 
@@ -272,461 +253,339 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
     const matches = v.match(/\d{4,16}/g);
     const match = (matches && matches[0]) || '';
     const parts = [];
-    for (let i = 0; i < match.length; i += 4) {
-      parts.push(match.substring(i, i + 4));
-    }
+    for (let i = 0; i < match.length; i += 4) parts.push(match.substring(i, i + 4));
     return parts.length ? parts.join(' ') : value;
   };
 
   const formatExpiry = (value: string) => {
     const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-    if (v.length >= 2) {
-      return v.substring(0, 2) + (v.length > 2 ? '/' + v.substring(2, 4) : '');
-    }
+    if (v.length >= 2) return v.substring(0, 2) + (v.length > 2 ? '/' + v.substring(2, 4) : '');
     return v;
   };
 
+  if (!isOpen || !packageInfo) return null;
+
+  const selectedMethodInfo = PAYMENT_METHODS.find(m => m.id === selectedMethod);
+
   return (
     <AnimatePresence>
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/30 backdrop-blur-sm"
-    >
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="relative bg-card rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[96vh] overflow-y-auto shadow-2xl border border-border"
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 dark:bg-black/60 backdrop-blur-sm"
+        onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="payment-modal-title"
       >
-        {/* Ambient glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+        <motion.div
+          ref={modalRef}
+          initial={{ opacity: 0, y: 40, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 40, scale: 0.97 }}
+          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="relative w-full max-w-xl max-h-[96vh] overflow-hidden rounded-t-2xl sm:rounded-2xl border border-border bg-background/95 dark:bg-background/90 backdrop-blur-xl shadow-2xl flex flex-col"
+        >
+          {/* Top accent glow */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-3/4 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
 
-        {/* Header */}
-        <div className="relative bg-gradient-to-r from-green-500 to-emerald-500 p-4 sm:p-5 rounded-t-2xl sm:rounded-t-3xl">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {(paymentMethod || paymentComplete) && !paymentSuccess && (
-                <button 
-                  onClick={handleBack} 
-                  disabled={processing || paymentSuccess}
-                  className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30 transition-all disabled:opacity-50"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                </button>
-              )}
+          {/* Header */}
+          <div className="relative border-b border-border px-4 pt-4 pb-3 sm:px-5">
+            <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="relative">
-                  <div className="h-10 w-10 rounded-xl overflow-hidden bg-white p-0.5 shadow-lg">
-                    <img 
-                      src="/claw.jpg" 
-                      alt="Clawdwako" 
-                      className="h-full w-full object-cover rounded-[10px]"
-                      style={{
-                        filter: 'hue-rotate(100deg) saturate(1.2) brightness(1.1)'
-                      }}
-                    />
-                  </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-white rounded-full border-2 border-green-500" />
-                </div>
+                {step !== 'select' && step !== 'success' && (
+                  <button
+                    onClick={handleBack}
+                    disabled={processing || paymentSuccess}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground transition-colors disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    aria-label="Go back"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </button>
+                )}
                 <div>
-                  <h2 className="text-sm font-semibold text-white">
-                    {paymentSuccess ? 'Payment Successful!' : paymentComplete ? 'Processing Payment...' : 'Complete Payment'}
+                  <h2 id="payment-modal-title" className="text-base font-semibold tracking-tight text-foreground sm:text-lg">
+                    {step === 'success' ? 'Payment successful' : step === 'processing' ? 'Processing payment' : 'Complete payment'}
                   </h2>
-                  <p className="text-xs text-white/80">
-                    {packageInfo.name} &middot; <span className="font-bold text-white">${packageInfo.price}</span>
-                  </p>
+                  <div className="mt-0.5 flex items-center gap-1.5">
+                    <span className="inline-flex items-center rounded-full border border-border bg-muted/60 px-2 py-0.5 text-[10px] font-medium text-foreground">
+                      {packageInfo.name}
+                    </span>
+                    <span className="text-[11px] font-semibold text-foreground">${packageInfo.price}</span>
+                    <span className="text-[9px] text-muted-foreground">one-time</span>
+                  </div>
                 </div>
               </div>
+              <button
+                ref={closeButtonRef}
+                onClick={onClose}
+                disabled={processing || paymentSuccess}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground transition-colors disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
-            <button 
-              onClick={onClose} 
-              disabled={processing || paymentSuccess}
-              className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30 transition-all disabled:opacity-50"
-            >
-              <X className="h-4 w-4" />
-            </button>
           </div>
-        </div>
 
-        {/* Content */}
-        <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-4">
+          {/* Body — scrollable */}
+          <div className="flex-1 overflow-y-auto px-4 py-3 sm:px-5">
 
-          {/* Payment Complete */}
-          {(paymentComplete || paymentSuccess) && (
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center py-8"
-            >
-              <div className="relative inline-flex items-center justify-center w-16 h-16 mb-4">
-                <div className={`absolute inset-0 rounded-full ${paymentSuccess ? 'bg-emerald-500/20' : 'bg-emerald-500/10'} ${!paymentSuccess ? 'animate-ping' : ''}`} />
-                <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                  {paymentSuccess ? (
+            {/* ===== SUCCESS STATE ===== */}
+            {step === 'success' && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-center py-8">
+                <div className="relative inline-flex items-center justify-center w-16 h-16 mb-4">
+                  <div className="absolute inset-0 rounded-full bg-emerald-500/20" />
+                  <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
                     <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', damping: 15 }}>
                       <Check className="w-7 h-7 text-white" />
                     </motion.div>
-                  ) : paymentMethod === 'card' ? (
-                    <CreditCard className="w-7 h-7 text-white animate-pulse" />
-                  ) : (
-                    <Smartphone className="w-7 h-7 text-white animate-pulse" />
-                  )}
+                  </div>
                 </div>
-              </div>
-              <h3 className="text-lg font-bold text-foreground mb-2">
-                {paymentSuccess 
-                  ? 'Payment Successful!' 
-                  : paymentMethod === 'card' 
-                    ? 'Complete Payment' 
-                    : 'Check Your Phone'}
-              </h3>
-              <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
-                {paymentSuccess 
-                  ? (deployStatus || `Redirecting to dashboard in ${redirectCountdown}s...`)
-                  : paymentMethod === 'card' 
-                    ? 'Please complete the payment in the popup window to continue.'
-                    : 'A USSD prompt has been sent to your phone. Please complete the payment to continue.'}
-              </p>
-              {!paymentSuccess && (
-                <div className="inline-flex items-center gap-2 text-sm text-muted-foreground bg-muted px-4 py-2 rounded-full border border-border">
-                  <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-primary border-t-transparent"></div>
-                  <span>Waiting for confirmation...</span>
-                </div>
-              )}
-              {paymentSuccess && (
-                <div className="inline-flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-full border border-emerald-500/20">
+                <h3 className="text-lg font-bold text-foreground mb-2">Payment Successful!</h3>
+                <p className="text-sm text-muted-foreground mb-4">{deployStatus || `Redirecting to dashboard in ${redirectCountdown}s...`}</p>
+                <div className="inline-flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-4 py-2 rounded-full border border-emerald-500/20">
                   <Check className="h-3.5 w-3.5" />
                   <span>Confirmed! Redirecting...</span>
                 </div>
-              )}
-            </motion.div>
-          )}
+              </motion.div>
+            )}
 
-          {/* Payment Method Selection */}
-          {!paymentMethod && !paymentComplete && !paymentSuccess && (
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="space-y-3"
-            >
-              <div className="flex items-center justify-between">
+            {/* ===== PROCESSING STATE ===== */}
+            {step === 'processing' && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-center py-8">
+                <div className="relative inline-flex items-center justify-center w-16 h-16 mb-4">
+                  <div className="absolute inset-0 rounded-full bg-emerald-500/10 animate-ping" />
+                  <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                    {paymentMethod === 'card' ? <CreditCard className="w-7 h-7 text-white animate-pulse" /> : <Smartphone className="w-7 h-7 text-white animate-pulse" />}
+                  </div>
+                </div>
+                <h3 className="text-lg font-bold text-foreground mb-2">
+                  {paymentMethod === 'card' ? 'Complete Payment' : 'Check Your Phone'}
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {paymentMethod === 'card' ? 'Please complete the payment in the popup window to continue.' : 'A USSD prompt has been sent to your phone. Please complete the payment to continue.'}
+                </p>
+                <div className="inline-flex items-center gap-2 text-xs text-muted-foreground bg-muted px-4 py-2 rounded-full border border-border">
+                  <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-primary border-t-transparent" />
+                  <span>Waiting for confirmation...</span>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ===== METHOD SELECTION ===== */}
+            {step === 'select' && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+                <div className="flex items-center justify-between mb-2.5">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Choose a payment method</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Transactions are encrypted and processed securely.</p>
+                  </div>
+                  <div className="flex items-center gap-1 text-muted-foreground/40">
+                    <Shield className="h-3.5 w-3.5" />
+                    <Lock className="h-3.5 w-3.5" />
+                  </div>
+                </div>
+
+                <div className="space-y-2" role="radiogroup" aria-label="Payment methods">
+                  {PAYMENT_METHODS.map((method) => {
+                    const isSelected = selectedMethod === method.id;
+                    return (
+                      <button
+                        key={method.id}
+                        role="radio"
+                        aria-checked={isSelected}
+                        onClick={() => { setSelectedMethod(method.id); setError(null); }}
+                        className={`
+                          group relative w-full rounded-xl border text-left transition-all duration-200 ease-out
+                          focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background
+                          ${isSelected
+                            ? `${method.selectedBorder} bg-card shadow-md ${method.selectedGlow}`
+                            : `border-border bg-card/60 hover:bg-card ${method.hoverBorder} hover:shadow-sm hover:-translate-y-px`
+                          }
+                        `}
+                      >
+                        {/* Selection glow */}
+                        {isSelected && (
+                          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/5 via-transparent to-transparent pointer-events-none" />
+                        )}
+                        <div className="relative flex items-center gap-3 px-3.5 py-3">
+                          {/* Icon tile */}
+                          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${method.accentFrom} ${method.accentTo} shadow-md ${method.shadowColor} transition-shadow`}>
+                            {method.id === 'card' && <CreditCard className="h-4 w-4 text-white" />}
+                            {method.id === 'crypto' && <Coins className="h-4 w-4 text-white" />}
+                            {method.id === 'mobile' && <Smartphone className="h-4 w-4 text-white" />}
+                          </div>
+
+                          {/* Text */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-sm font-semibold text-foreground">{method.title}</span>
+                              <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full border ${method.chipColor}`}>
+                                {method.chip}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">{method.caption}</p>
+                            {/* Next step hint */}
+                            {isSelected && (
+                              <p className="text-[9px] text-primary mt-0.5 font-medium">{method.nextStep}</p>
+                            )}
+                          </div>
+
+                          {/* Brand logos */}
+                          <div className="flex items-center gap-1 shrink-0 mr-2">
+                            {method.id === 'card' && (
+                              <>
+                                <img src="/visa.png" alt="Visa" className="h-3.5 w-auto object-contain opacity-60" />
+                                <img src="/mastercard.png" alt="Mastercard" className="h-3.5 w-auto object-contain opacity-60" />
+                              </>
+                            )}
+                            {method.id === 'crypto' && (
+                              <>
+                                <img src="/usdc-logo.png" alt="USDC" className="h-3.5 w-auto object-contain opacity-60" />
+                              </>
+                            )}
+                            {method.id === 'mobile' && (
+                              <>
+                                <img src="/M-pesa-logo.png" alt="M-Pesa" className="h-3.5 w-auto object-contain opacity-60" />
+                                <img src="/Airtel_Tanzania-Logo.wine.png" alt="Airtel" className="h-3.5 w-auto object-contain opacity-60" />
+                              </>
+                            )}
+                          </div>
+
+                          {/* Radio indicator */}
+                          <div className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${isSelected ? 'border-primary bg-primary' : 'border-muted-foreground/30'}`}>
+                            {isSelected && <Check className="h-2.5 w-2.5 text-primary-foreground" />}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Error */}
+                {error && (
+                  <div className="mt-2.5 flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0 text-destructive" />
+                    <p className="text-[11px] text-destructive flex-1">{error}</p>
+                    <button onClick={() => setError(null)} className="text-[9px] font-semibold text-destructive underline underline-offset-2">
+                      Dismiss
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* ===== MOBILE MONEY PROVIDER SELECTION ===== */}
+            {step === 'form' && paymentMethod === 'mobile' && !selectedProvider && !paymentComplete && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                <p className="text-xs font-medium text-muted-foreground mb-3">Select your mobile money provider</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {MOBILE_MONEY_PROVIDERS.map((provider, i) => (
+                    <motion.button
+                      key={provider.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.03 }}
+                      onClick={() => setSelectedProvider(provider.id)}
+                      className="group rounded-xl border border-border bg-card/60 p-2.5 hover:border-primary/40 hover:bg-card transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    >
+                      <div className="flex flex-col items-center gap-1.5">
+                        <div className="w-10 h-10 bg-background rounded-lg flex items-center justify-center p-1.5 border border-border group-hover:border-primary/30 transition-colors">
+                          <img src={provider.logo} alt={provider.name} className="w-full h-full object-contain" onError={(e) => { e.currentTarget.src = '/M-pesa-logo.png'; }} />
+                        </div>
+                        <span className="text-[10px] font-medium text-muted-foreground text-center leading-tight group-hover:text-foreground transition-colors">{provider.name}</span>
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* ===== MOBILE MONEY PHONE FORM ===== */}
+            {step === 'form' && paymentMethod === 'mobile' && selectedProvider && !paymentComplete && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+                <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card/60">
+                  <div className="w-10 h-10 bg-background rounded-xl flex items-center justify-center p-1.5 border border-border shrink-0">
+                    <img src={MOBILE_MONEY_PROVIDERS.find(p => p.id === selectedProvider)?.logo} alt="" className="w-full h-full object-contain" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground leading-tight">{MOBILE_MONEY_PROVIDERS.find(p => p.id === selectedProvider)?.name}</p>
+                    <p className="text-[11px] text-muted-foreground">Enter your phone number to pay</p>
+                  </div>
+                </div>
                 <div>
-                  <p className="text-foreground text-sm font-medium">Select payment method</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">All transactions are encrypted end-to-end</p>
+                  <label className="block text-[10px] font-medium text-muted-foreground mb-1">Phone Number</label>
+                  <input
+                    type="tel"
+                    placeholder="+255 XXX XXX XXX"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-background border border-border rounded-xl text-foreground text-xs placeholder:text-muted-foreground/50 focus:ring-2 focus:ring-primary/40 focus:border-primary/40 outline-none transition-all"
+                  />
+                  <p className="text-[10px] text-muted-foreground/60 mt-1">You will receive a USSD prompt to complete payment</p>
                 </div>
-                <div className="flex items-center gap-1.5 text-muted-foreground/50">
-                  <Shield className="h-3.5 w-3.5" />
-                  <Lock className="h-3.5 w-3.5" />
-                </div>
-              </div>
+                <button
+                  onClick={handlePayment}
+                  disabled={processing || !phoneNumber}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-11 text-sm font-semibold rounded-xl transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                >
+                  {processing ? <span className="flex items-center justify-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Sending prompt...</span> : `Pay $${packageInfo.price} now`}
+                </button>
+              </motion.div>
+            )}
 
-              {/* Card Payment */}
-              <motion.button
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={async () => {
-                  setProcessing(true);
-                  
-                  try {
-                    const response = await fetch('/api/payments/create-session', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        packageType: packageInfo?.id,
-                        paymentMethod: 'card',
-                        botConfig: botConfig || null
-                      })
-                    });
-                    const data = await response.json();
-                    if (!response.ok) throw new Error(data.error || 'Payment failed');
-                    
-                    if (data.checkoutUrl) {
-                      window.location.href = data.checkoutUrl;
-                    } else {
-                      throw new Error('No checkout URL received');
-                    }
-                  } catch (error: any) {
-                    setCardProcessing(false);
-                    alert(`Payment error: ${error.message}`);
-                  }
-                }}
-                disabled={cardProcessing}
-                className="group relative w-full rounded-xl bg-muted/50 border border-border hover:border-emerald-500/40 hover:bg-muted transition-all duration-300 disabled:opacity-50 overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative flex items-center justify-between gap-3 px-3.5 py-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:shadow-emerald-500/30 transition-shadow shrink-0">
-                      {cardProcessing ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                      ) : (
-                        <CreditCard className="w-4 h-4 text-white" />
-                      )}
-                    </div>
-                    <div className="text-left min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm text-foreground font-semibold leading-tight">
-                          {cardProcessing ? 'Redirecting...' : 'Card Payment'}
-                        </p>
-                        {!cardProcessing && (
-                          <span className="text-[9px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-full">Recommended</span>
-                        )}
-                      </div>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">
-                        {cardProcessing ? 'Please wait...' : 'Visa, Mastercard & more'}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <img src="/visa.png" alt="Visa" className="h-4 w-auto object-contain" />
-                    <img src="/mastercard.png" alt="Mastercard" className="h-4 w-auto object-contain" />
-                    <svg className="w-4 h-4 text-muted-foreground/40 group-hover:text-emerald-500 transition-colors" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-                  </div>
-                </div>
-              </motion.button>
+          </div>
 
-              {/* Crypto Payment */}
-              <motion.button
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={async () => {
-                  setCryptoProcessing(true);
-                  
-                  try {
-                    const response = await fetch('/api/payments/create-session', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        packageType: packageInfo?.id,
-                        paymentMethod: 'crypto',
-                        botConfig: botConfig || null
-                      })
-                    });
-                    const data = await response.json();
-                    if (!response.ok) throw new Error(data.error || 'Payment failed');
-                    
-                    if (data.checkoutUrl) {
-                      window.location.href = data.checkoutUrl;
-                    } else {
-                      throw new Error('No checkout URL received');
-                    }
-                  } catch (error: any) {
-                    setCryptoProcessing(false);
-                    alert(`Payment error: ${error.message}`);
-                  }
-                }}
-                disabled={cryptoProcessing}
-                className="group relative w-full rounded-xl bg-muted/50 border border-border hover:border-amber-500/40 hover:bg-muted transition-all duration-300 disabled:opacity-50 overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative flex items-center justify-between gap-3 px-3.5 py-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:shadow-amber-500/30 transition-shadow shrink-0">
-                      {cryptoProcessing ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                      ) : (
-                        <img src="/usdc-logo.png" alt="USDC" className="w-5 h-5 object-contain" />
-                      )}
-                    </div>
-                    <div className="text-left min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm text-foreground font-semibold leading-tight">
-                          {cryptoProcessing ? 'Redirecting...' : 'Crypto Payment'}
-                        </p>
-                        {!cryptoProcessing && (
-                          <span className="text-[9px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-full">Global</span>
-                        )}
-                      </div>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">
-                        {cryptoProcessing ? 'Please wait...' : 'BTC, ETH, USDC, USDT & more'}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <img src="/usdc-logo.png" alt="USDC" className="h-4 w-auto object-contain" />
-                    <svg className="w-4 h-4 text-muted-foreground/40 group-hover:text-amber-500 transition-colors" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-                  </div>
+          {/* ===== STICKY FOOTER ===== */}
+          {step === 'select' && (
+            <div className="border-t border-border px-4 py-3 sm:px-5 bg-muted/30">
+              {/* Trust row */}
+              <div className="flex items-center justify-center gap-2.5 mb-2.5">
+                <div className="flex items-center gap-0.5 text-[9px] text-muted-foreground">
+                  <Shield className="h-2.5 w-2.5 text-primary/60" />
+                  <span>Secure checkout</span>
                 </div>
-              </motion.button>
-
-              {/* Mobile Money */}
-              <motion.button
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setPaymentMethod('mobile')}
-                className="group relative w-full rounded-xl bg-muted/50 border border-border hover:border-blue-500/40 hover:bg-muted transition-all duration-300 overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative flex items-center justify-between gap-3 px-3.5 py-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/30 transition-shadow shrink-0">
-                      <Smartphone className="w-4 h-4 text-white" />
-                    </div>
-                    <div className="text-left min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm text-foreground font-semibold leading-tight">Mobile Money</p>
-                        <span className="text-[9px] font-semibold text-blue-700 dark:text-blue-300 bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 rounded-full">East Africa</span>
-                      </div>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">M-Pesa, Airtel, Yas & more</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <img src="/M-pesa-logo.png" alt="M-Pesa" className="h-4 w-auto object-contain" />
-                    <img src="/Airtel_Tanzania-Logo.wine.png" alt="Airtel" className="h-4 w-auto object-contain" />
-                    <img src="/yas.jpg" alt="Yas" className="h-4 w-auto object-contain" />
-                    <svg className="w-4 h-4 text-muted-foreground/40 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-                  </div>
+                <span className="text-muted-foreground/30 text-[9px]">·</span>
+                <div className="flex items-center gap-0.5 text-[9px] text-muted-foreground">
+                  <Lock className="h-2.5 w-2.5 text-primary/60" />
+                  <span>Encrypted in transit</span>
                 </div>
-              </motion.button>
-
-              {/* Security footer */}
-              <div className="flex items-center justify-center gap-2 pt-2">
-                <div className="flex items-center gap-1.5 text-muted-foreground/50 text-[10px]">
-                  <Lock className="h-3 w-3" />
-                  <span>256-bit SSL encrypted</span>
-                </div>
-                <span className="text-border">&bull;</span>
-                <div className="flex items-center gap-1.5 text-muted-foreground/50 text-[10px]">
-                  <Zap className="h-3 w-3" />
+                <span className="text-muted-foreground/30 text-[9px]">·</span>
+                <div className="flex items-center gap-0.5 text-[9px] text-muted-foreground">
+                  <Zap className="h-2.5 w-2.5 text-primary/60" />
                   <span>Instant confirmation</span>
                 </div>
               </div>
-            </motion.div>
-          )}
 
-        {/* Card Payment Form */}
-        {paymentMethod === 'card' && !paymentComplete && !paymentSuccess && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-            <p className="text-xs font-semibold text-foreground">Enter Payment Details</p>
-            <div>
-              <label className="block text-[10px] font-medium text-muted-foreground mb-1">Card information *</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="**** **** 1234 1234"
-                  maxLength={19}
-                  value={cardDetails.number}
-                  onChange={(e) => setCardDetails({ ...cardDetails, number: formatCardNumber(e.target.value) })}
-                  className="w-full px-3 py-2.5 bg-background border border-border rounded-t-xl text-foreground text-xs placeholder:text-muted-foreground/50 focus:ring-2 focus:ring-primary/40 focus:border-primary/40 outline-none transition-all"
-                />
-                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                  <img src="/visa.png" alt="Visa" className="h-4 w-auto object-contain opacity-40 dark:brightness-0 dark:invert dark:opacity-30" />
-                  <img src="/mastercard.png" alt="Mastercard" className="h-4 w-auto object-contain opacity-40" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-0">
-                <input type="text" placeholder="MM/YY" maxLength={5} value={cardDetails.expiry}
-                  onChange={(e) => setCardDetails({ ...cardDetails, expiry: formatExpiry(e.target.value) })}
-                  className="w-full px-3 py-2.5 bg-background border border-border border-t-0 rounded-bl-xl text-foreground text-xs placeholder:text-muted-foreground/50 focus:ring-2 focus:ring-primary/40 focus:border-primary/40 outline-none transition-all" />
-                <input type="text" placeholder="CVV" maxLength={4} value={cardDetails.cvv}
-                  onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value.replace(/[^0-9]/g, '') })}
-                  className="w-full px-3 py-2.5 bg-background border border-border border-t-0 border-l-0 rounded-br-xl text-foreground text-xs placeholder:text-muted-foreground/50 focus:ring-2 focus:ring-primary/40 focus:border-primary/40 outline-none transition-all" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-[10px] font-medium text-muted-foreground mb-1">Cardholder Name *</label>
-              <input type="text" placeholder="Full name on card" value={cardDetails.name}
-                onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
-                className="w-full px-3 py-2.5 bg-background border border-border rounded-xl text-foreground text-xs placeholder:text-muted-foreground/50 focus:ring-2 focus:ring-primary/40 focus:border-primary/40 outline-none transition-all" />
-            </div>
-            <div>
-              <label className="block text-[10px] font-medium text-muted-foreground mb-1">Country *</label>
-              <div className="mb-1.5">
-                <CountrySelector value={cardDetails.country} onChange={(country) => setCardDetails({ ...cardDetails, country })} />
-              </div>
-              <input type="text" placeholder="Address" value={cardDetails.addressLine1}
-                onChange={(e) => setCardDetails({ ...cardDetails, addressLine1: e.target.value })}
-                className="w-full px-3 py-2.5 bg-background border border-border rounded-xl text-foreground text-xs placeholder:text-muted-foreground/50 focus:ring-2 focus:ring-primary/40 focus:border-primary/40 outline-none transition-all mb-1.5" />
-              <div className="grid grid-cols-2 gap-1.5">
-                <input type="text" placeholder="Postal code" value={cardDetails.postalCode}
-                  onChange={(e) => setCardDetails({ ...cardDetails, postalCode: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-background border border-border rounded-xl text-foreground text-xs placeholder:text-muted-foreground/50 focus:ring-2 focus:ring-primary/40 focus:border-primary/40 outline-none transition-all" />
-                <input type="text" placeholder="City" value={cardDetails.city}
-                  onChange={(e) => setCardDetails({ ...cardDetails, city: e.target.value })}
-                  className="w-full px-3 py-2.5 bg-background border border-border rounded-xl text-foreground text-xs placeholder:text-muted-foreground/50 focus:ring-2 focus:ring-primary/40 focus:border-primary/40 outline-none transition-all" />
-              </div>
-            </div>
-            <button
-              onClick={handlePayment}
-              disabled={processing || !cardDetails.number || !cardDetails.expiry || !cardDetails.cvv || !cardDetails.name || !cardDetails.addressLine1 || !cardDetails.city}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white h-11 text-sm font-semibold rounded-xl transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 disabled:opacity-40 disabled:cursor-not-allowed mt-1"
-            >
-              {processing ? <span className="flex items-center justify-center"><Loader2 className="h-4 w-4 mr-2 animate-spin" />Processing...</span> : 'Pay now'}
-            </button>
-          </motion.div>
-        )}
-
-        {/* Mobile Money Provider Selection */}
-        {paymentMethod === 'mobile' && !selectedProvider && !paymentComplete && !paymentSuccess && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-            <p className="text-[11px] font-medium text-muted-foreground mb-3">Select your mobile money provider</p>
-            <div className="grid grid-cols-3 gap-2">
-              {MOBILE_MONEY_PROVIDERS.map((provider, i) => (
-                <motion.button
-                  key={provider.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.03 }}
-                  onClick={() => setSelectedProvider(provider.id)}
-                  className="group bg-muted/50 border border-border rounded-xl p-2.5 hover:border-primary/40 hover:bg-muted transition-all cursor-pointer"
+              {/* Action buttons */}
+              <div className="flex items-center gap-2.5">
+                <button
+                  onClick={onClose}
+                  className="flex-1 h-9 rounded-lg border border-border bg-card text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
-                  <div className="flex flex-col items-center gap-1.5">
-                    <div className="w-10 h-10 bg-background rounded-lg flex items-center justify-center p-1.5 border border-border group-hover:border-primary/30 transition-colors">
-                      <img src={provider.logo} alt={provider.name} className="w-full h-full object-contain" onError={(e) => { e.currentTarget.src = '/M-pesa-logo.png'; }} />
-                    </div>
-                    <span className="text-[10px] font-medium text-muted-foreground text-center leading-tight group-hover:text-foreground transition-colors">{provider.name}</span>
-                  </div>
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Mobile Money Payment Form */}
-        {paymentMethod === 'mobile' && selectedProvider && !paymentComplete && !paymentSuccess && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-xl border border-border">
-              <div className="w-10 h-10 bg-background rounded-xl flex items-center justify-center p-1.5 border border-border shrink-0">
-                <img
-                  src={MOBILE_MONEY_PROVIDERS.find(p => p.id === selectedProvider)?.logo}
-                  alt={MOBILE_MONEY_PROVIDERS.find(p => p.id === selectedProvider)?.name}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground leading-tight">
-                  {MOBILE_MONEY_PROVIDERS.find(p => p.id === selectedProvider)?.name}
-                </p>
-                <p className="text-[11px] text-muted-foreground">Enter your phone number to pay</p>
+                  Cancel
+                </button>
+                <button
+                  onClick={handleContinue}
+                  disabled={continueLoading}
+                  className="flex-[2] h-9 rounded-lg bg-primary text-primary-foreground text-xs font-semibold transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                >
+                  {continueLoading ? (
+                    <span className="flex items-center justify-center gap-1.5"><Loader2 className="h-3.5 w-3.5 animate-spin" />Processing...</span>
+                  ) : (
+                    <span className="flex items-center justify-center gap-1">
+                      Continue with {selectedMethodInfo?.title}
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </span>
+                  )}
+                </button>
               </div>
             </div>
-            <div>
-              <label className="block text-[10px] font-medium text-muted-foreground mb-1">Phone Number</label>
-              <input
-                type="tel"
-                placeholder="+255 XXX XXX XXX"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                className="w-full px-3 py-2.5 bg-background border border-border rounded-xl text-foreground text-xs placeholder:text-muted-foreground/50 focus:ring-2 focus:ring-primary/40 focus:border-primary/40 outline-none transition-all"
-              />
-              <p className="text-[10px] text-muted-foreground/60 mt-1">You will receive a USSD prompt to complete payment</p>
-            </div>
-            <button
-              onClick={handlePayment}
-              disabled={processing || !phoneNumber}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white h-11 text-sm font-semibold rounded-xl transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {processing ? <span className="flex items-center justify-center"><Loader2 className="h-4 w-4 mr-2 animate-spin" />Sending prompt...</span> : 'Pay now'}
-            </button>
-          </motion.div>
-        )}
-
-        </div>
+          )}
+        </motion.div>
       </motion.div>
-    </motion.div>
     </AnimatePresence>
   );
 }
