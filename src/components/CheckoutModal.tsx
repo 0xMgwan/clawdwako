@@ -444,6 +444,8 @@ export function CheckoutModal({ isOpen, onClose, packageInfo, onPaymentSuccess, 
                             {method.id === 'crypto' && (
                               <>
                                 <img src="/usdc-logo.png" alt="USDC" className="h-3.5 w-auto object-contain" />
+                                <img src="/USDT.png" alt="USDT" className="h-3.5 w-auto object-contain" />
+                                <img src="/Ethereum.png" alt="Ethereum" className="h-3.5 w-auto object-contain" />
                               </>
                             )}
                             {method.id === 'mobile' && (
