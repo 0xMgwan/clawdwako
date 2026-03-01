@@ -443,7 +443,7 @@ export default function Home() {
             <div className="space-y-8 lg:space-y-12">
               <div>
                 <h2 className="text-3xl lg:text-6xl font-light mb-2 lg:mb-4">Clawdwako.</h2>
-                <div className="text-[10px] lg:text-sm tracking-[0.2em] text-muted-foreground mb-4 lg:mb-8">THE WORLD'S LEADING AI AGENT</div>
+                <div className="text-[10px] lg:text-sm tracking-[0.2em] text-muted-foreground mb-4 lg:mb-8">THE WORLD'S LEADING AI AGENTS</div>
                 <div className="flex gap-2 mb-4 lg:mb-8">
                   <div className="w-2 h-2 rounded-full bg-green-400" />
                   <div className="w-2 h-2 rounded-full bg-green-400" />
@@ -890,7 +890,7 @@ export default function Home() {
                   <div className="w-1 h-1 rounded-full bg-green-400 mt-2" />
                   <div>
                     <h3 className="font-medium mb-1">Multi-Model Intelligence</h3>
-                    <p className="text-sm text-muted-foreground">Choose from Claude, GPT-4, or Gemini</p>
+                    <p className="text-sm text-muted-foreground">Choose from Claude, GPT, or Gemini models</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -982,7 +982,7 @@ export default function Home() {
             {/* ClawdWako Method */}
             <div>
               <h3 className="text-xl font-semibold mb-6 text-foreground italic text-center">ClawdWako</h3>
-              <div className="text-center py-12 mt-32">
+              <div className="text-center py-12 mt-16">
                 <div className="text-6xl font-bold text-primary mb-4">&lt;1 min</div>
                 <p className="text-base text-muted-foreground mb-6">
                   Pick a model, connect Telegram, deploy — done under 1 minute.
