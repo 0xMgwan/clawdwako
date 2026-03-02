@@ -1010,7 +1010,7 @@ export default function Home() {
       <section className="py-8 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="max-w-6xl mx-auto text-center mb-6">
           <h2 className="text-3xl md:text-4xl font-bold mb-3">
-            What can Clawdwako.ai do for you?
+            What can Clawdwako do for you?
           </h2>
           <p className="text-base text-muted-foreground">
             One assistant, thousands of use cases
